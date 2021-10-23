@@ -5,13 +5,13 @@ function website() {
   const fs = require("fs");
   var time = new Date();
   
+  app.disable('x-powered-by');
   app.use(bodyParser.urlencoded({ extended: true })); //to be able to parse the requests' bodies
   app.use(bodyParser.json());
 
   app.use(express.static("public")); //put anything in the public/ folder accessible (for website) (like css, js, etc.)
 
   //make a test json and put it in the clans saves
-  const packageJson = JSON.parse(fs.readFileSync("./package.json", "utf8")); //this was used for another db module, will remove this line if uselss
   const testJson = {
     type: "clan",
     clantest: true,
@@ -308,7 +308,7 @@ function website() {
            if (config.has(clanid) && config.get(value.clanid).type === "clan") {
              var clan = config.get(clanid)
              for (const [key3,value3] of Object.entries(player)) {
-               clan.clanmembers.push({"key": value})
+               clan.clanmembers[key3] = value3
              }
              config.set(clanid, clan)
              config.set(key.toString(),clanid)
