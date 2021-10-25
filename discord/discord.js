@@ -33,14 +33,14 @@ function discord() {
     const cleanseString = function(string) { //used to make clan IDs
     while (/\s+$/.test(string)) {
       var str = string.substring(0, string.length - 1);
-      var string = str;
+      string = str;
     }
 
-    var str = string
+    str = string
       .replace(/\s+/g, "-")
       .replace(/\W+/g, "-")
       .toLowerCase();
-    var str = str.replace(/-\s*$/, "");
+    str = str.replace(/-\s*$/, "");
 
     return str;
   };
@@ -48,8 +48,7 @@ function discord() {
   const makeClanID = function(str) {
     var name = cleanseString(str);
     var randomnumber = Math.floor(Math.random() * 8999 + 1000);
-    var clanid = name + "-" + randomnumber;
-    return clanid
+    return name + "-" + randomnumber;
   }
 
   client.on("ready", () => { //set the bot status
@@ -80,7 +79,7 @@ function discord() {
                 () => process.exit());
         } else {
           message.channel.send("Only the dev can use `restart`!")
-        };
+        }
         break;
       case "deleteclan": //only accessible by the developer
         if (message.author.id == 307112794229047296 ||
@@ -94,7 +93,7 @@ function discord() {
           }
         } else {
           message.channel.send("Only the dev can use `deleteclan`!")
-        };
+        }
         break;
       //case "verify":
       //  if (args[1] === undefined || args[1] === "") {
@@ -163,7 +162,7 @@ function discord() {
           var foundaclan = false
           var foundnumber = 0
           
-          for (const [key, value] of Object.entries(clans)) {
+          for (const [_, value] of Object.entries(clans)) {
             if (value.type == "clan") {
               var str = value.clanname
               var result = str.toLowerCase().search(args[1])
@@ -197,7 +196,7 @@ function discord() {
           } else {
             message.channel.send("No clans found for search query '" + args[1] + "'!")
           }
-        };
+        }
         break;
       case "clan": //search for clan and send it's data in an embed
         if (config.has(args[1])) {
@@ -227,7 +226,7 @@ function discord() {
           
             //processing into text
             //clan members
-            for (const [key, value] of Object.entries(clan.clanmembers)) {
+            for (const [_, value] of Object.entries(clan.clanmembers)) {
               if (membersintext === "") {
                 membersintext = membersintext + value
               } else {
@@ -236,7 +235,7 @@ function discord() {
             }
           
             //clan uniforms
-            for (const [key, value] of Object.entries(clan.clanuniforms)) {
+            for (const [key, _] of Object.entries(clan.clanuniforms)) {
               if (uniformsintext === "") {
                 uniformsintext = uniformsintext + key
               } else {
@@ -244,7 +243,7 @@ function discord() {
               }
             }
             //clan allies
-            for (const [key, value] of Object.entries(clan.clanallies)) {
+            for (const [_, value] of Object.entries(clan.clanallies)) {
               if (clanalliesintext === "") {
                 clanalliesintext = clanalliesintext + value
               } else {
@@ -253,7 +252,7 @@ function discord() {
             }
           
             //clan enemies
-            for (const [key, value] of Object.entries(clan.clanenemies)) {
+            for (const [_, value] of Object.entries(clan.clanenemies)) {
               if (clanenemiesintext === "") {
                 clanenemiesintext = clanenemiesintext + value
               } else {
@@ -274,8 +273,6 @@ function discord() {
             }
             
             var clancreditintext = clan.clancredit
-            
-            clancreditintext = "0"
             uniformsintext = "None"
             membersintext = "None"
             clanalliesintext = "None"
@@ -313,14 +310,14 @@ function discord() {
             message.author.id == 388776379824603138 ||
             message.author.id == 705207812526964757) {
           var timeStart = time.getTime();
-          var clans = config.store
-          for (const [key, value] of Object.entries(clans)) {
+          var clansstore = config.store
+          for (const [key, value] of Object.entries(clansstore)) {
             if (isDict(value) && ("type" in value) && value.type === "clan") {
               console.log("passed", key)
               for (const [key2, value2] of Object.entries(blankJson)) {
                 if ((key2 in value) === false) {
                   console.log("adding")
-                  clans[key][key2] = value2
+                  clansstore[key][key2] = value2
                 }
               }
             }
@@ -330,13 +327,12 @@ function discord() {
           config.store = clans
         } else {
           message.channel.send("Only the dev can use `restart`!")
-        };
+        }
         break;
       case "printclandata":
         console.log(config.store)
         break;
       case "ping":
-        var id
         message.channel.send(
           ":ping_pong: Pong! `" + `${Date.now() - message.createdTimestamp}` + "ms`"
         );
@@ -426,7 +422,6 @@ function discord() {
               }
             break;
               case 3:
-                description = arguement2
                 const embed3 = new Discord.MessageEmbed()
                   .setTitle("Clan 3/3")
                   .setAuthor("Almost done!")
@@ -443,7 +438,6 @@ function discord() {
                 message.channel.send(embed3)
                 break;
               case 4:
-                logo = arguement3
                 if (config.has(clanid)) {
                   message.channel.send(":warning: Error: a lot of clans already have this name! Please select another.")
                 } else {

@@ -113,7 +113,6 @@ function website() {
          console.log(value)
        }
        const payload2 = value.payload
-       const requestid = value.id
        switch(value.requestType) {
          case "heartbeat":
            const seconds = payload2.seconds
@@ -246,12 +245,12 @@ function website() {
                  var clanid = config.get(key3)
                  if ((clanid !== "" || clanid !== null || clanid !== undefined) && config.has(clanid)) {
                    var clan = config.get(clanid)
-                   for (const [key4, value4] of Object.entries(clan.clanowner)) {
+                   for (const [key4, _] of Object.entries(clan.clanowner)) {
                      if (key3 === key4) {
                        clan.clanowner[key4] = value3
                      }
                    }
-                   for (const [key5, value5] of Object.entries(clan.clanmembers)) {
+                   for (const [key5, _] of Object.entries(clan.clanmembers)) {
                      if (key3 == key5) {
                        clan.clanmembers[key5] = value3
                      }
@@ -323,7 +322,7 @@ function website() {
            var clanid = payload2.clanid
            if (config.has(clanid) && config.get(value.clanid).type === "clan") {
              var clan = config.get(clanid)
-             for (const [key3,value3] of Object.entries(player)) {
+             for (const [key3,_] of Object.entries(player)) {
                clan.clanmembers.delete(key3)
                config.delete(key3.toString())
              }
@@ -343,14 +342,14 @@ function website() {
   const cleanseString = function(string) { //used to make clan IDs
     while (/\s+$/.test(string)) {
       var str = string.substring(0, string.length - 1);
-      var string = str;
+      string = str;
     }
 
-    var str = string
+    str = string
       .replace(/\s+/g, "-")
       .replace(/\W+/g, "-")
       .toLowerCase();
-    var str = str.replace(/-\s*$/, "");
+    str = str.replace(/-\s*$/, "");
 
     return str;
   };
@@ -358,8 +357,7 @@ function website() {
   function makeClanID(str) {
     var name = cleanseString(str);
     var randomnumber = Math.floor(Math.random() * 8999 + 1000);
-    var clanid = name + "-" + randomnumber;
-    return clanid
+    return name + "-" + randomnumber;
   }
   
   // listen for requests :)
