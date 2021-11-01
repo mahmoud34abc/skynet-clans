@@ -10,7 +10,7 @@ and to allow Discord functionality.
 The handler does not collect data for any reason, it only saves it to share it back to the server.
 There is no intent and never will be, to collect any kind of data and use it for ourselves.
 
-You can check the code out on [github]() if you prefer instead from here. (Didn't make a github repo yet)
+You can check the code out on [github](https://github.com/mahmoud34abc/skynet-clans) if you prefer instead from here.
 
 How it works
 ----
@@ -29,4 +29,5 @@ Behind the scenes
 - The `express` [npm module](https://www.npmjs.com/package/express) is used to open [the site and the webhook](https:///skynet-clans.glitch.me) to allow requests from ROBLOX game servers
 - The `body-parser` [npm module](https://www.npmjs.com/package/body-parser) is a helper module for express, which allows easy JS reading the game servers' requests, since it can't be done without the module
 - The `discord.js` [npm module](https://www.npmjs.com/package/discord.js) is used to run the Discord bot.
+- The `cache` [npm module](https://www.npmjs.com/package/cache) is used to cache roblox user IDs when needed (for Discord functionality)
 - It saves atomically, which means if the process crashed or died, it won't lose data.

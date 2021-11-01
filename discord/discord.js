@@ -203,10 +203,15 @@ function discord() {
           const clan = config.get(args[1])
           if (clan.type == "clan") {
           
-            var membersintext = ""
-            var uniformsintext = ""
-            var clanalliesintext = ""
-            var clanenemiesintext = ""
+            var membersintext = "None"
+            var uniformsintext = "None"
+            var clanalliesintext = "None"
+            var clanenemiesintext = "None"
+            var username = "a roblox player"
+            var userid = ""
+            var groupName = "None"
+            var groupid = ""
+            
             function clanstatus() {
               switch(clan.clanstatus) {
                 case "public":
@@ -219,10 +224,6 @@ function discord() {
                   return ":grey_question:"
               }
             }
-            var username = ""
-            var userid = ""
-            var groupName = ""
-            var groupid = ""
           
             //processing into text
             //clan members
@@ -273,11 +274,6 @@ function discord() {
             }
             
             var clancreditintext = clan.clancredit
-            uniformsintext = "None"
-            membersintext = "None"
-            clanalliesintext = "None"
-            clanenemiesintext = "None"
-            username = "a roblox player"
             
             const embed = new Discord.MessageEmbed()
               .setTitle(clanstatus() + " " + clan.clanname)
