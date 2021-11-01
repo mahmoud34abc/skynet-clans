@@ -156,52 +156,21 @@ function website() {
            if (config.has(value.clanid) && config.get(value.clanid).type === "clan") {
              var changesjson = {}
              for (const [key1,value1] of Object.entries(payload)) {
-               switch(key1) {
-                 case "clanname":
-                   changesjson["clanname"] = value1
-                   break;
-                 case "clanid":
-                   changesjson["clanid"] =  value1
-                   break;
-                 case "clanowner":
-                   changesjson["clanowner"] = value1
-                   break;
-                 case "clancredit":
-                   changesjson["clancredit"] = value1
-                   break;
-                 case "clanuniforms":
-                   changesjson["clanuniforms"] = value1
-                   break;
-                 case "clanmembers":
-                   changesjson["clanmembers"] = value1
-                   break;
-                 case "clanallies":
-                   changesjson["clanallies"] = value1
-                   break;
-                 case "clanenemies":
-                   changesjson["clanenemies"] = value1
-                   break;
-                 case "clangroup":
-                   changesjson["clangroup"] = value1
-                   break;
-                 case "clandescription":
-                   changesjson["clandescription"] = value1
-                   break;
-                 case "addcredit":
-                   break;
-                 case "removecredit":
-                   break;
-                 default:
-                   console.error("No action found for " + key)
-                   break;
-               }
+               changesjson[key1] = value1
              }
+             
              var changedClan = config.get(payload2.clanid)
              for (const [key1, value1] of Object.entries(changesjson)) {
                if (changedClan.hasOwnProperty(key1)) {
                  changedClan[key1] = value1
                } else {
                  switch(key1) {
+                   case "addcredit":
+                     changedClan["clancredit"] = changedClan["clancredit"] + value1
+                     break;
+                   case "removecredit":
+                     changedClan["clancredit"] = changedClan["clancredit"] - value1
+                     break;
                    default:
                      var errorMessage = "Invalid change! " + key1
                      console.error(errorMessage)
@@ -223,9 +192,8 @@ function website() {
              config.delete(clantodelete)
              makeResponse(true, "", value.id, {"deletedclan": payload2.clanid2})
            } else {
-             var errorMessage = "Couldn't find clan of ID " + clantodelete
-             console.error(errorMessage)
-             makeResponse(false, errorMessage, value.id, {"error": 1})
+             console.error("Couldn't find clan of ID " + clantodelete)
+             makeResponse(false, "Couldn't find clan of ID " + clantodelete, value.id, {"error": 1})
            }
            break;
          case "fetchclan":
@@ -233,9 +201,8 @@ function website() {
            if (config.has(clanid) && config.get(value.clanid).type === "clan") {
              makeResponse(true, "", value.id, {"clan": config.get(clanid)})
            } else {
-             var errorMessage = "Couldn't find clan of ID"  + clanid
-             console.error(errorMessage)
-             makeResponse(false, errorMessage, value.id, {error: 1})
+             console.error("Couldn't find clan of ID"  + clanid)
+             makeResponse(false, "Couldn't find clan of ID"  + clanid, value.id, {error: 1})
            }
            break;
          case "fetchuser":
@@ -245,12 +212,12 @@ function website() {
                  var clanid = config.get(key3)
                  if ((clanid !== "" || clanid !== null || clanid !== undefined) && config.has(clanid)) {
                    var clan = config.get(clanid)
-                   for (const [key4, _] of Object.entries(clan.clanowner)) {
+                   for (const [key4, _1] of Object.entries(clan.clanowner)) {
                      if (key3 === key4) {
                        clan.clanowner[key4] = value3
                      }
                    }
-                   for (const [key5, _] of Object.entries(clan.clanmembers)) {
+                   for (const [key5, _2] of Object.entries(clan.clanmembers)) {
                      if (key3 == key5) {
                        clan.clanmembers[key5] = value3
                      }
@@ -279,9 +246,7 @@ function website() {
              config.set(clanid, clan)
              makeResponse(true, "", value.id, {"newclan": clan})
            } else {
-             var errorMessage = "Couldn't find clan of ID"  + clanid
-             console.error(errorMessage)
-             makeResponse(false, errorMessage, value.id, {error: 1})
+             makeResponse(false, "Couldn't find clan of ID"  + clanid, value.id, {error: 1})
            }
            break;
          case "removecredit":
@@ -293,9 +258,8 @@ function website() {
              config.set(clanid, clan)
              makeResponse(true, "", value.id, {"newclan": clan})
            } else {
-             var errorMessage = "Couldn't find clan of ID"  + clanid
-             console.error(errorMessage)
-             makeResponse(false, errorMessage, value.id, {error: 1})
+             console.error("Couldn't find clan of ID"  + clanid)
+             makeResponse(false, "Couldn't find clan of ID"  + clanid, value.id, {error: 1})
            }
            break;
          case "clannotifcation":
@@ -312,9 +276,8 @@ function website() {
              config.set(key.toString(),clanid)
              makeResponse(true, "", value.id, {"newclan": clan})
            } else {
-             var errorMessage = "Couldn't find clan of ID"  + clanid
-             console.error(errorMessage)
-             makeResponse(false, errorMessage, value.id, {error: 1})
+             console.error("Couldn't find clan of ID"  + clanid)
+             makeResponse(false, "Couldn't find clan of ID"  + clanid, value.id, {error: 1})
            }
            break;
          case "leaveclan":
@@ -329,8 +292,7 @@ function website() {
              config.set(clanid, clan)
              makeResponse(true, "", value.id, {"newclan": clan})
            } else {
-             var errorMessage = "Couldn't find clan of ID"  + clanid
-             console.error(errorMessage)
+             console.error("Couldn't find clan of ID"  + clanid)
              makeResponse(false, errorMessage, value.id, {error: 1})
            }
            break;
