@@ -4,7 +4,7 @@
   "//3": "updating this file will download and update your packages",
   "name": "skynet-clans",
   "version": "0.0.1",
-  "description": "A simple Node app with SQLite as a database management system, instantly up and running.",
+  "description": "Skynet Clans Roblox and Discord Handler",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
@@ -26,6 +26,8 @@
   "keywords": [
     "node",
     "glitch",
-    "express"
+    "express",
+    "roblox",
+    "skynet"
   ]
 }
