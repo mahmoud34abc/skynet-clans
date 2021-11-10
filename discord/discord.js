@@ -1,33 +1,38 @@
 function discord() {
   const Discord = require("discord.js");
   const client = new Discord.Client();
-  const https = require('https')
+  const https = require("https")
   const Conf = require("conf");
   const config = new Conf();
   const prefix = "c!";
+  const util = require("util");
   var time = new Date();
+  
   function isDict(o) {
     var string = JSON.stringify(o);
     return string.startsWith("{") && string.endsWith("}")
   }
+  
   const blankJson = {
-    "type": "clan",
-    "clanname": "",
-    "clanid": "",
-    "clanlogo": "",
-    "clanowner": {},
-    "clancredit": 0,
-    "clanuniforms": {},
-    "clanmembers": {},
-    "clanallies": {},
-    "clanenemies": {},
-    "clanserver": "",
-    "clangroup": {},
-    "clandescription": "",
-    "clantag": "",
-    "clanjoin": "",
-    "clannotification": "",
-    "clanstatus": ""
+    type: "clan",
+    clanname: "",
+    clanid: "",
+    clanlogo: "",
+    clanowner: {},
+    clancredit: 0,
+    clanuniforms: {},
+    clanmembers: {},
+    clanallies: {},
+    clanenemies: {},
+    clanserver: "",
+    clangroup: {},
+    clandescription: "",
+    clantag: "",
+    clanjoin: "",
+    clannotification: "",
+    clanstatus: "",
+    clanactivity: "online",
+    lastonline: 0
   };
   
     const cleanseString = function(string) { //used to make clan IDs
@@ -54,9 +59,9 @@ function discord() {
   client.on("ready", () => { //set the bot status
     console.log("Skynet Clans bot is online");
     client.user.setPresence({
-      status: "online",
+      status: "idle",
       activity: {
-        name: "Coming Soon",
+        name: "Readying up",
         type: 0
       }
     });
@@ -216,12 +221,49 @@ function discord() {
               switch(clan.clanstatus) {
                 case "public":
                   return ":unlock:"
+                  break;
                 case "inviteonly":
                   return ":closed_lock_with_key:"
+                  break;
                 case "grouponly":
                   return ":lock_with_ink_pen:"
+                  break;
                 default:
                   return ":grey_question:"
+                  break;
+              }
+            }
+            
+            function clanactivity() {
+              switch(clan.clanactivity) {
+                case "online":
+                  return "<:online:908084492680446043> `Ingame` • "
+                  break;
+                case "offline":
+                  return "<:offline:908084492453937174> `Offline` • "
+                  break;
+                case "event":
+                  return "<:event:908084493166989363> `In an event` • "
+                  break;
+                case "training":
+                  return "<:training:908084493775147049> `Training` • "
+                  break;
+                default:
+                  return "<:offline:908084492453937174> `Offline` • "
+                  break;
+              }
+            }
+            function clanactivitycolor() {
+              switch(clan.clanactivity) {
+                case "online":
+                  return "0x00ff00"
+                  break;
+                case "event":
+                  return "0xff0000"
+                  break;
+                case "training":
+                  return "0xffff00"
+                  break;
               }
             }
           
@@ -276,9 +318,9 @@ function discord() {
             var clancreditintext = clan.clancredit
             
             const embed = new Discord.MessageEmbed()
-              .setTitle(clanstatus() + " " + clan.clanname)
+              .setTitle(clanstatus() + " " + clan.clanname + " `" + clan.clanid + "`")
               .setAuthor("Clan Info")
-              //.setColor()
+              .setColor(clanactivitycolor())
               .setDescription("Owned by [" + username + "](https://www.roblox.com/users/" + userid + "/profile)")
               .setFooter("Skynet Clans • Version " + process.env.VERSION)
               //.setImage("https://www.roblox.com/Thumbs/Asset.ashx?assetId=" + clan.clanlogo)
@@ -286,7 +328,7 @@ function discord() {
               .setTimestamp()
               //.setURL()
               .addFields(
-                {name: ":pager: Description", value: clan.clandescription},
+                {name: ":pager: Description", value: clanactivity() + clan.clandescription},
                 {name: ":moneybag: Clan Credit", value: clancreditintext, inline: true},
                 {name: ":elevator: Members", value: membersintext, inline: true},
                 {name: ":martial_arts_uniform: Uniform Names", value: uniformsintext, inline: true},
@@ -305,7 +347,7 @@ function discord() {
          if (message.author.id == 307112794229047296 ||
             message.author.id == 388776379824603138 ||
             message.author.id == 705207812526964757) {
-          var timeStart = time.getTime();
+          var timeStart = Date.now();
           var clansstore = config.store
           for (const [key, value] of Object.entries(clansstore)) {
             if (isDict(value) && ("type" in value) && value.type === "clan") {
@@ -314,13 +356,15 @@ function discord() {
                 if ((key2 in value) === false) {
                   console.log("adding")
                   clansstore[key][key2] = value2
+                  //console.log(value)
                 }
               }
             }
           }
-          var timeEnd = time.getTime();
+          var timeEnd = Date.now();
           message.channel.send("Updated clans! (Took " + (timeEnd - timeStart) + "ms)")
-          config.store = clans
+          //console.log(JSON.stringify(clans, null, 4));
+          config.store = clansstore
         } else {
           message.channel.send("Only the dev can use `restart`!")
         }
@@ -503,7 +547,7 @@ function discord() {
     }
   });
   
-  
+  console.log(config.size)
   client.login(process.env.TOKEN); //login as bot
 }
 

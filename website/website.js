@@ -12,75 +12,39 @@ function website() {
   app.use(express.static("public")); //put anything in the public/ folder accessible (for website) (like css, js, etc.)
 
   //make a test json and put it in the clans saves
-  const testJson = {
-    type: "clan",
-    clantest: true,
-    clanname: "Clan Name",
-    clanid: "clan-name-1234",
-    clanlogo: "5225052916",
-    clanowner: {"123456": "Username"},
-    clancredit: 1234,
-    clanuniforms: {
-      Uniform1: {
-        shirt: "id",
-        pants: "id",
-        hats: ["optional", "array of ids", "maximum of 5"]
-      },
-      Uniform2: {
-        shirt: "id",
-        pants: "id",
-        hats: ["optional", "array of ids", "maximum of 5"]
-      }
-    },
-    clanmembers: {
-      "123456": "Username 1",
-      "113456": "Username 2"
-    },
-    clanallies: {
-      "clan-id-123": "Clan Name 1"
-    },
-    clanenemies: {
-      "clan-id-122": "Clan Name 2"
-    },
-    clanserver: "serverid in discord xd, otherwise just left blank xd",
-    clangroup: {"groupid": "Group Name"},
-    clandescription: "Clan Description",
-    "clantag": "CLAN",
-    "clanjoin": "inviteonly",
-    "clannotification": "No active notification",
-    "clanstatus": "offline"
-  };
   const blankJson = {
-    "type": "clan",
-    "clanname": "",
-    "clanid": "",
-    "clanlogo": "",
-    "clanowner": {},
-    "clancredit": 0,
-    "clanuniforms": {},
-    "clanmembers": {},
-    "clanallies": {},
-    "clanenemies": {},
-    "clanserver": "",
-    "clangroup": {},
-    "clandescription": "",
-    "clantag": "",
-    "clanjoin": "",
-    "clannotification": "",
-    "clanstatus": ""
+    type: "clan",
+    clanname: "",
+    clanid: "",
+    clanlogo: "",
+    clanowner: {},
+    clancredit: 0,
+    clanuniforms: {},
+    clanmembers: {},
+    clanallies: {},
+    clanenemies: {},
+    clanserver: "",
+    clangroup: {},
+    clandescription: "",
+    clantag: "",
+    clanjoin: "",
+    clannotification: "",
+    clanstatus: "",
+    clanactivity: "online",
+    lastonline: 0
   };
   // Create a Configstore instance.
   const Conf = require("conf");
   const config = new Conf();
 
-  if (config.has("clantest") === false) {
-    config.set(testJson.clanid, testJson);
-    config.set("123456",testJson.clanid)
-  } else {
-    config.set(testJson.clanid, testJson);
-    config.set("123456",testJson.clanid)
-    console.log(config.size - 1, "saved data"); // the - 1 is because there is an already set test clan thing
-  }
+  //if (config.has("clantest") === false) {
+  //   config.set(testJson.clanid, testJson);
+  //   config.set("123456",testJson.clanid)
+  //} else {
+  //  config.set(testJson.clanid, testJson);
+  //  config.set("123456",testJson.clanid)
+  //  console.log(config.size - 1, "saved data"); // the - 1 is because there is an already set test clan thing
+  //}
 
   //app.get("/", (request, response) => { //listener for get requests (website)
   //  response.sendFile(`${__dirname}/views/index.html`);
@@ -322,6 +286,27 @@ function website() {
     var randomnumber = Math.floor(Math.random() * 8999 + 1000);
     return name + "-" + randomnumber;
   }
+  
+  function isDict(o) {
+    var string = JSON.stringify(o);
+    return string.startsWith("{") && string.endsWith("}")
+  }
+  
+  function routineCheck() {
+    var currentTime = Date.now()
+    
+    var clansstore = config.store
+    for (const [key, value] of Object.entries(clansstore)) {
+      if (isDict(value) && ("type" in value) && value.type === "clan") {
+        if ((value.lastonline + 60*4000) < Date.now()) {
+          value.clanactivity = "offline"
+        }
+      }
+    }
+    config.store = clansstore
+  }
+  routineCheck();
+  setInterval(routineCheck, 60*4000);
   
   // listen for requests :)
   var listener = app.listen(process.env.PORT, () => {
