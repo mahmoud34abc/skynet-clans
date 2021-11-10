@@ -298,7 +298,7 @@ function website() {
     var clansstore = config.store
     for (const [key, value] of Object.entries(clansstore)) {
       if (isDict(value) && ("type" in value) && value.type === "clan") {
-        if ((value.lastonline + 60*4000) < Date.now()) {
+        if ((value.lastonline + 60*4000) < currentTime) {
           value.clanactivity = "offline"
         }
       }
@@ -312,9 +312,6 @@ function website() {
   var listener = app.listen(process.env.PORT, () => {
     console.log(`Your app is listening on port ${listener.address().port}`);
   });
-
-
-  //console.log(clanid); //was used for testing the clan name 
 }
 
 module.exports = website;
