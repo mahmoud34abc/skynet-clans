@@ -5,8 +5,6 @@ function discord() {
   const Conf = require("conf");
   const config = new Conf();
   const prefix = "c!";
-  const util = require("util");
-  var time = new Date();
   
   function isDict(o) {
     var string = JSON.stringify(o);
@@ -221,16 +219,12 @@ function discord() {
               switch(clan.clanstatus) {
                 case "public":
                   return ":unlock:"
-                  break;
                 case "inviteonly":
                   return ":closed_lock_with_key:"
-                  break;
                 case "grouponly":
                   return ":lock_with_ink_pen:"
-                  break;
                 default:
                   return ":grey_question:"
-                  break;
               }
             }
             
@@ -238,32 +232,24 @@ function discord() {
               switch(clan.clanactivity) {
                 case "online":
                   return "<:online:908084492680446043> `Ingame` • "
-                  break;
                 case "offline":
                   return "<:offline:908084492453937174> `Offline` • "
-                  break;
                 case "event":
                   return "<:event:908084493166989363> `In an event` • "
-                  break;
                 case "training":
                   return "<:training:908084493775147049> `Training` • "
-                  break;
                 default:
                   return "<:offline:908084492453937174> `Offline` • "
-                  break;
               }
             }
             function clanactivitycolor() {
               switch(clan.clanactivity) {
                 case "online":
                   return "0x00ff00"
-                  break;
                 case "event":
                   return "0xff0000"
-                  break;
                 case "training":
                   return "0xffff00"
-                  break;
               }
             }
           
