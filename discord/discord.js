@@ -13,32 +13,37 @@ function discord() {
     return string.startsWith("{") && string.endsWith("}")
   }
   
-  async function getRobloxID(discordID) {
+  function getRobloxID(discordID, callback) {
+    
     var playerid = robloxuserstore.get(discordID)
     if (playerid !== undefined && playerid !== null) {
-      return false, playerid
+      callback({error: false,
+                id: playerid})
     } else {
-      let options = {
+      var options = {
         hostname: 'api.blox.link',
         port: 443,
         path: '/v1/user/' + discordID,
         method: 'GET'
       }
-      let req = await https.request(options, res => {
+      var req = https.request(options, res => {
         res.setEncoding('utf8');
         res.on('data', function (chunk) {
           var body = JSON.parse(chunk)
           if (body.status === "ok") {
             robloxuserstore.put(discordID, body.primaryAccount)
-            return false, body.primaryAccount
+            callback({error: false,
+                      id: body.primaryAccount})
           } else {
-            return true, body.error
+            callback({error: true,
+                      message: body.error})
           }
         });
       })
       req.on('error', error => {
         console.error(error)
-        return true, error
+        callback({error: true,
+                  message: error})
       })        
       req.end()
     }
@@ -156,6 +161,7 @@ function discord() {
   });
 
   client.on("message", message => { //basic command processor
+    var timestart = Date.now()
     if (!message.content.startsWith(prefix)) return;
     
     var args = message.content.trim().split(/ +/g);
@@ -200,7 +206,6 @@ function discord() {
         if (args[1] === "" || args[1] === undefined) {
           message.channel.send("Missing arguement! Type `" + prefix + "search clanname` to search")
         } else {
-          var timestart = Date.now()
           args[1] = args[1].toLowerCase();
           var foundclans = ""
           var foundaclan = false
@@ -244,111 +249,113 @@ function discord() {
         }
         break;
       case "clan": //search for clan and send it's data in an embed
-        var timestart = Date.now()
-        var errorbool, playerid, clan
-        if (errorbool === false & args[1] === undefined) {
-          if (config.has(playerid)) {
-            for (const [key3,value3] of Object.entries(config.get(playerid))) {
-              if (config.has(key3)) {
-                clan = config.get(key3)
+        var clan
+        getRobloxID(message.member.id, function(outputjson) {
+          if (outputjson.error === false && args[1] === undefined) {
+            if (config.has(outputjson.id)) {
+              var clanid = config.get(outputjson.id)
+              if (config.has(clanid)) {
+                clan = config.get(clanid)
               }
             }
-          }
-        } else if (config.has(args[1])) {
-          clan = config.get(args[1])
-        }
-        if (clan === undefined) {
-          message.channel.send("Couldn't find clan!")
-          return
-        }
-        if (clan !== undefined && isDict(clan) && clan.type == "clan") {
-        
-          var membersintext = "None"
-          var uniformsintext = "None"
-          var clanalliesintext = "None"
-          var clanenemiesintext = "None"
-          var username = "a roblox player"
-          var userid = ""
-          var groupName = "None"
-          var groupid = ""
-          
-          //processing into text
-          //clan members
-          for (const [_2, value] of Object.entries(clan.clanmembers)) {
-            if (membersintext === "") {
-              membersintext = membersintext + value
-            } else {
-              membersintext = value + "\n" + membersintext
-            }
+          } else if (config.has(args[1])) {
+            clan = config.get(args[1])
           }
           
-          //clan uniforms
-          for (const [key, _3] of Object.entries(clan.clanuniforms)) {
-            if (uniformsintext === "") {
-              uniformsintext = uniformsintext + key
-            } else {
-              uniformsintext = uniformsintext + "\n" + key
-            }
-          }
-          //clan allies
-          for (const [_4, value] of Object.entries(clan.clanallies)) {
-            if (clanalliesintext === "") {
-              clanalliesintext = clanalliesintext + value
-            } else {
-              clanalliesintext = value + "\n" + clanalliesintext
-            }
-          }
           
-          //clan enemies
-          for (const [_5, value] of Object.entries(clan.clanenemies)) {
-            if (clanenemiesintext === "") {
-              clanenemiesintext = clanenemiesintext + value
-            } else {
-              clanenemiesintext = value + "\n" + clanenemiesintext
-            }
+          if (clan === undefined) {
+            message.channel.send("Couldn't find clan!")
+            return
           }
-        
-          //clan owner
-          for (const [key, value] of Object.entries(clan.clanowner)) {
-            userid = key
-            if (value !== "") {
-              username = value
-            }
-          }
+          if (clan !== undefined && isDict(clan) && clan.type == "clan") {
           
-          //clan group
-          for (const [key, value] of Object.entries(clan.clangroup)) {
-            groupid = key
-            if (value !== "") {
-              groupName = value
-            }
-          }
+            var membersintext = "None"
+            var uniformsintext = "None"
+            var clanalliesintext = "None"
+            var clanenemiesintext = "None"
+            var username = "a roblox player"
+            var userid = ""
+            var groupName = "None"
+            var groupid = ""
             
-          var clancreditintext = clan.clancredit
+            //processing into text
+            //clan members
+            for (const [_2, value] of Object.entries(clan.clanmembers)) {
+              if (membersintext === "") {
+                membersintext = membersintext + value
+              } else {
+                membersintext = value + "\n" + membersintext
+              }
+            }
           
-          var timeend = Date.now()
-          const embed = new Discord.MessageEmbed()
-            .setTitle(clanstatus(clan) + " " + clan.clanname + " `" + clan.clanid + "`")
-            .setAuthor("Clan Info")
-            .setColor(clanactivitycolor(clan))
-            .setDescription("Owned by [" + username + "](https://www.roblox.com/users/" + userid + "/profile)")
-            .setFooter("Skynet Clans • Version " + process.env.VERSION + " • Took " + (timeend - timestart) + "ms")
-            //.setImage("https://www.roblox.com/Thumbs/Asset.ashx?assetId=" + clan.clanlogo)
-            .setThumbnail("https://www.roblox.com/Thumbs/Asset.ashx?assetId=" + clan.clanlogo)
-            .setTimestamp()
-            //.setURL()
-            .addFields(
-              {name: ":pager: Description", value: clanactivity(clan, true) + clan.clandescription},
-              {name: ":moneybag: Clan Credit", value: clancreditintext, inline: true},
-              {name: ":elevator: Members", value: membersintext, inline: true},
-              {name: ":martial_arts_uniform: Uniform Names", value: uniformsintext, inline: true},
-              {name: ":radio: Group", value: "[" + groupName + "](https://www.roblox.com/groups/" + groupid + "/" + cleanseString(groupName) + "#!/about)", inline: true},
-              {name: ":shield: Clan Allies", value: clanalliesintext, inline: true},
-              {name: ":crossed_swords: Clan Enemies", value: clanenemiesintext, inline: true}
-            )
+            //clan uniforms
+            for (const [key, _3] of Object.entries(clan.clanuniforms)) {
+              if (uniformsintext === "") {
+                uniformsintext = uniformsintext + key
+              } else {
+                uniformsintext = uniformsintext + "\n" + key
+              }
+            }
+            //clan allies
+            for (const [_4, value] of Object.entries(clan.clanallies)) {
+              if (clanalliesintext === "") {
+                clanalliesintext = clanalliesintext + value
+              } else {
+                clanalliesintext = value + "\n" + clanalliesintext
+              }
+            }
             
-          message.channel.send({embed})
-        }
+            //clan enemies
+            for (const [_5, value] of Object.entries(clan.clanenemies)) {
+              if (clanenemiesintext === "") {
+                clanenemiesintext = clanenemiesintext + value
+              } else {
+                clanenemiesintext = value + "\n" + clanenemiesintext
+              }
+            }
+        
+            //clan owner
+            for (const [key, value] of Object.entries(clan.clanowner)) {
+              userid = key
+              if (value !== "") {
+                username = value
+              }
+            }
+          
+            //clan group
+            for (const [key, value] of Object.entries(clan.clangroup)) {
+              groupid = key
+              if (value !== "") {
+                groupName = value
+              }
+            }
+            
+            var clancreditintext = clan.clancredit
+          
+            var timeend = Date.now()
+            const embed = new Discord.MessageEmbed()
+              .setTitle(clanstatus(clan) + " " + clan.clanname + " `" + clan.clanid + "`")
+              .setAuthor("Clan Info")
+              .setColor(clanactivitycolor(clan))
+              .setDescription("Owned by [" + username + "](https://www.roblox.com/users/" + userid + "/profile)")
+              .setFooter("Skynet Clans • Version " + process.env.VERSION + " • Took " + (timeend - timestart) + "ms")
+              //.setImage("https://www.roblox.com/Thumbs/Asset.ashx?assetId=" + clan.clanlogo)
+              .setThumbnail("https://www.roblox.com/Thumbs/Asset.ashx?assetId=" + clan.clanlogo)
+              .setTimestamp()
+              //.setURL()
+              .addFields(
+                {name: ":pager: Description", value: clanactivity(clan, true) + clan.clandescription},
+                {name: ":moneybag: Clan Credit", value: clancreditintext, inline: true},
+                {name: ":elevator: Members", value: membersintext, inline: true},
+                {name: ":martial_arts_uniform: Uniform Names", value: uniformsintext, inline: true},
+                {name: ":radio: Group", value: "[" + groupName + "](https://www.roblox.com/groups/" + groupid + "/" + cleanseString(groupName) + "#!/about)", inline: true},
+                {name: ":shield: Clan Allies", value: clanalliesintext, inline: true},
+                {name: ":crossed_swords: Clan Enemies", value: clanenemiesintext, inline: true}
+              )
+            
+            message.channel.send({embed})
+          }
+        })
       break;
       case "updateclans":
          if (message.author.id == 307112794229047296 ||
@@ -373,7 +380,7 @@ function discord() {
           //console.log(JSON.stringify(clans, null, 4));
           config.store = clansstore
         } else {
-          message.channel.send("Only the dev can use `restart`!")
+          message.channel.send("Only the dev can use `updateclans`!")
         }
         break;
       case "printclandata":
