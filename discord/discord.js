@@ -280,7 +280,8 @@ function discord() {
             
             //processing into text
             //clan members
-            for (const [_2, value] of Object.entries(clan.clanmembers)) {
+            for (var [_2, value] of Object.entries(clan.clanmembers)) {
+              _2 = undefined
               if (membersintext === "") {
                 membersintext = membersintext + value
               } else {
@@ -289,7 +290,8 @@ function discord() {
             }
           
             //clan uniforms
-            for (const [key, _3] of Object.entries(clan.clanuniforms)) {
+            for (var [key, _3] of Object.entries(clan.clanuniforms)) {
+              _3 = undefined
               if (uniformsintext === "") {
                 uniformsintext = uniformsintext + key
               } else {
@@ -297,7 +299,8 @@ function discord() {
               }
             }
             //clan allies
-            for (const [_4, value] of Object.entries(clan.clanallies)) {
+            for (var [_4, value] of Object.entries(clan.clanallies)) {
+              _4 = undefined
               if (clanalliesintext === "") {
                 clanalliesintext = clanalliesintext + value
               } else {
@@ -306,7 +309,8 @@ function discord() {
             }
             
             //clan enemies
-            for (const [_5, value] of Object.entries(clan.clanenemies)) {
+            for (var [_5, value] of Object.entries(clan.clanenemies)) {
+              _5 = undefined
               if (clanenemiesintext === "") {
                 clanenemiesintext = clanenemiesintext + value
               } else {
@@ -315,7 +319,7 @@ function discord() {
             }
         
             //clan owner
-            for (const [key, value] of Object.entries(clan.clanowner)) {
+            for (var [key, value] of Object.entries(clan.clanowner)) {
               userid = key
               if (value !== "") {
                 username = value
@@ -323,7 +327,7 @@ function discord() {
             }
           
             //clan group
-            for (const [key, value] of Object.entries(clan.clangroup)) {
+            for (var [key, value] of Object.entries(clan.clangroup)) {
               groupid = key
               if (value !== "") {
                 groupName = value
