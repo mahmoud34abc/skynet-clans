@@ -80,10 +80,7 @@ function website() {
        const payload2 = value.payload
        switch(value.requestType) {
          case "heartbeat":
-           const seconds = payload2.seconds
-           const ping = time.getTime() / 1000 - seconds
-           console.log(ping)
-           makeResponse(true, "",value.id, {"ping": ping})
+           makeResponse(true, "",value.id, {})
            break;
          case "createclan":
            const clanname = payload2.clanname
