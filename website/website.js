@@ -2,8 +2,6 @@ function website() {
   const express = require("express");
   const bodyParser = require("body-parser");
   const app = express();
-
-  var time = new Date();
   
   app.disable('x-powered-by');
   app.use(bodyParser.urlencoded({ extended: true })); //to be able to parse the requests' bodies
@@ -174,12 +172,12 @@ function website() {
                  var clanid = config.get(key3)
                  if ((clanid !== "" || clanid !== null || clanid !== undefined) && config.has(clanid)) {
                    var clan = config.get(clanid)
-                   for (const [key4, _1] of Object.entries(clan.clanowner)) {
+                   for (const [key4] of Object.entries(clan.clanowner)) {
                      if (key3 === key4) {
                        clan.clanowner[key4] = value3
                      }
                    }
-                   for (const [key5, _2] of Object.entries(clan.clanmembers)) {
+                   for (const [key5] of Object.entries(clan.clanmembers)) {
                      if (key3 == key5) {
                        clan.clanmembers[key5] = value3
                      }

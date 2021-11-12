@@ -280,8 +280,7 @@ function discord() {
             
             //processing into text
             //clan members
-            for (var [_2, value] of Object.entries(clan.clanmembers)) {
-              _2 = undefined
+            for (const [_2, value] of Object.entries(clan.clanmembers)) {
               if (membersintext === "") {
                 membersintext = membersintext + value
               } else {
@@ -290,8 +289,7 @@ function discord() {
             }
           
             //clan uniforms
-            for (var [key, _3] of Object.entries(clan.clanuniforms)) {
-              _3 = undefined
+            for (const [key] of Object.entries(clan.clanuniforms)) {
               if (uniformsintext === "") {
                 uniformsintext = uniformsintext + key
               } else {
@@ -299,8 +297,7 @@ function discord() {
               }
             }
             //clan allies
-            for (var [_4, value] of Object.entries(clan.clanallies)) {
-              _4 = undefined
+            for (const [_4, value] of Object.entries(clan.clanallies)) {
               if (clanalliesintext === "") {
                 clanalliesintext = clanalliesintext + value
               } else {
@@ -309,8 +306,7 @@ function discord() {
             }
             
             //clan enemies
-            for (var [_5, value] of Object.entries(clan.clanenemies)) {
-              _5 = undefined
+            for (const [_5, value] of Object.entries(clan.clanenemies)) {
               if (clanenemiesintext === "") {
                 clanenemiesintext = clanenemiesintext + value
               } else {
@@ -319,7 +315,7 @@ function discord() {
             }
         
             //clan owner
-            for (var [key, value] of Object.entries(clan.clanowner)) {
+            for (const [key, value] of Object.entries(clan.clanowner)) {
               userid = key
               if (value !== "") {
                 username = value
