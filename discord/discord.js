@@ -51,7 +51,7 @@ function discord() {
   
   function clanstatus(selectedclan) {
     switch(selectedclan.clanstatus) {
-      case "public":
+      case "publickey":
         return ":unlock:"
       case "inviteonly":
         return ":closed_lock_with_key:"
@@ -251,7 +251,7 @@ function discord() {
       case "clan": //search for clan and send it's data in an embed
         var clan
         getRobloxID(message.member.id, function(outputjson) {
-          if (outputjson.error === false && args[1] === undefined) {
+          if (args[1] === undefined && outputjson.error === false) {
             if (config.has(outputjson.id)) {
               var clanid = config.get(outputjson.id)
               if (config.has(clanid)) {
@@ -333,7 +333,7 @@ function discord() {
             var clancreditintext = clan.clancredit
           
             var timeend = Date.now()
-            const embed = new Discord.MessageEmbed()
+            var embed = new Discord.MessageEmbed()
               .setTitle(clanstatus(clan) + " " + clan.clanname + " `" + clan.clanid + "`")
               .setAuthor("Clan Info")
               .setColor(clanactivitycolor(clan))
@@ -377,7 +377,6 @@ function discord() {
           }
           var timeEnd = Date.now();
           message.channel.send("Updated clans! (Took " + (timeEnd - timeStart) + "ms)")
-          //console.log(JSON.stringify(clans, null, 4));
           config.store = clansstore
         } else {
           message.channel.send("Only the dev can use `updateclans`!")
@@ -401,15 +400,10 @@ function discord() {
         var clanid
         var description
         var logo
-        var options = {
-          hostname: 'api.blox.link',
-          port: 443,
-          path: '/v1/user/' + memberid,
-          method: 'GET'
-        }
-        const execute = function(robloxid) {
-           if (config.has(robloxid)) {
-          message.channel.send(":warning: You already have or in a clan!")
+        var execute = function(robloxid) {
+          if (robloxid.error === false) {
+           if (config.has(robloxid.id)) {
+             message.channel.send(":warning: You already have or in a clan!")
         } else {
         const embed1 = new Discord.MessageEmbed()
           .setTitle("Clan 1/3")
@@ -499,7 +493,7 @@ function discord() {
                   newclan.clanid = clanid
                   newclan.clanname = arguement1
                   newclan.clanowner = {}
-                  newclan.clanowner[robloxid] = ""
+                  newclan.clanowner[robloxid.id] = ""
                   newclan.clandescription = arguement2
                   newclan.clanlogo = arguement3
                   config.set(clanid, newclan)
@@ -534,31 +528,67 @@ function discord() {
         //newclan.clanlogo = clanlogo
         //newclan.clanid = makeClanID(clanname)
     }
+        } else {
+          message.channel.send("An error occured: " + robloxid.message)
         }
-        var req = https.request(options, res => {
-        //console.log(`statusCode: ${res.statusCode}`)
-          res.setEncoding('utf8');
-          res.on('data', function (chunk) {
-            var body = JSON.parse(chunk)
-            if (body.status === "ok") {
-              var robloxid = body.primaryAccount
-              execute(robloxid)
-            } else {
-              message.channel.send("An error occured: " + body.error)
+        }
+        
+        getRobloxID(message.member.id, execute)
+        break;
+      case "editclan":
+        var execute = function(robloxdata) {
+          if (robloxdata.error === false) {
+            if (config.has(robloxdata.id) && config.has(config.get(robloxdata.id))) {
+              if (args[1] === undefined) {
+                var clan = config.get(config.get(robloxdata.id))
+                var groupid
+                for (var [key, value] of Object.entries(clan.clangroup)) {
+                  groupid = key
+                }
+                if (groupid === undefined) {
+                  groupid = "None"
+                }
+                if (clan.clanstatus === "" || clan.clanstatus === undefined) {
+                  clan.clanstatus = "Not selected"
+                }
+                
+                var timeend = Date.now() 
+                var editembed = new Discord.MessageEmbed()
+                .setTitle(clan.clanname + " `" + clan.clanid + "`")
+                .setAuthor("Clan Info")
+                .setFooter("Skynet Clans • Version " + process.env.VERSION + " • Took " + (timeend - timestart) + "ms")
+                //.setImage("https://www.roblox.com/Thumbs/Asset.ashx?assetId=" + clan.clanlogo)
+                .setThumbnail("https://www.roblox.com/Thumbs/Asset.ashx?assetId=" + clan.clanlogo)
+                .setTimestamp()
+                .setDescription("There are three join modes: `publickey`, `inviteonly` and `grouponly`.\n:warning: **Please note that you'll have to change the property if it has been tagged by roblox!**")
+                //.setURL()
+                .addFields(
+                  {name: ":pencil: `description`", value: clan.clandescription},
+                  {name: ":pencil: `group`", value: groupid, inline: true},
+                  {name: ":pencil: `icon`", value: clan.clanlogo, inline: true},
+                  {name: ":pencil: `joinMode`", value: clan.clanstatus, inline: true}
+                )
+                
+                message.channel.send("*Any field with a :pencil: can be edited! `c!editclan property value`",editembed)
+              } else {
+                var string = ""
+                for (const [key, value] of Object.entries(args)) {
+                  if (key > 1) {
+                    if (string === "") {
+                      string = value
+                    } else {
+                      string = string + " " + value
+                    }
+                  }
+                }
+                console.log(args[1],string)
+              }
             }
-          });
-        })
-        
-        req.on('error', error => {
-          console.error(error)
-          message.channel.send("An error occured while retrieving roblox data: " + error)
-        })
-        
-
-        
-        req.end()
-        break
-    }
+          }
+        }
+        getRobloxID(message.member.id, execute)
+        break;
+      }
   });
   
   console.log(config.size)
