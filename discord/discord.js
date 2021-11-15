@@ -608,7 +608,7 @@ function discord() {
                           message.channel.send("Successfully set `joinMode` to `" + clan.clanstatus + "`!")
                           break;
                         case "grouponly":
-                          if (groupid !== "" || groupid !== undefined || groupid !== null || groupid !== NaN) {
+                          if (groupid !== "" || groupid !== undefined || groupid !== null || !Number.isNaN(groupid)) {
                             clan.clanstatus = "grouponly"
                             message.channel.send("Successfully set `joinMode` to `" + clan.clanstatus + "`!")
                           } else {
