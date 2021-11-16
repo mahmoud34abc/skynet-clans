@@ -400,7 +400,6 @@ function discord() {
         );
         break;
       case "createclan":
-        var memberid = message.author.id
         var stage = 0
         var arguement1
         var arguement2
@@ -550,10 +549,10 @@ function discord() {
             if (config.has(robloxdata.id) && config.has(config.get(robloxdata.id))) {
               var clan = config.get(config.get(robloxdata.id))
               var groupid, userid
-              for (const [key, value] of Object.entries(clan.clanowner)) {
+              for (const [key] of Object.entries(clan.clanowner)) {
                 userid = key
               }
-              for (var [key, value] of Object.entries(clan.clangroup)) {
+              for (var [key] of Object.entries(clan.clangroup)) {
                 groupid = key
               }
               
@@ -653,7 +652,7 @@ function discord() {
       case "joinclan":
         var execute = function(robloxdata) {
           if (robloxdata.error === false) {
-            var playerid = robloxdata.id
+            //var playerid = robloxdata.id
             var clan
             if (config.has(args[1])) {
               clan = config.get(args[1])
