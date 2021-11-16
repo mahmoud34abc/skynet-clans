@@ -6,6 +6,7 @@ function discord() {
   const Cache = require("cache");
   const robloxuserstore = new Cache(12*60*60*1000)
   const config = new Conf();
+  const util = require("util")
   const prefix = "c!";
   
   function isDict(o) {
@@ -383,7 +384,15 @@ function discord() {
         }
         break;
       case "printclandata":
-        console.log(config.store)
+        if (args[1] === undefined) {
+          console.log(util.inspect(config.store,false,null))
+        } else {
+          if (config.has(args[1])) {
+            console.log(util.inspect(config.get(args[1]),false,null))
+          } else {
+            message.channel.send("Couldn't find clan!")
+          }
+        }
         break;
       case "ping":
         message.channel.send(
@@ -481,7 +490,7 @@ function discord() {
                   .setTimestamp()
                   //.setURL()
                   .addFields(
-                    {name: ":frame_photo: Description", value: "Paste a `rbxassetid://id` logo for your clan! (optional, type `skip` to leave empty) (can be changed later) (send it as a normal message)"}
+                    {name: ":frame_photo: Description", value: "Paste a rbxassetid://**id** logo for your clan! (optional, type `skip` to leave empty) (can be changed later) (send it as a normal message)"}
                   )
                 message.channel.send(embed3)
                 break;
@@ -556,6 +565,12 @@ function discord() {
                   if (clan.clanstatus === "" || clan.clanstatus === undefined) {
                     clan.clanstatus = "Not selected"
                   }
+                  if (clan.clanlogo === "" || clan.clanlogo === undefined) {
+                    clan.clanlogo = "Not set"
+                  }
+                  if (clan.clandescription === "" || clan.clandescription === undefined) {
+                    clan.clandescription = "Not set"
+                  }
                   
                   var timeend = Date.now() 
                   var editembed = new Discord.MessageEmbed()
@@ -612,7 +627,7 @@ function discord() {
                             clan.clanstatus = "grouponly"
                             message.channel.send("Successfully set `joinMode` to `" + clan.clanstatus + "`!")
                           } else {
-                            message.channel.send("It looks like you didn't set a group as clan group yet! `c!editclan group id`")
+                            message.channel.send("It looks like you didn't set a group as clan group yet! ~~`" + prefix +"editclan group id`~~")
                           }
                           break;
                       }
@@ -629,6 +644,33 @@ function discord() {
                 message.channel.send("You don't have permission to change the clan data!")
               }
             }
+          } else {
+            message.channel.send("An error has occured: " + robloxdata.message)
+          }
+        }
+        getRobloxID(message.member.id, execute)
+        break;
+      case "joinclan":
+        var execute = function(robloxdata) {
+          if (robloxdata.error === false) {
+            var playerid = robloxdata.id
+            var clan
+            if (config.has(args[1])) {
+              clan = config.get(args[1])
+              console.log(args[1],args[2])
+              switch(clan.clanstatus) {
+                //case "publickey":
+                //  break;
+                case "inviteonly":
+                  break;
+                case "grouponly":
+                  break;
+              }
+            } else {
+              message.channel.send("Couldn't find the clan! `" + prefix + "joinclan clanid`")
+            }
+          } else {
+            message.channel.send("An error has occured: " + robloxdata.message)
           }
         }
         getRobloxID(message.member.id, execute)
