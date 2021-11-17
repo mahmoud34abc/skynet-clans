@@ -548,27 +548,35 @@ function discord() {
           if (robloxdata.error === false) {
             if (config.has(robloxdata.id) && config.has(config.get(robloxdata.id))) {
               var clan = config.get(config.get(robloxdata.id))
-              var groupid, userid
+              var userid
               for (const [key] of Object.entries(clan.clanowner)) {
                 userid = key
-              }
-              for (var [key] of Object.entries(clan.clangroup)) {
-                groupid = key
               }
               
               if (userid === robloxdata.id) {
                 if (args[1] === undefined) {
-                  if (groupid === undefined) {
-                    groupid = "None"
+                  var groupid
+                  for (var [key] of Object.entries(clan.clangroup)) {
+                    groupid = key
                   }
+                  if (groupid === undefined) {
+                    groupid = "Not set - `id`"
+                  }
+                  var clanlogotext, clanstatustext, clandescriptiontext
                   if (clan.clanstatus === "" || clan.clanstatus === undefined) {
-                    clan.clanstatus = "Not selected"
+                    clanstatustext = "Not selected - `option`"
+                  } else {
+                    clanstatustext = clan.clanstatus
                   }
                   if (clan.clanlogo === "" || clan.clanlogo === undefined) {
-                    clan.clanlogo = "Not set"
+                    clanlogotext = "Not set - `id`"
+                  } else {
+                    clanlogotext = clan.clanlogo
                   }
                   if (clan.clandescription === "" || clan.clandescription === undefined) {
-                    clan.clandescription = "Not set"
+                    clandescriptiontext = "Not set - `string (no emojis)`"
+                  } else {
+                    clandescriptiontext = clan.clandescription
                   }
                   
                   var timeend = Date.now() 
@@ -582,13 +590,13 @@ function discord() {
                   .setDescription("There are three join modes: ~~`publickey`~~, `inviteonly` and `grouponly`.\n:warning: **Please note that you'll have to change the property if it has been tagged by roblox!**")
                   //.setURL()
                   .addFields(
-                    {name: ":pencil: `description`", value: clan.clandescription},
+                    {name: ":pencil: `description`", value: clandescriptiontext},
                     //{name: ":pencil: `group`", value: groupid, inline: true},
-                    {name: ":pencil: `icon`", value: clan.clanlogo, inline: true},
-                    {name: ":pencil: `joinMode`", value: clan.clanstatus, inline: true}
+                    {name: ":pencil: `icon`", value: clanlogotext, inline: true},
+                    {name: ":pencil: `joinMode`", value: clanstatustext, inline: true}
                   )
                   
-                  message.channel.send("*Any field with a :pencil: can be edited! `c!editclan property value`",editembed)
+                  message.channel.send("*Any field with a :pencil: can be edited! `c!editclan property value`",editembed).catch(console.error)
                 } else if (args[1] !== undefined && args[2] !== undefined) {
                   var string = ""
                   for (const [key, value] of Object.entries(args)) {
@@ -602,42 +610,47 @@ function discord() {
                   }
                   //console.log(args[1],string)
                   
-                  switch(args[1]) {
-                    case "description":
-                      clan.clandescription = string
-                      message.channel.send("Successfully set `description` to:\n> " + clan.clandescription)
-                      break;
-                    //case "group":
-                    //  break;
-                    case "icon":
-                      clan.clanlogo = string
-                      message.channel.send("Successfully set `icon` to `" + clan.clanlogo + "`!")
-                      break;
-                    case "joinMode":
-                      switch(string) {
-                        //case "publickey":
-                        //  break;
-                        case "inviteonly":
-                          clan.clanstatus = "inviteonly"
-                          message.channel.send("Successfully set `joinMode` to `" + clan.clanstatus + "`!")
-                          break;
-                        case "grouponly":
-                          if (groupid !== "" || groupid !== undefined || groupid !== null || !Number.isNaN(groupid)) {
-                            clan.clanstatus = "grouponly"
+                  if (string !== undefined) {
+                    switch(args[1]) {
+                      case "description":
+                        clan.clandescription = string
+                        message.channel.send("Successfully set `description` to:\n> " + clan.clandescription)
+                        break;
+                      //case "group":
+                      //  break;
+                      case "icon":
+                        clan.clanlogo = string
+                        message.channel.send("Successfully set `icon` to `" + clan.clanlogo + "`!")
+                        break;
+                      case "joinMode":
+                        switch(string) {
+                          //case "publickey":
+                          //  break;
+                          case "inviteonly":
+                            clan.clanstatus = "inviteonly"
                             message.channel.send("Successfully set `joinMode` to `" + clan.clanstatus + "`!")
-                          } else {
-                            message.channel.send("It looks like you didn't set a group as clan group yet! ~~`" + prefix +"editclan group id`~~")
-                          }
-                          break;
-                      }
-                      break;
+                            break;
+                          case "grouponly":
+                            if (groupid !== "" || groupid !== undefined || groupid !== null || !Number.isNaN(groupid)) {
+                              clan.clanstatus = "grouponly"
+                              message.channel.send("Successfully set `joinMode` to `" + clan.clanstatus + "`!")
+                            } else {
+                              message.channel.send("It looks like you didn't set a group as clan group yet! ~~`" + prefix +"editclan group id`~~")
+                            }
+                            break;
+                        }
+                        break;
+                      default:
+                        message.channel.send("Invalid property choice! Please check again")
+                        break;
+                    }
+                  } else {
+                    message.channel.send("Please send the second arguement!")
                   }
                   if (clan !== config.get(clan.clanid)) {
                     clan.clanactivity = "online"
                     config.set(clan.clanid, clan)
                   }
-                } else {
-                  message.channel.send("Invalid property choice! Please check again")
                 }
               } else {
                 message.channel.send("You don't have permission to change the clan data!")
