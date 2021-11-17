@@ -91,9 +91,10 @@ function website() {
            newclan.clandescription = clandescription
            newclan.clanlogo = clanlogo
            newclan.clanid = makeClanID(clanname)
+           var ownerid
            for (const [key2, value2] of Object.entries(clanowner)) {
              newclan.clanowner[key2] = value2
-             var ownerid = key2
+             ownerid = key2
            }
            if (config.has(newclan.clanid)) {
             newclan.clanid = makeClanID(clanname) 
@@ -263,11 +264,12 @@ function website() {
   
   const cleanseString = function(string) { //used to make clan IDs
     if (!string.length() > 32) {
+      var str
       while (/\s+$/.test(string)) {
-        var str = string.substring(0, string.length - 1);
+        str = string.substring(0, string.length - 1);
         string = str;
       }
-      str = string
+      str
         .replace(/\s+/g, "-")
         .replace(/\W+/g, "-")
         .toLowerCase();
@@ -298,6 +300,7 @@ function website() {
       if (isDict(value) && ("type" in value) && value.type === "clan") {
         if ((value.lastonline + 60*4000) < currentTime) {
           value.clanactivity = "offline"
+          value.lastonline = currentTime
         }
       }
     }

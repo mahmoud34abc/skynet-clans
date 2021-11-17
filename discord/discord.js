@@ -131,11 +131,12 @@ function discord() {
   
   const cleanseString = function(string) { //used to make clan IDs
     if (!string.length() > 32) {
+      var str
       while (/\s+$/.test(string)) {
-        var str = string.substring(0, string.length - 1);
+        str = string.substring(0, string.length - 1);
         string = str;
       }
-      str = string
+      str
         .replace(/\s+/g, "-")
         .replace(/\W+/g, "-")
         .toLowerCase();
@@ -668,7 +669,6 @@ function discord() {
       case "joinclan":
         var execute = function(robloxdata) {
           if (robloxdata.error === false) {
-            //var playerid = robloxdata.id
             var clan
             if (config.has(args[1])) {
               clan = config.get(args[1])
