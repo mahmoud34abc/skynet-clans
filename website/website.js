@@ -262,18 +262,21 @@ function website() {
   }); //listener for post requests (webhook)
   
   const cleanseString = function(string) { //used to make clan IDs
-    while (/\s+$/.test(string)) {
-      var str = string.substring(0, string.length - 1);
-      string = str;
+    if (!string.length() > 32) {
+      while (/\s+$/.test(string)) {
+        var str = string.substring(0, string.length - 1);
+        string = str;
+      }
+      str = string
+        .replace(/\s+/g, "-")
+        .replace(/\W+/g, "-")
+        .toLowerCase();
+      str = str.replace(/-\s*$/, "");
+
+      return str;
+    } else {
+      console.warn("String to cleanse is longer than 32 characters!")
     }
-
-    str = string
-      .replace(/\s+/g, "-")
-      .replace(/\W+/g, "-")
-      .toLowerCase();
-    str = str.replace(/-\s*$/, "");
-
-    return str;
   };
   
   function makeClanID(str) {
