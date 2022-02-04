@@ -80,35 +80,30 @@ function clanactivity(selectedclan, bool) {
       } else {
         return "<:online:908084492680446043>"
       }
-    break;
     case "offline":
       if (bool) {
         return "<:offline:908084492453937174> `Offline` • "
       } else {
         return "<:offline:908084492453937174>"
       }
-    break;
     case "event":
       if (bool) {
         return "<:event:908084493166989363> `In an event` • "
       } else {
         return "<:event:908084493166989363>"
       }
-    break;
     case "training":
       if (bool) {
         return "<:training:908084493775147049> `Training` • "
       } else {
         return "<:training:908084493775147049>"
       }
-    break;
     default:
       if (bool) {
         return "<:offline:908084492453937174> `Offline` • "
       } else {
         return "<:offline:908084492453937174>"
       }
-    break;
   }
 }
 
