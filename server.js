@@ -1027,8 +1027,8 @@ client.on("message", message => { //basic command processor
                   {name: ":pager: Report Reason", value: reportreason}
                 )
             client.guilds.fetch(discordmodcallserver).then(serverinstance => serverinstance.channels.resolve(discordmodcallchannel).send("<@&720057768459108425> <@&727940388765040650> <@&726746155970461769>",embed))
-            break;
             makeResponse(true, "",value.id, {})
+            break;
         }
         break;
       }
