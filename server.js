@@ -973,17 +973,62 @@ client.on("message", message => { //basic command processor
         }
         break;
       case "moderation":
-        var requesttype = payload2.requesttype
+        var requesttype = payload2.requestType
         switch(requesttype) {
           case "modcall":
+            var timestart = Date.now()
             var modcallpayload = payload2.payload
-            var reporteduser = modcallpayload.reporteduser //the user that was reported
+            var reporteduser = modcallpayload.reporteduser //the user that as reported
             var reportinguser = modcallpayload.reportinguser //the user that reported
             var reportreason = modcallpayload.reportreason //the reason for reporting
             var game = modcallpayload.game //used to indicate the game
-            var serverjobid = modcallpayload.serverjobid //used for joining the server
-            var reportdetails = modcallpayload.reportdetails //which mod joined
+            //var serverjobid = modcallpayload.serverjobid //used for joining the server from ingame
+            //var reportdetails = modcallpayload.reportdetails //which mod joined
+            var discordmodcallserver = "719673864111652936"
+            var discordmodcallchannel = "908390430863929404"
+            
+            var reportingusername
+            var reportinguserid
+            var reportedusername
+            var reporteduserid
+            var gamename
+            var gamekeyname
+            
+            for (const [key, value] of Object.entries(reportinguser)) {
+              reportingusername = value
+              reportinguserid = key
+            }
+            
+            for (const [key, value] of Object.entries(reporteduser)) {
+              reportedusername = value
+              reporteduserid = key
+            }
+            
+            for (const [key, value] of Object.entries(game)) {
+              gamename = value
+              gamekeyname = key
+            }
+            
+            //dont forget to make a quicklink field!
+            var timeend = Date.now()
+            var embed = new Discord.MessageEmbed()
+                .setTitle(":loudspeaker: Modcall")
+                .setFooter("Skynet Clans • Version " + process.env.VERSION + " • Took " + (timeend - timestart) + "ms")
+                //.setImage("https://www.roblox.com/Thumbs/Asset.ashx?assetId=" + clan.clanlogo)
+                //.setThumbnail("https://www.roblox.com/Thumbs/Asset.ashx?assetId=" + clan.clanlogo)
+                .setTimestamp()
+                .setColor(0x660000)
+                .setDescription("From: " + gamename)
+                //.setURL()
+                .addFields(
+                  {name: ":name_badge: Reported User", value: "[" + reportedusername + "](https://www.roblox.com/users/" + reporteduserid + "/profile)", inline: true},
+                  //{name: ":pencil: `group`", value: groupid, inline: true},
+                  {name: ":shield: Reporting User", value: "[" + reportingusername + "](https://www.roblox.com/users/" + reportinguserid + "/profile)", inline: true},
+                  {name: ":pager: Report Reason", value: reportreason}
+                )
+            client.guilds.fetch(discordmodcallserver).then(serverinstance => serverinstance.channels.resolve(discordmodcallchannel).send("<@&720057768459108425> <@&727940388765040650> <@&726746155970461769>",embed))
             break;
+            makeResponse(true, "",value.id, {})
         }
         break;
       }
