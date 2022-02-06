@@ -139,6 +139,26 @@ const blankJson = {
   clanactivity: "online",
   lastonline: 0
 };
+
+const blankUserJson = {
+  type: "user",
+  username: "",
+  clan: "",
+  warns: {},
+  ban: [
+    {
+      banned: false,
+      reason: "",
+      bannedUntil: 0,
+      bannedFrom: ""
+    }
+  ],
+  mod: {
+    isAMod: false,
+    rank: "",
+    points: 0
+  }
+};
   
 const cleanseString = function(string) { //used to make clan IDs
   if (!string.length > 32) {
@@ -739,6 +759,185 @@ client.on("message", message => { //basic command processor
           }
         }
         getRobloxID(message.member.id, execute)
+        break;
+      case "loadsavedata":
+        if (message.author.id == 307112794229047296 ||
+            message.author.id == 388776379824603138 ||
+            message.author.id == 705207812526964757) {
+          config.store = {
+  '123456': 'clan-name-1234',
+  '91552156': 'prmd-5041',
+  '129097391': 'imperial-phantoms-1179',
+  '419167150': '1st-bingus-battalion-8226',
+  '881145125': 'sniper-pistols-1083',
+  '2704344764': 'my-1640',
+  'clan-name-1234': {
+    type: 'clan',
+    clantest: true,
+    clanname: 'Clan Name',
+    clanid: 'clan-name-1234',
+    clanlogo: '5225052916',
+    clanowner: { '123456': 'Username' },
+    clancredit: 1234,
+    clanuniforms: {
+      Uniform1: {
+        shirt: 'id',
+        pants: 'id',
+        hats: [ 'optional', 'array of ids', 'maximum of 5' ]
+      },
+      Uniform2: {
+        shirt: 'id',
+        pants: 'id',
+        hats: [ 'optional', 'array of ids', 'maximum of 5' ]
+      }
+    },
+    clanmembers: { '113456': 'Username 2', '123456': 'Username 1' },
+    clanallies: { 'clan-id-123': 'Clan Name 1' },
+    clanenemies: { 'clan-id-122': 'Clan Name 2' },
+    clanserver: 'serverid in discord xd, otherwise just left blank xd',
+    clangroup: { groupid: 'Group Name' },
+    clandescription: 'Clan Description',
+    clantag: 'CLAN',
+    clanjoin: 'inviteonly',
+    clannotification: 'No active notification',
+    clanstatus: 'offline'
+  },
+  'prmd-5041': {
+    type: 'clan',
+    clanname: 'PRMD',
+    clanid: 'prmd-5041',
+    clanlogo: '7537991411',
+    clanowner: { '91552156': '' },
+    clancredit: 0,
+    clanuniforms: {},	
+    clanmembers: {},
+    clanallies: {},
+    clanenemies: {},
+    clanserver: '',
+    clangroup: {},
+    clandescription: 'This is the official ACS clan for PRMD!',
+    clantag: '',
+    clanjoin: '',
+    clannotification: '',
+    clanstatus: 'inviteonly',
+    clanactivity: 'offline',
+    lastonline: 1643901401649
+  },
+  'sniper-pistols-1083': {
+    type: 'clan',
+    clanname: 'Sniper Pistols',
+    clanid: 'sniper-pistols-1083',
+    clanlogo: 'skip',
+    clanowner: { '881145125': '' },
+    clancredit: 0,
+    clanuniforms: {},
+    clanmembers: {},
+    clanallies: {},
+    clanenemies: {},
+    clanserver: '',
+    clangroup: {},
+    clandescription: 'Pro pistol users that can snipe',
+    clantag: '',
+    clanjoin: '',
+    clannotification: '',
+    clanstatus: '',
+    clanactivity: 'offline',
+    lastonline: 1643901401649
+  },
+  'my-1640': {
+    type: 'clan',
+    clanname: 'MY',
+    clanid: 'my-1640',
+    clanlogo: 'rbxassetid://id',
+    clanowner: { '2704344764': 'zafnie' },
+    clancredit: 0,
+    clanuniforms: {},
+    clanmembers: {},
+    clanallies: {},
+    clanenemies: {},
+    clanserver: '',
+    clangroup: {},
+    clandescription: 'Asia only heh',
+    clantag: '',
+    clanjoin: '',
+    clannotification: '',
+    clanstatus: '',
+    clanactivity: 'offline',
+    lastonline: 1643901401649
+  },
+  '1st-bingus-battalion-8226': {
+    type: 'clan',
+    clanname: '1st Bingus Battalion',
+    clanid: '1st-bingus-battalion-8226',
+    clanlogo: 'skip',
+    clanowner: { '419167150': '' },
+    clancredit: 0,
+    clanuniforms: {},
+    clanmembers: {},
+    clanallies: {},
+    clanenemies: {},
+    clanserver: '',
+    clangroup: {},
+    clandescription: '"bingus and floppa united"',
+    clantag: '',
+    clanjoin: '',
+    clannotification: '',
+    clanstatus: '',
+    clanactivity: 'offline',
+    lastonline: 1643901401649
+  },
+  'imperial-phantoms-1179': {
+    type: 'clan',
+    clanname: 'Imperial Phantoms',
+    clanid: 'imperial-phantoms-1179',
+    clanlogo: '',
+    clanowner: { '129097391': '' },
+    clancredit: 0,
+    clanuniforms: {},
+    clanmembers: {},
+    clanallies: {},
+    clanenemies: {},
+    clanserver: '',
+    clangroup: {},
+    clandescription: 'omk sus',
+    clantag: '',
+    clanjoin: '',
+    clannotification: '',
+    clanstatus: 'inviteonly',
+    clanactivity: 'offline',
+    lastonline: 1643901401649
+  }
+}
+        }
+        break;
+      case "updateusers":
+        if (message.author.id == 307112794229047296 ||
+            message.author.id == 388776379824603138 ||
+            message.author.id == 705207812526964757) {
+          var timeStart = Date.now();
+          var clansstore = config.store
+          for (const [key, value] of Object.entries(clansstore)) {
+            if (!isDict(value)) {
+              console.log("passed & submitting", key)
+              var playerprofile = blankUserJson
+              playerprofile.clan = value
+              clansstore[key] = playerprofile
+            } else {
+              for (const [key2, value2] of Object.entries(blankUserJson)) {
+                if ((key2 in value) === false && ("type" in value) && value.type === "user") {
+                  console.log("passed & adding")
+                  clansstore[key][key2] = value2
+                  console.log(value)
+                }
+              }
+            }
+          }
+          var timeEnd = Date.now();
+          message.channel.send("Updated users! (Took " + (timeEnd - timeStart) + "ms)")
+          config.store = clansstore
+        } else {
+          message.channel.send("Only the dev can use `updateusers`!")
+        }
         break;
       }
   });
