@@ -144,15 +144,23 @@ const blankUserJson = {
   type: "user",
   username: "",
   clan: "",
-  warns: {},
-  ban: [
-    {
+  notices: {
+    gameName: {
+      type: "warn",
+      content: "",
+      countAsOffense: true,
+      reasonIndex: "ModcallMisuse",
+      issuer: "moderatorId"
+    }
+  },
+  ban: {
+    gameName: {
       banned: false,
       reason: "",
       bannedUntil: 0,
-      bannedFrom: ""
+      issuer: "moderatorId"
     }
-  ],
+  },
   mod: {
     isAMod: false,
     rank: "",
@@ -803,18 +811,6 @@ client.on("message", message => { //basic command processor
 
   app.use(express.static("public")); //put anything in the public/ folder accessible (for website) (like css, js, etc.)
 
-  //make a test json and put it in the clans saves
-  // Create a Configstore instance.
-
-  //if (config.has("clantest") === false) {
-  //   config.set(testJson.clanid, testJson);
-  //   config.set("123456",testJson.clanid)
-  //} else {
-  //  config.set(testJson.clanid, testJson);
-  //  config.set("123456",testJson.clanid)
-  //  console.log(config.size - 1, "saved data"); // the - 1 is because there is an already set test clan thing
-  //}
-
   //app.get("/", (request, response) => { //listener for get requests (website)
   //  response.sendFile(`${__dirname}/views/index.html`);
   //});
@@ -1082,9 +1078,9 @@ client.on("message", message => { //basic command processor
                   {name: ":shield: Reporting User", value: "[" + reportingusername + "](https://www.roblox.com/users/" + reportinguserid + "/profile)", inline: true},
                   {name: ":pager: Report Reason", value: reportreason}
                 )
-            client.guilds.fetch(discordmodcallserver).then(serverinstance => serverinstance.channels.resolve(discordmodcallchannel).send("<@&720057768459108425> <@&727940388765040650> <@&726746155970461769>",embed))
+            client.guilds.fetch(discordmodcallserver).then(serverinstance => serverinstance.channels.resolve(discordmodcallchannel).send("<@&941348501151961108>",embed))
             makeResponse(true, "",value.id, {})
-            break;
+          break;
         }
         break;
       }
