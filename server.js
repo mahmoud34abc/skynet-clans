@@ -14,10 +14,50 @@ app.disable('x-powered-by');
 app.use(bodyParser.urlencoded({ extended: true })); //to be able to parse the requests' bodies
 app.use(bodyParser.json());
 const prefix = "c!";
+var errorembed = new Discord.MessageEmbed()
+  .setTitle() //Error, syntax error, etc
+  .setColor() //Error: #CC0000, Syntax: #00AACC
+  .setDescription() //The description of the error
+  //.setFooter("Skynet Clans • Version " + process.env.VERSION + " • Took " + (timeend - timestart) + "ms")
+  .setTimestamp()
 
 function isDict(o) {
   var string = JSON.stringify(o);
   return string.startsWith("{") && string.endsWith("}")
+}
+
+function getClan(clanID, callback) {
+  try {
+    if (clanID == "" || clanID == null || clanID == undefined) {
+      callback({
+        error: "syntax",
+        message: ""
+      })
+    } 
+    var clan = config.get(clanID)
+    if (clan === undefined) {
+      callback({
+        error: "error",
+        message: "Couldn't find your clan!"
+      })
+    }
+    if (clan !== undefined && isDict(clan) && clan.type == "clan") {
+      callback({
+        error: "no",
+        foundClan: clan
+      })
+    } else {
+      callback({
+        error: "error",
+        message: "The clan was found, but an error occured while reading the data. Please try again later!"
+      })
+    }
+  } catch {
+    callback({
+      error: "error",
+      message: "An error while executing code has occured. Please try again later!"
+    })
+  }
 }
 
 function getRobloxID(discordID, callback) {
@@ -150,15 +190,19 @@ const blankUserJson = {
       content: "",
       countAsOffense: true,
       reasonIndex: "ModcallMisuse",
-      issuer: "moderatorId"
+      issuer: "moderatorId",
+      issuedSince: 0,
+      read: false
     }
   },
   ban: {
     gameName: {
       banned: false,
       reason: "",
+      durationInText: "",
       bannedUntil: 0,
-      issuer: "moderatorId"
+      issuer: "moderatorId",
+      issuedSince: 0
     }
   },
   mod: {
@@ -245,16 +289,50 @@ client.on("message", message => { //basic command processor
       if (message.author.id == 307112794229047296 ||
           message.author.id == 388776379824603138 ||
           message.author.id == 705207812526964757) {
-        if (config.has(args[1])) {
-          config.delete(args[1])
-          message.channel.send("Clan deleted")
-        } else {
-          message.channel.send("Couldn't find the clan to delete!")
+        function execute(data) {
+          try {
+            if (data.error == "no") {
+              config.delete(args[1])
+              message.channel.send("Clan deleted")
+            } else {
+              switch (data.error) {
+                case "syntax":
+                  //syntax error
+                  console.log("Syntax Error")
+                  var timeend = Date.now()
+                  var errorembed = new Discord.MessageEmbed()
+                    .setTitle("Syntax error")
+                    .setColor("0x00aacc")
+                    .setDescription("Missing arguements! Please include `clanID` as the first arguement. Example: `" + prefix + "deleteclan clanID`")
+                    .setTimestamp()
+                    .setFooter("Skynet Clans • Version " + process.env.VERSION + " • Took " + (timeend - timestart) + "ms")
+                  message.channel.send([errorembed])
+                break;
+                case "error":
+                  //just an error
+                  console.log("Error")
+                  var timeend = Date.now()
+                  var errorembed = new Discord.MessageEmbed()
+                    .setTitle("Error")
+                    .setColor("0xcc0000")
+                    .setDescription(data.message)
+                    .setTimestamp()
+                    .setFooter("Skynet Clans • Version " + process.env.VERSION + " • Took " + (timeend - timestart) + "ms")
+                  message.channel.send([errorembed])
+                break;
+              }
+            }
+          } catch {
+            //error in executing
+            console.log("Error has occured in `deleteclan` command")
+            message.channel.send("Error has occured in `deleteclan` command")
+          }
         }
+        getClan(args[1],execute)
       } else {
-        message.channel.send("Only the dev can use `deleteclan`!")
+        message.channel.send("Only developers can use `deleteclan`!")
       }
-      break;
+        break;
     case "search":
       var clans = config.store
       
@@ -310,135 +388,155 @@ client.on("message", message => { //basic command processor
         }
         break;
       case "clan": //search for clan and send it's data in an embed
-        var clan
-        getRobloxID(message.member.id, function(outputjson) {
-          console.log(outputjson)
-          if (args[1] === undefined && outputjson.error === false) {
-            if (config.has(outputjson.id)) {
-              var clanid = config.get(outputjson.id)
-              if (config.has(clanid)) {
-                clan = config.get(clanid)
-              }
-            }
-          } else {
-            if (config.has(args[1])) {
-            clan = config.get(args[1])
-          }
-          
-          if (clan === undefined) {
-            message.channel.send("Couldn't find clan!")
-            return
-          }
-          if (clan !== undefined && isDict(clan) && clan.type == "clan") {
-          
-            var membersintext = "None"
-            var uniformsintext = "None"
-            var clanalliesintext = "None"
-            var clanenemiesintext = "None"
-            var username = "a roblox player"
-            var userid = ""
-            var groupName = "None"
-            var groupid = ""
-            
-            //processing into text
-            //clan members
-            for (const [_2, value] of Object.entries(clan.clanmembers)) {
-              if (value === "" || value !== undefined || value !== null) {
-                membersintext = membersintext + value
-              } else {
-                membersintext = value + "\n" + membersintext
-              }
-              if (membersintext === "") {
-                membersintext = "None"
-              }
-            }
-          
-            //clan uniforms
-            for (const [key] of Object.entries(clan.clanuniforms)) {
-              if (value === "" || value !== undefined || value !== null) {
-                uniformsintext = uniformsintext + key
-              } else {
-                uniformsintext = uniformsintext + "\n" + key
-              }
-              if (uniformsintext === "") {
-                uniformsintext = "None"
-              }
-            }
-            //clan allies
-            for (const [_4, value] of Object.entries(clan.clanallies)) {
-              if (value === "" || value !== undefined || value !== null) {
-                clanalliesintext = clanalliesintext + value
-              } else {
-                clanalliesintext = value + "\n" + clanalliesintext
-              }
-              if (clanalliesintext === "") {
-                clanalliesintext = "None"
-              }
-            }
-            
-            //clan enemies
-            for (const [_5, value] of Object.entries(clan.clanenemies)) {
-              if (value === "" || value !== undefined || value !== null) {
-                clanenemiesintext = clanenemiesintext + value
-              } else {
-                clanenemiesintext = value + "\n" + clanenemiesintext
-              }
-              if (clanenemiesintext === "") {
-                clanenemiesintext = "None"
-              }
-            }
-        
-            //clan owner
-            for (const [key, value] of Object.entries(clan.clanowner)) {
-              userid = key
-              if (value !== "" || value !== undefined || value !== null) {
-                username = value
-              }
-              if (username === "") {
-                username = "a ROBLOX player"
-              }
-            }
-          
-            //clan group
-            if (clan.clangroup.length > 2) {
-              for (var [key, value] of Object.entries(clan.clangroup)) {
-                groupid = key
-                if (value !== "" || value !== undefined || value !== null) {
-                  groupName = value
+        function execute(data) {
+          try {
+            console.log(data)
+            if (data.error == "no") {
+              var clan = data.foundClan
+              var membersintext = "None"
+              var uniformsintext = "None"
+              var clanalliesintext = "None"
+              var clanenemiesintext = "None"
+              var username = "a roblox player"
+              var userid = ""
+              var groupName = "None"
+              var groupid = ""
+              
+              //processing into text
+              //clan members
+              for (const [_2, value] of Object.entries(clan.clanmembers)) {
+                if (value === "" || value !== undefined || value !== null) {
+                  membersintext = membersintext + value
+                } else {
+                  membersintext = value + "\n" + membersintext
+                }
+                if (membersintext === "") {
+                  membersintext = "None"
                 }
               }
-            } else {
-              groupName = "None"
-            }
             
-            var clancreditintext = clan.clancredit
+              //clan uniforms
+              for (const [key] of Object.entries(clan.clanuniforms)) {
+                if (value === "" || value !== undefined || value !== null) {
+                  uniformsintext = uniformsintext + key
+                } else {
+                  uniformsintext = uniformsintext + "\n" + key
+                }
+                if (uniformsintext === "") {
+                  uniformsintext = "None"
+                }
+              }
+              //clan allies
+              for (const [_4, value] of Object.entries(clan.clanallies)) {
+                if (value === "" || value !== undefined || value !== null) {
+                  clanalliesintext = clanalliesintext + value
+                } else {
+                  clanalliesintext = value + "\n" + clanalliesintext
+                }
+                if (clanalliesintext === "") {
+                  clanalliesintext = "None"
+                }
+              }
+              
+              //clan enemies
+              for (const [_5, value] of Object.entries(clan.clanenemies)) {
+                if (value === "" || value !== undefined || value !== null) {
+                  clanenemiesintext = clanenemiesintext + value
+                } else {
+                  clanenemiesintext = value + "\n" + clanenemiesintext
+                }
+                if (clanenemiesintext === "") {
+                  clanenemiesintext = "None"
+                }
+              }
           
-            var timeend = Date.now()
-            var embed = new Discord.MessageEmbed()
-              .setTitle(clanstatus(clan) + " " + clan.clanname + " `" + clan.clanid + "`")
-              .setAuthor("Clan Info")
-              .setColor(clanactivitycolor(clan))
-              .setDescription("Owned by [" + username + "](https://www.roblox.com/users/" + userid + "/profile)")
-              .setFooter("Skynet Clans • Version " + process.env.VERSION + " • Took " + (timeend - timestart) + "ms")
-              //.setImage("https://www.roblox.com/Thumbs/Asset.ashx?assetId=" + clan.clanlogo)
-              .setThumbnail("https://www.roblox.com/Thumbs/Asset.ashx?assetId=" + clan.clanlogo + "&size=48x48&format=png")
-              .setTimestamp()
-              //.setURL()
-              .addFields(
-                {name: ":pager: Description", value: clanactivity(clan, true) + clan.clandescription},
-                {name: ":moneybag: Clan Credit", value: clancreditintext, inline: true},
-                {name: ":elevator: Members", value: membersintext, inline: true},
-                {name: ":martial_arts_uniform: Uniform Names", value: uniformsintext, inline: true},
-                {name: ":radio: Group", value: "[" + groupName + "](https://www.roblox.com/groups/" + groupid + "/" + cleanseStringUnlimited(groupName) + "#!/about)", inline: true},
-                {name: ":shield: Clan Allies", value: clanalliesintext, inline: true},
-                {name: ":crossed_swords: Clan Enemies", value: clanenemiesintext, inline: true}
-              )
+              //clan owner
+              for (const [key, value] of Object.entries(clan.clanowner)) {
+                userid = key
+                if (value !== "" || value !== undefined || value !== null) {
+                  username = value
+                }
+                if (username === "") {
+                  username = "a ROBLOX player"
+                }
+              }
             
-            message.channel.send({embed})
+              //clan group
+              if (clan.clangroup.length > 2) {
+                for (var [key, value] of Object.entries(clan.clangroup)) {
+                  groupid = key
+                  if (value !== "" || value !== undefined || value !== null) {
+                    groupName = value
+                  }
+                }
+              } else {
+                groupName = "None"
+              }
+              
+              var clancreditintext = clan.clancredit
+            
+              var timeend = Date.now()
+              var embed = new Discord.MessageEmbed()
+                .setTitle(clanstatus(clan) + " " + clan.clanname + " `" + clan.clanid + "`")
+                .setAuthor("Clan Info")
+                .setColor(clanactivitycolor(clan))
+                .setDescription("Owned by [" + username + "](https://www.roblox.com/users/" + userid + "/profile)")
+                .setFooter("Skynet Clans • Version " + process.env.VERSION + " • Took " + (timeend - timestart) + "ms")
+                //.setImage("https://www.roblox.com/Thumbs/Asset.ashx?assetId=" + clan.clanlogo)
+                .setThumbnail("https://www.roblox.com/Thumbs/Asset.ashx?assetId=" + clan.clanlogo + "&size=48x48&format=png")
+                .setTimestamp()
+                //.setURL()
+                .addFields(
+                  {name: ":pager: Description", value: clanactivity(clan, true) + clan.clandescription},
+                  {name: ":moneybag: Clan Credit", value: clancreditintext, inline: true},
+                  {name: ":elevator: Members", value: membersintext, inline: true},
+                  {name: ":martial_arts_uniform: Uniform Names", value: uniformsintext, inline: true},
+                  {name: ":radio: Group", value: "[" + groupName + "](https://www.roblox.com/groups/" + groupid + "/" + cleanseStringUnlimited(groupName) + "#!/about)", inline: true},
+                  {name: ":shield: Clan Allies", value: clanalliesintext, inline: true},
+                  {name: ":crossed_swords: Clan Enemies", value: clanenemiesintext, inline: true}
+                )
+            
+              message.channel.send([embed])
+            } else {
+              switch (data.error) {
+                case "syntax":
+                  //syntax error
+                  console.log("Syntax Error")
+                  var timeend = Date.now()
+                  var errorembed = new Discord.MessageEmbed()
+                    .setTitle("Syntax error")
+                    .setColor("0x00aacc")
+                    .setDescription("Missing arguements! Please include `clanID` as the first arguement. Example: `" + prefix + "clan clanID`")
+                    .setTimestamp()
+                    .setFooter("Skynet Clans • Version " + process.env.VERSION + " • Took " + (timeend - timestart) + "ms")
+                  message.channel.send([errorembed])
+                break;
+                case "error":
+                  //just an error
+                  console.log("Error")
+                  var timeend = Date.now()
+                  var errorembed = new Discord.MessageEmbed()
+                    .setTitle("Error")
+                    .setColor("0xcc0000")
+                    .setDescription(data.message)
+                    .setTimestamp()
+                    .setFooter("Skynet Clans • Version " + process.env.VERSION + " • Took " + (timeend - timestart) + "ms")
+                  message.channel.send([errorembed])
+                break;
+              }
+            }
+          } catch {
+            //error in excution
+            console.log("Error has occured in `clan` command")
+            message.channel.send("Error has occured in `clan` command")
           }
         }
-      })
-        
+      
+      if (args[1] == "" || args[1] == undefined || args[1] == null) {
+        getRobloxID(message.member.id, execute)
+      } else {
+        getClan(args[1], execute)
+      }
       break;
       case "updateclans":
          if (message.author.id == 307112794229047296 ||
@@ -490,7 +588,7 @@ client.on("message", message => { //basic command processor
         var clanid
         var description
         var logo
-        var execute = function(robloxid) {
+        function execute(robloxid) {
           if (robloxid.error === false) {
            if (config.has(robloxid.id)) {
              message.channel.send(":warning: You already have or in a clan!")
@@ -626,7 +724,7 @@ client.on("message", message => { //basic command processor
         getRobloxID(message.member.id, execute)
         break;
       case "editclan":
-        var execute = function(robloxdata) {
+        function execute(robloxdata) {
           if (robloxdata.error === false) {
             if (config.has(robloxdata.id) && config.has(config.get(robloxdata.id))) {
               var clan = config.get(config.get(robloxdata.id))
@@ -745,7 +843,7 @@ client.on("message", message => { //basic command processor
         getRobloxID(message.member.id, execute)
         break;
       case "joinclan":
-        var execute = function(robloxdata) {
+        function execute(robloxdata) {
           if (robloxdata.error === false) {
             var clan
             if (config.has(args[1])) {
