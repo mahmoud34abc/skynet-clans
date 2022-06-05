@@ -23,11 +23,5 @@
     "url": "https://glitch.com/edit/#!/hello-sqlite"
   },
   "license": "MIT",
-  "keywords": [
-    "node",
-    "glitch",
-    "express",
-    "roblox",
-    "skynet"
-  ]
+  "keywords": []
 }

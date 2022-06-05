@@ -1,6 +1,6 @@
 //start the bot and the webhook
-const Discord = require("discord.js");
-const client = new Discord.Client();
+const {Client,Intents} = require("discord.js");
+const client = new Client({intents: [Intents.FLAGS.MESSAGE_CONTENT]});
 const https = require("https")
 const Conf = require("conf");
 const Cache = require("cache");
@@ -23,7 +23,7 @@ var errorembed = new Discord.MessageEmbed()
 
 function isDict(o) {
   var string = JSON.stringify(o);
-  return string.startsWith("{") && string.endsWith("}")
+  return (string.startsWith("{") && string.endsWith("}"))
 }
 
 function getClan(clanID, callback) {
@@ -265,7 +265,7 @@ function routineCheck() {
 }
 routineCheck();
 
-client.on("message", message => { //basic command processor
+client.on("messageCreate", message => { //basic command processor
   var timestart = Date.now()
   if (!message.content.startsWith(prefix)) return;  
   var args = message.content.trim().split(/ +/g);
