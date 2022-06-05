@@ -15,9 +15,9 @@ app.use(bodyParser.urlencoded({ extended: true })); //to be able to parse the re
 app.use(bodyParser.json());
 const prefix = "c!";
 var errorembed = new MessageEmbed()
-  .setTitle() //Error, syntax error, etc
-  .setColor() //Error: #CC0000, Syntax: #00AACC
-  .setDescription() //The description of the error
+  .setTitle("") //Error, syntax error, etc
+  .setColor("") //Error: #CC0000, Syntax: #00AACC
+  .setDescription("") //The description of the error
   //.setFooter("Skynet Clans • Version " + process.env.VERSION + " • Took " + (timeend - timestart) + "ms")
   .setTimestamp()
 
