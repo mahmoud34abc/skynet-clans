@@ -16,10 +16,10 @@ app.use(bodyParser.json());
 const prefix = "c!";
 var errorembed = new MessageEmbed()
   .setTitle("") //Error, syntax error, etc
-  .setColor("") //Error: #CC0000, Syntax: #00AACC
+  .setColor("0xCC0000") //Error: 0xCC0000, Syntax: 0x00AACC
   .setDescription("") //The description of the error
   //.setFooter("Skynet Clans • Version " + process.env.VERSION + " • Took " + (timeend - timestart) + "ms")
-  .setTimestamp()
+  .setTimestamp(Date.now())
 
 function isDict(o) {
   var string = JSON.stringify(o);
@@ -303,7 +303,7 @@ client.on("messageCreate", message => { //basic command processor
                     .setTitle("Syntax error")
                     .setColor("0x00aacc")
                     .setDescription("Missing arguements! Please include `clanID` as the first arguement. Example: `" + prefix + "deleteclan clanID`")
-                    .setTimestamp()
+                    .setTimeStamp(Date.now())
                     .setFooter("Skynet Clans • Version " + process.env.VERSION + " • Took " + (timeend - timestart) + "ms")
                   message.channel.send({embeds: [errorembed]})
                 break;
@@ -315,7 +315,7 @@ client.on("messageCreate", message => { //basic command processor
                     .setTitle("Error")
                     .setColor("0xcc0000")
                     .setDescription(data.message)
-                    .setTimestamp()
+                    .setTimeStamp(Date.now())
                     .setFooter("Skynet Clans • Version " + process.env.VERSION + " • Took " + (timeend - timestart) + "ms")
                   message.channel.send({embeds: [errorembed]})
                 break;
@@ -377,7 +377,7 @@ client.on("messageCreate", message => { //basic command processor
               .setFooter("Skynet Clans • Version: " + process.env.VERSION + " • Took " + (timeend - timestart) + "ms")
               //.setImage("http://i.imgur.com/yVpymuV.png")
               //.setThumbnail(avatarpic)
-              .setTimestamp()
+              .setTimeStamp(Date.now())
               //.setURL()
             
             message.channel.send({embeds: [embed]})
@@ -483,7 +483,7 @@ client.on("messageCreate", message => { //basic command processor
                 .setFooter("Skynet Clans • Version " + process.env.VERSION + " • Took " + (timeend - timestart) + "ms")
                 //.setImage("https://www.roblox.com/Thumbs/Asset.ashx?assetId=" + clan.clanlogo)
                 .setThumbnail("https://www.roblox.com/Thumbs/Asset.ashx?assetId=" + clan.clanlogo + "&size=48x48&format=png")
-                .setTimestamp()
+                .setTimeStamp(Date.now())
                 //.setURL()
                 .addFields(
                   {name: ":pager: Description", value: clanactivity(clan, true) + clan.clandescription},
@@ -506,7 +506,7 @@ client.on("messageCreate", message => { //basic command processor
                     .setTitle("Syntax error")
                     .setColor("0x00aacc")
                     .setDescription("Missing arguements! Please include `clanID` as the first arguement. Example: `" + prefix + "clan clanID`")
-                    .setTimestamp()
+                    .setTimeStamp(Date.now())
                     .setFooter("Skynet Clans • Version " + process.env.VERSION + " • Took " + (timeend - timestart) + "ms")
                   message.channel.send({embeds: [errorembed]})
                 break;
@@ -518,7 +518,7 @@ client.on("messageCreate", message => { //basic command processor
                     .setTitle("Error")
                     .setColor("0xcc0000")
                     .setDescription(data.message)
-                    .setTimestamp()
+                    .setTimeStamp(Date.now())
                     .setFooter("Skynet Clans • Version " + process.env.VERSION + " • Took " + (timeend - timestart) + "ms")
                   message.channel.send({embeds: [errorembed]})
                 break;
@@ -598,7 +598,7 @@ client.on("messageCreate", message => { //basic command processor
           .setFooter("Skynet Clans • Version " + process.env.VERSION)
           //.setImage("https://www.roblox.com/Thumbs/Asset.ashx?assetId=" + clan.clanlogo)
           //.setThumbnail("https://www.roblox.com/Thumbs/Asset.ashx?assetId=" + clan.clanlogo)
-          .setTimestamp()
+          .setTimeStamp(Date.now())
           //.setURL()
           .addFields(
             {name: ":shield: Clan Name", value: "Pick a name for your clan! (send it as a normal message)"}
@@ -646,7 +646,7 @@ client.on("messageCreate", message => { //basic command processor
                   .setFooter("Skynet Clans • Version " + process.env.VERSION)
                   //.setImage("https://www.roblox.com/Thumbs/Asset.ashx?assetId=" + clan.clanlogo)
                   //.setThumbnail("https://www.roblox.com/Thumbs/Asset.ashx?assetId=" + clan.clanlogo)
-                  .setTimestamp()
+                  .setTimeStamp(Date.now())
                   //.setURL()
                   .addFields(
                     {name: ":pager: Description", value: "Type a description for your clan! (can be changed later) (send it as a normal message)"}
@@ -663,7 +663,7 @@ client.on("messageCreate", message => { //basic command processor
                   .setFooter("Skynet Clans • Version " + process.env.VERSION)
                   //.setImage("https://www.roblox.com/Thumbs/Asset.ashx?assetId=" + clan.clanlogo)
                   //.setThumbnail("https://www.roblox.com/Thumbs/Asset.ashx?assetId=" + clan.clanlogo)
-                  .setTimestamp()
+                  .setTimeStamp(Date.now())
                   //.setURL()
                   .addFields(
                     {name: ":frame_photo: Description", value: "Paste a rbxassetid://**id** logo for your clan! (optional, type `skip` to leave empty) (can be changed later) (send it as a normal message)"}
@@ -691,7 +691,7 @@ client.on("messageCreate", message => { //basic command processor
                     .setFooter("Skynet Clans • Version " + process.env.VERSION)
                     //.setImage("https://www.roblox.com/Thumbs/Asset.ashx?assetId=" + clan.clanlogo)
                     //.setThumbnail("https://www.roblox.com/Thumbs/Asset.ashx?assetId=" + clan.clanlogo)
-                    .setTimestamp()
+                    .setTimeStamp(Date.now())
                   collector.stop()
                   message.channel.send({embeds: [embed4]})
                   break
@@ -763,7 +763,7 @@ client.on("messageCreate", message => { //basic command processor
                   .setFooter("Skynet Clans • Version " + process.env.VERSION + " • Took " + (timeend - timestart) + "ms")
                   .setImage("https://www.roblox.com/Thumbs/Asset.ashx?assetId=" + clan.clanlogo)
                   //.setThumbnail("https://www.roblox.com/Thumbs/Asset.ashx?assetId=" + clan.clanlogo)
-                  .setTimestamp()
+                  .setTimeStamp(Date.now())
                   .setDescription("There are three join modes: ~~`publickey`~~, `inviteonly` and `grouponly`.\n:warning: **Please note that you'll have to change the property if it has been tagged by roblox!**")
                   //.setURL()
                   .addFields(
@@ -1163,7 +1163,7 @@ client.on("messageCreate", message => { //basic command processor
                 .setFooter("Skynet Clans • Version " + process.env.VERSION + " • Took " + (timeend - timestart) + "ms")
                 //.setImage("https://www.roblox.com/Thumbs/Asset.ashx?assetId=" + clan.clanlogo)
                 //.setThumbnail("https://www.roblox.com/Thumbs/Asset.ashx?assetId=" + clan.clanlogo)
-                .setTimestamp()
+                .setTimeStamp(Date.now())
                 .setColor(0x660000)
                 .setDescription("From: " + gamename)
                 //.setURL()
