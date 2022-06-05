@@ -1,11 +1,6 @@
 //start the bot and the webhook
 const Discord = require("discord.js");
-const client = new Discord.Client({
-  makeCache: Options.cacheWithLimits({
-    MessageManager: 400,
-    PresenceManager: 0,
-  }),
-});
+const client = new Discord.Client();
 const https = require("https")
 const Conf = require("conf");
 const Cache = require("cache");
