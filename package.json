@@ -17,7 +17,7 @@
     "express": "^4.17.2"
   },
   "engines": {
-    "node": "16.6.0"
+    "node": "16.14.2"
   },
   "repository": {
     "url": "https://glitch.com/edit/#!/hello-sqlite"
