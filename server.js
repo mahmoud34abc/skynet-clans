@@ -1,10 +1,15 @@
 //start the bot and the webhook
 const Discord = require("discord.js");
-const client = new Discord.Client();
+const client = new Discord.Client({
+  makeCache: Options.cacheWithLimits({
+    MessageManager: 400,
+    PresenceManager: 0,
+  }),
+});
 const https = require("https")
 const Conf = require("conf");
 const Cache = require("cache");
-const robloxuserstore = new Cache(12*60*60*1000)
+const robloxuserstore = new Cache(12*60*60*1000);
 const config = new Conf();
 const util = require("util")
 const express = require("express");
@@ -240,10 +245,9 @@ const cleanseStringUnlimited = function(string) { //used to make clan IDs
     .replace(/\W+/g, "-")
     .toLowerCase();
   string = string.replace(/-\s*$/, "");
-
   return string;
 };
-  
+
 const makeClanID = function(str) {
   var name = cleanseString(str);
   var randomnumber = Math.floor(Math.random() * 8999 + 1000);
@@ -277,12 +281,12 @@ client.on("message", message => { //basic command processor
       if (message.author.id == 307112794229047296 ||
           message.author.id == 388776379824603138 ||
           message.author.id == 705207812526964757) {
-        message.channel.send("Restarting...").then(
+        message.channel.send({content: "Restarting..."}).then(
           () => console.log("Skynet Clans bot is restarting...")).then(
             () => client.destroy()).then(
               () => process.exit());
       } else {
-        message.channel.send("Only the dev can use `restart`!")
+        message.channel.send({content: "Only the dev can use `restart`!"})
       }
       break;
     case "deleteclan": //only accessible by the developer
@@ -293,7 +297,7 @@ client.on("message", message => { //basic command processor
           try {
             if (data.error == "no") {
               config.delete(args[1])
-              message.channel.send("Clan deleted")
+              message.channel.send({content: "Clan deleted"})
             } else {
               switch (data.error) {
                 case "syntax":
@@ -306,7 +310,7 @@ client.on("message", message => { //basic command processor
                     .setDescription("Missing arguements! Please include `clanID` as the first arguement. Example: `" + prefix + "deleteclan clanID`")
                     .setTimestamp()
                     .setFooter("Skynet Clans • Version " + process.env.VERSION + " • Took " + (timeend - timestart) + "ms")
-                  message.channel.send([errorembed])
+                  message.channel.send({embeds: [errorembed]})
                 break;
                 case "error":
                   //just an error
@@ -318,19 +322,19 @@ client.on("message", message => { //basic command processor
                     .setDescription(data.message)
                     .setTimestamp()
                     .setFooter("Skynet Clans • Version " + process.env.VERSION + " • Took " + (timeend - timestart) + "ms")
-                  message.channel.send([errorembed])
+                  message.channel.send({embeds: [errorembed]})
                 break;
               }
             }
           } catch {
             //error in executing
             console.log("Error has occured in `deleteclan` command")
-            message.channel.send("Error has occured in `deleteclan` command")
+            message.channel.send({content: "Error has occured in `deleteclan` command"})
           }
         }
         getClan(args[1],execute)
       } else {
-        message.channel.send("Only developers can use `deleteclan`!")
+        message.channel.send({content: "Only developers can use `deleteclan`!"})
       }
         break;
     case "search":
@@ -343,7 +347,7 @@ client.on("message", message => { //basic command processor
       }
       
       if (args[1] === "" || args[1] === undefined) {
-        message.channel.send("Missing arguement! Type `" + prefix + "search clanname` to search")
+        message.channel.send({content: "Missing arguement! Type `" + prefix + "search clanname` to search"})
       } else {
         args[1] = args[1].toLowerCase();
         var foundclans = ""
@@ -381,9 +385,9 @@ client.on("message", message => { //basic command processor
               .setTimestamp()
               //.setURL()
             
-            message.channel.send({embed})
+            message.channel.send({embeds: [embed]})
           } else {
-            message.channel.send("No clans found for search query '" + args[1] + "'!")
+            message.channel.send({content: "No clans found for search query '" + args[1] + "'!"})
           }
         }
         break;
@@ -496,7 +500,7 @@ client.on("message", message => { //basic command processor
                   {name: ":crossed_swords: Clan Enemies", value: clanenemiesintext, inline: true}
                 )
             
-              message.channel.send([embed])
+              message.channel.send({embeds: [embed]})
             } else {
               switch (data.error) {
                 case "syntax":
@@ -509,7 +513,7 @@ client.on("message", message => { //basic command processor
                     .setDescription("Missing arguements! Please include `clanID` as the first arguement. Example: `" + prefix + "clan clanID`")
                     .setTimestamp()
                     .setFooter("Skynet Clans • Version " + process.env.VERSION + " • Took " + (timeend - timestart) + "ms")
-                  message.channel.send([errorembed])
+                  message.channel.send({embeds: [errorembed]})
                 break;
                 case "error":
                   //just an error
@@ -521,14 +525,14 @@ client.on("message", message => { //basic command processor
                     .setDescription(data.message)
                     .setTimestamp()
                     .setFooter("Skynet Clans • Version " + process.env.VERSION + " • Took " + (timeend - timestart) + "ms")
-                  message.channel.send([errorembed])
+                  message.channel.send({embeds: [errorembed]})
                 break;
               }
             }
           } catch {
             //error in excution
             console.log("Error has occured in `clan` command")
-            message.channel.send("Error has occured in `clan` command")
+            message.channel.send({content: "Error has occured in `clan` command"})
           }
         }
       
@@ -557,10 +561,10 @@ client.on("message", message => { //basic command processor
             }
           }
           var timeEnd = Date.now();
-          message.channel.send("Updated clans! (Took " + (timeEnd - timeStart) + "ms)")
+          message.channel.send({content: "Updated clans! (Took " + (timeEnd - timeStart) + "ms)"})
           config.store = clansstore
         } else {
-          message.channel.send("Only the dev can use `updateclans`!")
+          message.channel.send({content: "Only the dev can use `updateclans`!"})
         }
         break;
       case "printclandata":
@@ -570,14 +574,12 @@ client.on("message", message => { //basic command processor
           if (config.has(args[1])) {
             console.log(util.inspect(config.get(args[1]),false,null))
           } else {
-            message.channel.send("Couldn't find clan!")
+            message.channel.send({content: "Couldn't find clan!"})
           }
         }
         break;
       case "ping":
-        message.channel.send(
-          ":ping_pong: Pong! `" + `${Date.now() - message.createdTimestamp}` + "ms`"
-        );
+        message.channel.send({content: ":ping_pong: Pong! `" + `${Date.now() - message.createdTimestamp}` + "ms`"});
         break;
       case "createclan":
         var stage = 0
@@ -591,7 +593,7 @@ client.on("message", message => { //basic command processor
         function execute(robloxid) {
           if (robloxid.error === false) {
            if (config.has(robloxid.id)) {
-             message.channel.send(":warning: You already have or in a clan!")
+             message.channel.send({content: ":warning: You already have or in a clan!"})
         } else {
         const embed1 = new Discord.MessageEmbed()
           .setTitle("Clan 1/3")
@@ -606,7 +608,7 @@ client.on("message", message => { //basic command processor
           .addFields(
             {name: ":shield: Clan Name", value: "Pick a name for your clan! (send it as a normal message)"}
           )
-        message.channel.send(embed1)
+        message.channel.send({embeds: [embed1]})
         
         stage =  1
         
@@ -639,7 +641,7 @@ client.on("message", message => { //basic command processor
             case 2:
               clanid = makeClanID(clanname)
               if (config.has(clanid)) {
-                message.channel.send(":warning: Error: a lot of clans already have this name! Please select another.")
+                message.channel.send({content: ":warning: Error: a lot of clans already have this name! Please select another."})
               } else {
                 const embed2 = new Discord.MessageEmbed()
                   .setTitle("Clan 2/3")
@@ -654,7 +656,7 @@ client.on("message", message => { //basic command processor
                   .addFields(
                     {name: ":pager: Description", value: "Type a description for your clan! (can be changed later) (send it as a normal message)"}
                   )
-                message.channel.send(embed2)
+                message.channel.send({embeds: [embed2]})
               }
             break;
               case 3:
@@ -671,11 +673,11 @@ client.on("message", message => { //basic command processor
                   .addFields(
                     {name: ":frame_photo: Description", value: "Paste a rbxassetid://**id** logo for your clan! (optional, type `skip` to leave empty) (can be changed later) (send it as a normal message)"}
                   )
-                message.channel.send(embed3)
+                message.channel.send({embeds: [embed3]})
                 break;
               case 4:
                 if (config.has(clanid)) {
-                  message.channel.send(":warning: Error: a lot of clans already have this name! Please select another.")
+                  message.channel.send({content: ":warning: Error: a lot of clans already have this name! Please select another."})
                 } else {
                   var newclan = blankJson
                   newclan.clanid = clanid
@@ -696,7 +698,7 @@ client.on("message", message => { //basic command processor
                     //.setThumbnail("https://www.roblox.com/Thumbs/Asset.ashx?assetId=" + clan.clanlogo)
                     .setTimestamp()
                   collector.stop()
-                  message.channel.send(embed4)
+                  message.channel.send({embeds: [embed4]})
                   break
                 }
               }
@@ -717,7 +719,7 @@ client.on("message", message => { //basic command processor
         //newclan.clanid = makeClanID(clanname)
     }
         } else {
-          message.channel.send("An error occured: " + robloxid.message)
+          message.channel.send({content: "An error occured: " + robloxid.message})
         }
         }
         
@@ -776,7 +778,7 @@ client.on("message", message => { //basic command processor
                     {name: ":pencil: `joinMode`", value: clanstatustext, inline: true}
                   )
                   
-                  message.channel.send("*Any field with a :pencil: can be edited! `c!editclan property value`",editembed).catch(console.error)
+                  message.channel.send({content: "*Any field with a :pencil: can be edited! `c!editclan property value`", embeds: [editembed]}).catch(console.error)
                 } else if (args[1] !== undefined && args[2] !== undefined) {
                   var string = ""
                   for (const [key, value] of Object.entries(args)) {
@@ -794,13 +796,13 @@ client.on("message", message => { //basic command processor
                     switch(args[1]) {
                       case "description":
                         clan.clandescription = string
-                        message.channel.send("Successfully set `description` to:\n> " + clan.clandescription)
+                        message.channel.send({content: "Successfully set `description` to:\n> " + clan.clandescription})
                         break;
                       //case "group":
                       //  break;
                       case "icon":
                         clan.clanlogo = string
-                        message.channel.send("Successfully set `icon` to `" + clan.clanlogo + "`!")
+                        message.channel.send({content: "Successfully set `icon` to `" + clan.clanlogo + "`!"})
                         break;
                       case "joinMode":
                         switch(string) {
@@ -808,24 +810,24 @@ client.on("message", message => { //basic command processor
                           //  break;
                           case "inviteonly":
                             clan.clanstatus = "inviteonly"
-                            message.channel.send("Successfully set `joinMode` to `" + clan.clanstatus + "`!")
+                            message.channel.send({content: "Successfully set `joinMode` to `" + clan.clanstatus + "`!"})
                             break;
                           case "grouponly":
                             if (groupid !== "" || groupid !== undefined || groupid !== null || !Number.isNaN(groupid)) {
                               clan.clanstatus = "grouponly"
-                              message.channel.send("Successfully set `joinMode` to `" + clan.clanstatus + "`!")
+                              message.channel.send({content: "Successfully set `joinMode` to `" + clan.clanstatus + "`!"})
                             } else {
-                              message.channel.send("It looks like you didn't set a group as clan group yet! ~~`" + prefix +"editclan group id`~~")
+                              message.channel.send({content: "It looks like you didn't set a group as clan group yet! ~~`" + prefix +"editclan group id`~~"})
                             }
                             break;
                         }
                         break;
                       default:
-                        message.channel.send("Invalid property choice! Please check again")
+                        message.channel.send({content: "Invalid property choice! Please check again"})
                         break;
                     }
                   } else {
-                    message.channel.send("Please send the second arguement!")
+                    message.channel.send({content: "Please send the second arguement!"})
                   }
                   if (clan !== config.get(clan.clanid)) {
                     clan.clanactivity = "online"
@@ -833,11 +835,11 @@ client.on("message", message => { //basic command processor
                   }
                 }
               } else {
-                message.channel.send("You don't have permission to change the clan data!")
+                message.channel.send({content: "You don't have permission to change the clan data!"})
               }
             }
           } else {
-            message.channel.send("An error has occured: " + robloxdata.message)
+            message.channel.send({content: "An error has occured: " + robloxdata.message})
           }
         }
         getRobloxID(message.member.id, execute)
@@ -858,10 +860,10 @@ client.on("message", message => { //basic command processor
                   break;
               }
             } else {
-              message.channel.send("Couldn't find the clan! `" + prefix + "joinclan clanid`")
+              message.channel.send({content: "Couldn't find the clan! `" + prefix + "joinclan clanid`"})
             }
           } else {
-            message.channel.send("An error has occured: " + robloxdata.message)
+            message.channel.send({content: "An error has occured: " + robloxdata.message})
           }
         }
         getRobloxID(message.member.id, execute)
@@ -896,10 +898,10 @@ client.on("message", message => { //basic command processor
             }
           }
           var timeEnd = Date.now();
-          message.channel.send("Updated users! (Took " + (timeEnd - timeStart) + "ms)")
+          message.channel.send({content: "Updated users! (Took " + (timeEnd - timeStart) + "ms)"})
           config.store = clansstore
         } else {
-          message.channel.send("Only the dev can use `updateusers`!")
+          message.channel.send({content: "Only the dev can use `updateusers`!"})
         }
         break;
       }
@@ -1176,7 +1178,7 @@ client.on("message", message => { //basic command processor
                   {name: ":shield: Reporting User", value: "[" + reportingusername + "](https://www.roblox.com/users/" + reportinguserid + "/profile)", inline: true},
                   {name: ":pager: Report Reason", value: reportreason}
                 )
-            client.guilds.fetch(discordmodcallserver).then(serverinstance => serverinstance.channels.resolve(discordmodcallchannel).send("<@&941348501151961108>",embed))
+            client.guilds.fetch(discordmodcallserver).then(serverinstance => serverinstance.channels.resolve(discordmodcallchannel).send({content: "<@&941348501151961108>", embeds: [embed]}))
             makeResponse(true, "",value.id, {})
           break;
         }
