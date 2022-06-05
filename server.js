@@ -1,5 +1,5 @@
 //start the bot and the webhook
-const {Client,Intents} = require("discord.js");
+const {Client,Intents,MessageEmbed} = require("discord.js");
 const client = new Client({intents: ["GUILD_MESSAGES","DIRECT_MESSAGES"]});
 const https = require("https")
 const Conf = require("conf");
@@ -14,7 +14,7 @@ app.disable('x-powered-by');
 app.use(bodyParser.urlencoded({ extended: true })); //to be able to parse the requests' bodies
 app.use(bodyParser.json());
 const prefix = "c!";
-var errorembed = new Discord.MessageEmbed()
+var errorembed = new MessageEmbed()
   .setTitle() //Error, syntax error, etc
   .setColor() //Error: #CC0000, Syntax: #00AACC
   .setDescription() //The description of the error
@@ -299,7 +299,7 @@ client.on("messageCreate", message => { //basic command processor
                   //syntax error
                   console.log("Syntax Error")
                   var timeend = Date.now()
-                  var errorembed = new Discord.MessageEmbed()
+                  var errorembed = new MessageEmbed()
                     .setTitle("Syntax error")
                     .setColor("0x00aacc")
                     .setDescription("Missing arguements! Please include `clanID` as the first arguement. Example: `" + prefix + "deleteclan clanID`")
@@ -311,7 +311,7 @@ client.on("messageCreate", message => { //basic command processor
                   //just an error
                   console.log("Error")
                   var timeend = Date.now()
-                  var errorembed = new Discord.MessageEmbed()
+                  var errorembed = new MessageEmbed()
                     .setTitle("Error")
                     .setColor("0xcc0000")
                     .setDescription(data.message)
@@ -369,7 +369,7 @@ client.on("messageCreate", message => { //basic command processor
           
           var timeend = Date.now()
           if (foundaclan) {
-            const embed = new Discord.MessageEmbed()
+            const embed = new MessageEmbed()
               .setTitle("Found " + foundnumber + " clan(s)")
               .setAuthor("Search query for '" + args[1] + "'")
               //.setColor()
@@ -475,7 +475,7 @@ client.on("messageCreate", message => { //basic command processor
               var clancreditintext = clan.clancredit
             
               var timeend = Date.now()
-              var embed = new Discord.MessageEmbed()
+              var embed = new MessageEmbed()
                 .setTitle(clanstatus(clan) + " " + clan.clanname + " `" + clan.clanid + "`")
                 .setAuthor("Clan Info")
                 .setColor(clanactivitycolor(clan))
@@ -502,7 +502,7 @@ client.on("messageCreate", message => { //basic command processor
                   //syntax error
                   console.log("Syntax Error")
                   var timeend = Date.now()
-                  var errorembed = new Discord.MessageEmbed()
+                  var errorembed = new MessageEmbed()
                     .setTitle("Syntax error")
                     .setColor("0x00aacc")
                     .setDescription("Missing arguements! Please include `clanID` as the first arguement. Example: `" + prefix + "clan clanID`")
@@ -514,7 +514,7 @@ client.on("messageCreate", message => { //basic command processor
                   //just an error
                   console.log("Error")
                   var timeend = Date.now()
-                  var errorembed = new Discord.MessageEmbed()
+                  var errorembed = new MessageEmbed()
                     .setTitle("Error")
                     .setColor("0xcc0000")
                     .setDescription(data.message)
@@ -590,7 +590,7 @@ client.on("messageCreate", message => { //basic command processor
            if (config.has(robloxid.id)) {
              message.channel.send({content: ":warning: You already have or in a clan!"})
         } else {
-        const embed1 = new Discord.MessageEmbed()
+        const embed1 = new MessageEmbed()
           .setTitle("Clan 1/3")
           .setAuthor("Setting up a clan")
           //.setColor()
@@ -638,7 +638,7 @@ client.on("messageCreate", message => { //basic command processor
               if (config.has(clanid)) {
                 message.channel.send({content: ":warning: Error: a lot of clans already have this name! Please select another."})
               } else {
-                const embed2 = new Discord.MessageEmbed()
+                const embed2 = new MessageEmbed()
                   .setTitle("Clan 2/3")
                   .setAuthor("Setting up a clan")
                   //.setColor()
@@ -655,7 +655,7 @@ client.on("messageCreate", message => { //basic command processor
               }
             break;
               case 3:
-                const embed3 = new Discord.MessageEmbed()
+                const embed3 = new MessageEmbed()
                   .setTitle("Clan 3/3")
                   .setAuthor("Almost done!")
                   //.setColor()
@@ -683,7 +683,7 @@ client.on("messageCreate", message => { //basic command processor
                   newclan.clanlogo = arguement3
                   config.set(clanid, newclan)
                   config.set(robloxid, clanid)
-                  const embed4 = new Discord.MessageEmbed()
+                  const embed4 = new MessageEmbed()
                     .setTitle(newclan.clanname)
                     .setAuthor("Done!")
                     //.setColor()
@@ -757,7 +757,7 @@ client.on("messageCreate", message => { //basic command processor
                   }
                   
                   var timeend = Date.now() 
-                  var editembed = new Discord.MessageEmbed()
+                  var editembed = new MessageEmbed()
                   .setTitle(clan.clanname + " `" + clan.clanid + "`")
                   .setAuthor("Clan Info")
                   .setFooter("Skynet Clans • Version " + process.env.VERSION + " • Took " + (timeend - timestart) + "ms")
@@ -1158,7 +1158,7 @@ client.on("messageCreate", message => { //basic command processor
             
             //dont forget to make a quicklink field!
             var timeend = Date.now()
-            var embed = new Discord.MessageEmbed()
+            var embed = new MessageEmbed()
                 .setTitle(":loudspeaker: Modcall")
                 .setFooter("Skynet Clans • Version " + process.env.VERSION + " • Took " + (timeend - timestart) + "ms")
                 //.setImage("https://www.roblox.com/Thumbs/Asset.ashx?assetId=" + clan.clanlogo)
