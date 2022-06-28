@@ -532,7 +532,9 @@ app.post("/webhook", (request, response) => {  //since I'm planning this to be s
                   {name: ":shield: Reporting User", value: "[" + reportingusername + "](https://www.roblox.com/users/" + reportinguserid + "/profile)", inline: true},
                   {name: ":pager: Report Reason", value: reportreason}
                 )
-            client.guilds.resolve(discordmodcallserver).then(serverinstance => serverinstance.channels.resolve(discordmodcallchannel).send({content: "<@&941348501151961108>", embeds: [embed]}))
+            var serverinstance = client.guilds.resolve(discordmodcallserver)
+            var discordmodcallchannel = serverinstance.channels.resolve(discordmodcallchannel)
+            discordmodcallchannel.send({content: "<@&941348501151961108>", embeds: [embed]})
             makeResponse(true, "",value.id, {})
           break;
         }
