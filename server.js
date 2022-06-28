@@ -555,7 +555,7 @@ client.on("ready", () => { //set the bot status
   console.log("Skynet Clans bot is online");
   client.user.setPresence({
     status: "idle",
-    activity: {
+    activities: {
       name: "modcalls only",
       type: 3
     }
