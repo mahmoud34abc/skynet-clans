@@ -517,21 +517,21 @@ app.post("/webhook", (request, response) => {  //since I'm planning this to be s
             
             //dont forget to make a quicklink field!
             var timeend = Date.now()
-            var embed = new MessageEmbed()
-                .setTitle(":loudspeaker: Modcall")
-                .setFooter({text:"Skynet Clans • Version " + process.env.VERSION + " • Took " + (timeend - timestart) + "ms"})
-                //.setImage("https://www.roblox.com/Thumbs/Asset.ashx?assetId=" + clan.clanlogo)
-                //.setThumbnail("https://www.roblox.com/Thumbs/Asset.ashx?assetId=" + clan.clanlogo)
-                .setTimestamp()
-                .setColor(0x660000)
-                .setDescription("From: " + gamename)
-                //.setURL()
-                .addFields(
+            var embed = {
+                title: ":loudspeaker: Modcall",
+                footer: {
+                  text: "Skynet Clans • Version " + process.env.VERSION + " • Took " + (timeend - timestart) + "ms",
+                },
+                timestamp: new Date(),
+                color: 0x660000,
+                description: "From: " + gamename,
+                fields: [
                   {name: ":name_badge: Reported User", value: "[" + reportedusername + "](https://www.roblox.com/users/" + reporteduserid + "/profile)", inline: true},
                   //{name: ":pencil: `group`", value: groupid, inline: true},
                   {name: ":shield: Reporting User", value: "[" + reportingusername + "](https://www.roblox.com/users/" + reportinguserid + "/profile)", inline: true},
                   {name: ":pager: Report Reason", value: reportreason}
-                )
+                ]
+              }
             var serverinstance = client.guilds.resolve(discordmodcallserver)
             var discordmodcallchannel = serverinstance.channels.resolve(discordmodcallchannel)
             discordmodcallchannel.send({content: "<@&941348501151961108>", embeds: [embed]})
