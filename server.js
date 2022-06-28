@@ -1,6 +1,6 @@
 //start the bot and the webhook
 const {Client,Intents,MessageEmbed} = require("discord.js");
-const client = new Client({intents: ["TYPING_START","GUILD_MESSAGES","DIRECT_MESSAGES"]});
+const client = new Client({intents: ["GUILD_MESSAGES","DIRECT_MESSAGES"]});
 const https = require("https")
 const Conf = require("conf");
 const Cache = require("cache");
