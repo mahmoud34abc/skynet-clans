@@ -522,7 +522,7 @@ app.post("/webhook", (request, response) => {  //since I'm planning this to be s
                 .setFooter({text:"Skynet Clans • Version " + process.env.VERSION + " • Took " + (timeend - timestart) + "ms"})
                 //.setImage("https://www.roblox.com/Thumbs/Asset.ashx?assetId=" + clan.clanlogo)
                 //.setThumbnail("https://www.roblox.com/Thumbs/Asset.ashx?assetId=" + clan.clanlogo)
-                .setTimeStamp(Date.now())
+                .setTimestamp()
                 .setColor(0x660000)
                 .setDescription("From: " + gamename)
                 //.setURL()
