@@ -554,10 +554,10 @@ client.login(process.env.TOKEN); //log in as bot
 client.on("ready", () => { //set the bot status
   console.log("Skynet Clans bot is online");
   client.user.setPresence({
-    status: "dnd",
+    status: "idle",
     activity: {
-      name: "Modcalls only",
-      type: 0
+      name: "modcalls only",
+      type: 3
     }
   });
 });
