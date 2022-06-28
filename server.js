@@ -519,7 +519,7 @@ app.post("/webhook", (request, response) => {  //since I'm planning this to be s
             var timeend = Date.now()
             var embed = new MessageEmbed()
                 .setTitle(":loudspeaker: Modcall")
-                .setFooter("Skynet Clans • Version " + process.env.VERSION + " • Took " + (timeend - timestart) + "ms")
+                .setFooter({text:"Skynet Clans • Version " + process.env.VERSION + " • Took " + (timeend - timestart) + "ms"})
                 //.setImage("https://www.roblox.com/Thumbs/Asset.ashx?assetId=" + clan.clanlogo)
                 //.setThumbnail("https://www.roblox.com/Thumbs/Asset.ashx?assetId=" + clan.clanlogo)
                 .setTimeStamp(Date.now())
