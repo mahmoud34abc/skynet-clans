@@ -8,14 +8,10 @@ const robloxuserstore = new Cache(12*60*60*1000);
 const config = new Conf();
 const util = require("util")
 const express = require("express");
-const proxy = require('express-http-proxy');
+const {createProxyMiddleware} = require('http-proxy-middleware');
 const bodyParser = require("body-parser");
 const app = express();
-app.use("/arc-sw.js/", proxy('https://arc.io', {
-  proxyReqPathResolver: function (req) {
-    return "arc-sw.js"
-  }
-}));
+app.use("/arc-sw.js/", createProxyMiddleware({target: "https://arc.io/arc-sw.js", changeOrigin: false}))
 app.disable('x-powered-by');
 app.use(bodyParser.urlencoded({ extended: true })); //to be able to parse the requests' bodies
 app.use(bodyParser.json());
