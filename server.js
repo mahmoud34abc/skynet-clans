@@ -8,7 +8,8 @@ const robloxuserstore = new Cache(12*60*60*1000);
 const config = new Conf();
 const util = require("util")
 const express = require("express");
-const apiProxy = require("http-proxy");
+const httpProxy = require("http-proxy");
+const apiProxy = httpProxy.createProxyServer();
 const bodyParser = require("body-parser");
 const app = express();
 app.disable('x-powered-by');
