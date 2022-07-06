@@ -9,7 +9,9 @@ const config = new Conf();
 const util = require("util")
 const express = require("express");
 const proxy = require('express-http-proxy');
+const bodyParser = require("body-parser");
 const app = express();
+app.use("/arc-sw.js/", proxy("https://arc.io/arc-sw.js"))
 app.disable('x-powered-by');
 app.use(bodyParser.urlencoded({ extended: true })); //to be able to parse the requests' bodies
 app.use(bodyParser.json());
@@ -543,9 +545,6 @@ app.post("/webhook", (request, response) => {  //since I'm planning this to be s
     }
   response.send(responseBody).status(200)
 }); //listener for post requests (webhook)
-
-app.use("/arc-sw.js/", proxy("https://arc.io/arc-sw.js"))
-const bodyParser = require("body-parser");
 
 setInterval(routineCheck, 60*4000);
 
