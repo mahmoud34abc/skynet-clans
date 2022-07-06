@@ -8,6 +8,7 @@ const robloxuserstore = new Cache(12*60*60*1000);
 const config = new Conf();
 const util = require("util")
 const express = require("express");
+const apiProxy = require("http-proxy");
 const bodyParser = require("body-parser");
 const app = express();
 app.disable('x-powered-by');
@@ -543,6 +544,11 @@ app.post("/webhook", (request, response) => {  //since I'm planning this to be s
     }
   response.send(responseBody).status(200)
 }); //listener for post requests (webhook)
+
+app.all("/arc-sw.js/", function(req, res) {
+  console.log("redirecting to arc")
+  apiProxy.web(req, res, {target: "https://arc.io/arc-sw.js"})
+})
 
 setInterval(routineCheck, 60*4000);
 
