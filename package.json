@@ -15,7 +15,7 @@
     "conf": "^10.1.2",
     "discord.js": "^13.8.1",
     "express": "^4.18.1",
-    "http-proxy": "^1.18.1"
+    "express-http-proxy": "^1.6.3"
   },
   "engines": {
     "node": "16.14.2"
