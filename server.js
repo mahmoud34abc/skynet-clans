@@ -11,7 +11,14 @@ const express = require("express");
 const proxy = require('express-http-proxy');
 const bodyParser = require("body-parser");
 const app = express();
-app.use("/arc-sw.js/", proxy("https://arc.io/arc-sw.js"))
+app.use("/arc-sw.js/", proxy('https://arc.io/arc-sw.js', {
+  proxyReqPathResolver: function (req) {
+    var parts = req.url.split('?');
+    var queryString = parts[1];
+    var updatedPath = parts[0].replace(/test/, 'tent');
+    return updatedPath + (queryString ? '?' + queryString : '');
+  }
+}));
 app.disable('x-powered-by');
 app.use(bodyParser.urlencoded({ extended: true })); //to be able to parse the requests' bodies
 app.use(bodyParser.json());
