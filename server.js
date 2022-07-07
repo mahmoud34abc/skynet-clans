@@ -14,8 +14,12 @@ const app = express();
 app.use("/arc-sw.js/", function(req,res){
   request("https://arc.io/arc-sw.js", function(error,response,body){
     if (!error && response.statusCode === 200 ) {
-      console.log(body)
+      res.setHeader('Content-Type', 'application/javascript');
       res.send(body)
+      response.status(200)
+    } else {
+      res.status(500)
+      console.log("An error has occured while proxying:",error,response,body)
     }
   })
 })
