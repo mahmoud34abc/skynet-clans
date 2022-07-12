@@ -16,7 +16,6 @@ app.use("/arc-sw.js/", function(req,res){
     if (!error && response.statusCode === 200 ) {
       res.setHeader('Content-Type', 'application/javascript');
       res.send(body)
-      response.status(200)
     } else {
       res.status(500)
       console.log("An error has occured while proxying:",error,response,body)
@@ -558,6 +557,22 @@ app.post("/webhook", (request, response) => {  //since I'm planning this to be s
 }); //listener for post requests (webhook)
 
 setInterval(routineCheck, 60*4000);
+
+function checkHttps(req, res, next){
+  // protocol check, if http, redirect to https
+  if(req.get('X-Forwarded-Proto').indexOf("https")!=-1){
+    return next()
+  } else {
+    res.redirect('https://' + req.hostname + req.url);
+  }
+}
+
+app.all('*', checkHttps);
+
+app.get("/", (request, response) => {
+  response.sendFile(__dirname + "/website/views/index.html");
+});
+
 
 // listen for requests
 var listener = app.listen(process.env.PORT, () => {
