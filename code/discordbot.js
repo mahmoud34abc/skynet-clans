@@ -15,6 +15,11 @@ const botPrefix = "c!"
 
 var botOnline = false
 
+// Send script messages
+function shareData(data) {
+  process.send(data);
+}
+
 function embedMessage(details, preEmbed) {
     function performEmbedChanges(anEmbed) {
         for (const [key, value] of Object.entries(details)) {
@@ -152,13 +157,29 @@ client.on("ready", () => { //set the bot status
 client.login(process.env.TOKEN); //log in as bot
 
 // Receive script messages
-process.on('message', (data) => {
-  console.log('Received shared data:', data);
-});
 
-// Send script messages
-function shareData(data) {
-  process.send(data);
+async function handleSharedData(data) {
+    if (!botOnline) {
+        setTimeout(function() {handleSharedData(data)}, 500)
+        return
+    }
+
+    //console.log('Received shared data:', data);
+
+    if (data.MessageTo == "Discord" && data.Type == "Embed") {
+        const guildId = data.Payload.ServerToSendTo
+        const channelId = data.Payload.ChannelToSendTo
+        const embedable = data.Payload.Embed
+        var embed = embedMessage(embedable)
+
+        const guild = await client.guilds.fetch(guildId);
+        const channel = await guild.channels.fetch(channelId);
+        await channel.send({ embeds: [embed] });
+    }
 }
 
-shareData("hiii")
+process.on('message', (data) => {
+    handleSharedData(data)
+});
+
+//shareData("hiii")
