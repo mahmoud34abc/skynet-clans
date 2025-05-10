@@ -1,0 +1,18 @@
+if you're seeing this, congrats! its working!
+
+multiple lines test
+
+<b>OH MY GODDU ITS BOLD</b>
+<font color="#FF7800">OH MY GODDU ITS ORANGE</font>
+<font size="40">oh my GODUD ITS BIG TEXT</font> 
+<font transparency="0.5">WOAHHH SEMI TRANSPARENT TEXT</font>
+<stroke color="#00A2FF" joins="miter" thickness="2" transparency="0.25">jeez you take up so much space to write</stroke>
+<i>womp womp!!!</i>
+<u>WHAT DID YOU JUST SAY TO ME</u>
+<s>juhehehehehhe you ARE BAD HAAAAAAAAAAAAAAAAAAAAAA</s>
+<mark>yo i'm highlighted</mark>
+
+IM A REALLY LONG LINE IM A REALLY LONG LINE IM A REALLY LONG LINE IM A REALLY LONG LINE IM A REALLY LONG LINE IM A REALLY LONG LINE IM A REALLY LONG LINE IM A REALLY LONG LINE IM A REALLY LONG LINE IM A REALLY LONG LINE IM A REALLY LONG LINE IM A REALLY LONG LINE IM A REALLY LONG LINE IM A REALLY LONG LINE IM A REALLY LONG LINE IM A REALLY LONG LINE IM A REALLY LONG LINE IM A REALLY LONG LINE 
+
+
+HI ROBLOX HI HI HI HI HI

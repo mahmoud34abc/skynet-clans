@@ -7,22 +7,28 @@
   "description": "Skynet Clans Roblox and Discord Handler",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js --experimental-modules"
   },
+  "type": "module",
   "dependencies": {
-    "body-parser": "^1.20.0",
-    "cache": "^3.0.0",
-    "conf": "^10.1.2",
-    "discord.js": "^13.8.1",
-    "express": "^4.18.1",
-    "request": "^2.88.2"
+    "body-parser": "^2.2.0",
+    "cache": "^2.3.1",
+    "conf": "^10.1.1",
+    "discord.js": "^12.5.3",
+    "express": "^4.21.0"
   },
   "engines": {
-    "node": "16.14.2"
+    "node": "14.17.3"
   },
   "repository": {
     "url": "https://glitch.com/edit/#!/hello-sqlite"
   },
   "license": "MIT",
-  "keywords": []
+  "keywords": [
+    "node",
+    "glitch",
+    "express",
+    "roblox",
+    "skynet"
+  ]
 }
