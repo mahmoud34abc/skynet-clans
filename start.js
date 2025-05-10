@@ -37,16 +37,26 @@ function spawnScript(filePath) {
   console.log(`Starting script: ${scriptName}`);
   
   const child = spawn('node', [filePath], {
-    stdio: 'inherit', // Share stdio with parent
+    stdio: ['pipe', 'pipe', 'pipe', 'ipc'],
     env: { ...process.env, CHILD_SCRIPT: 'true' }
   });
 
   // Store process info
   processes.set(child.pid, {
+    child: child,
     filePath,
     restarts: 0,
     scriptName
   });
+
+  //Handle different child stuff
+
+  child.stdout.on('data', (data) => {
+      process.stdout.write(data);
+  });
+
+  // Still show errors
+  child.stderr.pipe(process.stderr);
 
   child.on('error', (err) => {
     console.error(`Error in ${scriptName}:`, err);
@@ -61,6 +71,21 @@ function spawnScript(filePath) {
     } else {
       processes.delete(child.pid);
     }
+  });
+
+  child.on('message', (message) => {
+    console.log("Recieved a message")
+    // Broadcast to all other processes
+    processes.forEach((info, pid) => {
+      if (pid !== child.pid) {
+        // Get the actual child process reference
+        const otherChild = processes.get(pid)?.child;
+        if (otherChild && otherChild.connected) {
+          otherChild.send(message);
+          //console.log(`Forwarded to ${pid}`);
+        }
+      }
+    });
   });
 }
 
@@ -83,6 +108,7 @@ function startAllScripts() {
 
 // Handle parent process exit
 process.on('exit', () => {
+  stopRestarting = true;
   console.log('Parent process exiting - cleaning up child processes');
   processes.forEach((info, pid) => {
     try {

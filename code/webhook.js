@@ -10,7 +10,7 @@ app.disable('x-powered-by'); //safety
 app.use(bodyParser.urlencoded({ extended: true })); //to be able to parse the requests' bodies
 app.use(bodyParser.json());
 
- app.use(express.static("website/public")); //put anything in the public/ folder accessible (for website) (like css, js, etc.)
+app.use(express.static("website/public")); //put anything in the public/ folder accessible (for website) (like css, js, etc.)
 
   //app.get("/", (request, response) => { //listener for get requests (website)
   //  response.sendFile(`${__dirname}/views/index.html`);
@@ -581,3 +581,15 @@ app.post("/skynetwebhook", (request, response) => {
 var listener = app.listen(process.env.PORT, () => {
   console.log(`Your app is listening on port ${listener.address().port}`);
 });
+
+// Receive messages
+process.on('message', (data) => {
+  console.log('Received shared data:', data);
+});
+
+// Send messages
+function shareData(data) {
+  process.send(data);
+}
+
+shareData("hello")
