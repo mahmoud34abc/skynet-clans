@@ -425,14 +425,3 @@ var listener = app.listen(process.env.PORT, () => {
 process.on('message', (data) => {
   console.log('Received shared data:', data);
 });
-
-
-shareData({
-                            MessageTo: "Discord",
-                            Type: "Embed",
-                            Payload: {
-                                ServerToSendTo: "719673864111652936",
-                                ChannelToSendTo: "908390430863929404",
-                                Embed: {["title"]: "hi", ["description"]: "test"}
-                            },
-                        })
