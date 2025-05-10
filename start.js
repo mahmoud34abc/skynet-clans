@@ -11,7 +11,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const codeFolder = join(__dirname, 'code');
 
-const restartDelay = 1000; //1 second
+const restartDelay = 3000; //1 second
 var stopRestarting = false;
 
 const processes = new Map();
@@ -79,10 +79,21 @@ function spawnScript(filePath) {
     processes.forEach((info, pid) => {
       if (pid !== child.pid) {
         // Get the actual child process reference
-        const otherChild = processes.get(pid)?.child;
+        var otherChild = processes.get(pid)?.child;
         if (otherChild && otherChild.connected) {
           otherChild.send(message);
           //console.log(`Forwarded to ${pid}`);
+        } else {
+          function retrySendingMessage() {
+            var otherChild = processes.get(pid)?.child;
+            if (otherChild && otherChild.connected) {
+              otherChild.send(message);
+              //console.log(`Forwarded to ${pid}`);
+            } else {
+              setTimeout(retrySendingMessage, restartDelay)
+            }
+          }
+          setTimeout(retrySendingMessage, restartDelay)
         }
       }
     });

@@ -182,4 +182,10 @@ process.on('message', (data) => {
     handleSharedData(data)
 });
 
+process.on('exit', async () => {
+    //logout from discord client
+    await client.logout();
+    client.destroy();
+})
+
 //shareData("hiii")
