@@ -51,8 +51,8 @@ function embedMessage(details, preEmbed) {
                 case "timestamp":
                     anEmbed.setTitle(value)
                 break;
-                case "addFields":
-                    anEmbed.setTitle(value)
+                case "fields":
+                    anEmbed.addFields(value)
                 break;
             }
         }
@@ -174,7 +174,11 @@ async function handleSharedData(data) {
 
         const guild = await client.guilds.fetch(guildId);
         const channel = await guild.channels.fetch(channelId);
-        await channel.send({ embeds: [embed] });
+        if (channelId !== 1291314421511094272) {
+            await channel.send({ content: "<@&941348501151961108>", embeds: [embed] });
+        } else {
+            await channel.send({ embeds: [embed] });
+        }
     }
 }
 

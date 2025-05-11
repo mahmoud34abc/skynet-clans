@@ -112,7 +112,7 @@ app.post("/webhook", (request, response) => {  //since I'm planning this to be s
                     
               var newEmbed = {
                 ["title"]: ":loudspeaker: Modcall",
-                ["footer"]: "Skynet Clans • Version " + process.env.VERSION + " • Took " + (timeend - timestart) + "ms",
+                ["footer"]: {text: "Skynet Clans • Version " + process.env.VERSION + " • Took " + (timeend - timestart) + "ms"},
                 //["image"]: images[0], //reported
                 //["thumbnail"]: images[1], //reporter
                 ["color"]: 0x990000,
