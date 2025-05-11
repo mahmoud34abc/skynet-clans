@@ -5,14 +5,7 @@ const https = require("https")
 const express = require("express");
 const bodyParser = require("body-parser");
 const app = express();
-const ngrok = require('ngrok');
 
-await ngrok.authtoken(process.env.NGROK_AUTHTOKEN);
-const url = await ngrok.connect({
-  addr: process.env.PORT, // port or network address, defaults to 80
-  subdomain: "moccasin-caring-ladybird"
-});
-console.log(url)
 
 app.disable('x-powered-by'); //safety
 app.use(bodyParser.urlencoded({ extended: true })); //to be able to parse the requests' bodies
