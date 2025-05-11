@@ -6,7 +6,6 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const app = express();
 
-
 app.disable('x-powered-by'); //safety
 app.use(bodyParser.urlencoded({ extended: true })); //to be able to parse the requests' bodies
 app.use(bodyParser.json());
@@ -23,116 +22,113 @@ app.use(express.static("website/public")); //put anything in the public/ folder 
   //});
   
   
-  app.post("/webhook", (request, response) => {  //since I'm planning this to be semi-public, it'll require authkeys
-    var responseBody = []                        //to make clans and make changes to them and give them credit
-                                                 //authkeys will only be given to trusted ones, and exploiting them
-                                                 //will cause deactivation to their authkey
-    function makeResponse(bool,message,id,payload) {
-      const theResponse = {
-        id,
-        status: bool?200:400,
-        responseStatus: bool?'OK':'BAD REQUEST',
-        message,
-        payload,
-      }
-      var arraylength = responseBody.length
-      var newResponse = {...theResponse}
-      newResponse.message = message
-      newResponse.id = id
-      newResponse.payload = {...payload}
-      responseBody[arraylength + 1] = newResponse
+app.post("/webhook", (request, response) => {  //since I'm planning this to be semi-public, it'll require authkeys
+  var responseBody = []                        //to make clans and make changes to them and give them credit
+                                               //authkeys will only be given to trusted ones, and exploiting them
+                                               //will cause deactivation to their authkey
+  function makeResponse(bool,message,id,payload) {
+    const theResponse = {
+      id,
+      status: bool?200:400,
+      responseStatus: bool?'OK':'BAD REQUEST',
+      message,
+      payload,
     }
+    var arraylength = responseBody.length
+    var newResponse = {...theResponse}
+    newResponse.message = message
+    newResponse.id = id
+    newResponse.payload = {...payload}
+    responseBody[arraylength + 1] = newResponse
+  }
     
-    const body = request.body
-    const payload = body.payload //requests will be sent every 2 seconds, so they'll be in a dictionary called payload
-    for (const [key, value] of Object.entries(payload)) {
-        if (key == "requestType") {
-            console.log(value)
-        }
-        const payload2 = value.payload
-        switch(value.requestType) {
-            case "heartbeat":
-                makeResponse(true, "",value.id, {})
-            break;
-            case "moderation":
-                var requesttype = payload2.requestType
-                switch(requesttype) {
-                    case "modcall":
-                        var dataToSend = {
-                            MessageTo: "Discord",
-                            Type: "Embed",
-                            Payload: {
-                                ServerToSendTo: "719673864111652936",
-                                ChannelToSendTo: "908390430863929404",
-                                Embed: null
-                            },
-                        }
+  const body = request.body
+  const payload = body.payload //requests will be sent every 2 seconds, so they'll be in a dictionary called payload
+  for (const [key, value] of Object.entries(payload)) {
+      if (key == "requestType") {
+          console.log(value)
+      }
+      const payload2 = value.payload
+      switch(value.requestType) {
+        case "heartbeat":
+          makeResponse(true, "",value.id, {})
+        break;
+        case "moderation":
+          var requesttype = payload2.requestType
+          switch(requesttype) {
+            case "modcall":
+              var dataToSend = {
+                MessageTo: "Discord",
+                Type: "Embed",
+                Payload: {
+                  ServerToSendTo: "719673864111652936",
+                  ChannelToSendTo: "908390430863929404",
+                  Embed: null
+                },
+              }
                         
+              var timestart = Date.now()
+              var modcallpayload = payload2.payload
+              var reporteduser = modcallpayload.reporteduser //the user that as reported
+              var reportinguser = modcallpayload.reportinguser //the user that reported
+              var reportreason = modcallpayload.reportreason //the reason for reporting
+              var game = modcallpayload.game //used to indicate the game
+              var jobid = modcallpayload.jobid
+              var suspicionpercent = modcallpayload.suspicionpercent
+              //var reportdetails = modcallpayload.reportdetails //which mod joined
+              var reportingusername
+              var reportinguserid
+              var reportedusername
+              var reporteduserid
+              var gamename
+              var gamekeyname
+              var gameid
+                        
+              for (const [key, value] of Object.entries(reportinguser)) {
+                reportingusername = value
+                reportinguserid = key
+              }
+                        
+              for (const [key, value] of Object.entries(reporteduser)) {
+                reportedusername = value
+                reporteduserid = key
+              }
+                    
+              for (const [key, value] of Object.entries(game)) {
+                gamename = value
+                gamekeyname = key
+              }
+              
+              switch(gamekeyname) {
+                case "ACSGroundsV1":
+                  gameid = "5223287266"
+                break;
+                case "ACSTestingPlace":
+                  gameid = "6262966584"
+                break;
+              }
 
-                        var timestart = Date.now()
-                        var modcallpayload = payload2.payload
-                        var reporteduser = modcallpayload.reporteduser //the user that as reported
-                        var reportinguser = modcallpayload.reportinguser //the user that reported
-                        var reportreason = modcallpayload.reportreason //the reason for reporting
-                        var game = modcallpayload.game //used to indicate the game
-                        var jobid = modcallpayload.jobid
-                        var suspicionpercent = modcallpayload.suspicionpercent
-                        //var reportdetails = modcallpayload.reportdetails //which mod joined
-                        var discordmodcallserver = "719673864111652936"
-                        var discordmodcallchannel = "908390430863929404"
-                        
-                        var reportingusername
-                        var reportinguserid
-                        var reportedusername
-                        var reporteduserid
-                        var gamename
-                        var gamekeyname
-                        var gamelink
-                        var gameid
-                        
-                        for (const [key, value] of Object.entries(reportinguser)) {
-                        reportingusername = value
-                        reportinguserid = key
-                        }
-                        
-                        for (const [key, value] of Object.entries(reporteduser)) {
-                        reportedusername = value
-                        reporteduserid = key
-                        }
+              var timeend = Date.now()
                     
-                        for (const [key, value] of Object.entries(game)) {
-                        gamename = value
-                        gamekeyname = key
-                        }
-                        
-                        if (gamekeyname === "ACSGroundsV1") {
-                        gameid = "5223287266"
-                        }
-                        if (gamekeyname === "ACSTestingPlace") {
-                        gameid = "6262966584"
-                        }
-                        
-                        var timeend = Date.now()
-                    
-                        var newEmbed = {
-                            ["title"]: ":loudspeaker: Modcall",
-                            ["footer"]: "Skynet Clans • Version " + process.env.VERSION + " • Took " + (timeend - timestart) + "ms",
-                            //["image"]: images[0], //reported
-                            //["thumbnail"]: images[1], //reporter
-                            ["color"]: 0x990000,
-                            ["description"]: "From: " + gamename,
-                            ["fields"]: [
-                                {name: ":name_badge: Reported User", value: "**[" + reportedusername + "](https://www.roblox.com/users/" + reporteduserid + "/profile)**", inline: true},
-                                //{name: ":pencil: `group`", value: groupid, inline: true},
-                                {name: ":shield: Reporting User", value: "||[" + reportingusername + "](https://www.roblox.com/users/" + reportinguserid + "/profile)||", inline: true},
-                                {name: ":pager: Report Reason", value: reportreason},
-                                {name: ":triangular_flag_on_post: Suspicion Meter", value: "**" + suspicionpercent + "%**", inline: true},
-                                //{name: ":globe_with_meridians: Translation", value: translatedText},
-                                {name: ":link: Join Link 1", value: "[Launch & autojoin (1)](https://www.roblox.com/games/start?placeId=" + gameid + '&launchData={"ReportJobId":"' + jobid + '"})', inline: true},
-                                {name: ":link: Join Link 2", value: "[Launch & autojoin (2)](https://www.roblox.com/games/5223287266/ACS-Phoenix-Grounds?serverJobId=" + jobid + ")", inline: true},
-                                {name: ":postbox: Server's JobId", value: "`" + jobid + "`"}
-                            ]
-                        }
+              var newEmbed = {
+                ["title"]: ":loudspeaker: Modcall",
+                ["footer"]: "Skynet Clans • Version " + process.env.VERSION + " • Took " + (timeend - timestart) + "ms",
+                //["image"]: images[0], //reported
+                //["thumbnail"]: images[1], //reporter
+                ["color"]: 0x990000,
+                ["description"]: "From: " + gamename,
+                ["fields"]: [
+                  {name: ":name_badge: Reported User", value: "**[" + reportedusername + "](https://www.roblox.com/users/" + reporteduserid + "/profile)**", inline: true},
+                  //{name: ":pencil: `group`", value: groupid, inline: true},
+                  {name: ":shield: Reporting User", value: "||[" + reportingusername + "](https://www.roblox.com/users/" + reportinguserid + "/profile)||", inline: true},
+                  {name: ":pager: Report Reason", value: reportreason},
+                  {name: ":triangular_flag_on_post: Suspicion Meter", value: "**" + suspicionpercent + "%**", inline: true},
+                  //{name: ":globe_with_meridians: Translation", value: translatedText},
+                  {name: ":link: Join Link 1", value: "[Launch & autojoin (1)](https://www.roblox.com/games/start?placeId=" + gameid + '&launchData={"ReportJobId":"' + jobid + '"})', inline: true},
+                  {name: ":link: Join Link 2", value: "[Launch & autojoin (2)](https://www.roblox.com/games/5223287266/ACS-Phoenix-Grounds?serverJobId=" + jobid + ")", inline: true},
+                  {name: ":postbox: Server's JobId", value: "`" + jobid + "`"}
+                ]
+              }
                         
                         dataToSend.Payload.Embed = newEmbed
                         shareData(dataToSend)
