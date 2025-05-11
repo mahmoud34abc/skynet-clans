@@ -7,17 +7,10 @@ const bodyParser = require("body-parser");
 const app = express();
 const ngrok = require('ngrok');
 
+await ngrok.authtoken(process.env.NGROK_AUTHTOKEN);
 const url = await ngrok.connect({
-  //proto: 'http', // http|tcp|tls, defaults to http
   addr: process.env.PORT, // port or network address, defaults to 80
-  //basic_auth: 'user:pwd', // http basic authentication for tunnel
-  subdomain: 'refined-patient-yeti.ngrok-free.app', // reserved tunnel name https://alex.ngrok.io
-  authtoken: process.env.NGROKAUTHTOKEN, // your authtoken from ngrok.com
-  //region: 'us', // one of ngrok regions (us, eu, au, ap, sa, jp, in), defaults to us
-  //configPath: '~/git/project/ngrok.yml', // custom path for ngrok config file
-  //binPath: path => path.replace('app.asar', 'app.asar.unpacked'), // custom binary path, eg for prod in electron
-  //onStatusChange: status => {}, // 'closed' - connection is lost, 'connected' - reconnected
-  //onLogEvent: data => {}, // returns stdout messages from ngrok process
+  subdomain: "moccasin-caring-ladybird"
 });
 console.log(url)
 
