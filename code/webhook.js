@@ -217,7 +217,8 @@ app.post("/webhook", (request, response) => {  //since I'm planning this to be s
                             ["color"]: 0x006080,
                             ["description"]: "From: " + gamename,
                             ["fields"]: [
-                                
+                                {name: ":floppy_disk: Commands", value: text},
+                                {name: ":postbox: Server's JobId", value: "`" + jobid + "`"},
                             ]
                         }
 
