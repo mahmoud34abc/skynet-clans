@@ -103,8 +103,13 @@ app.post("/webhook", (request, response) => {  //since I'm planning this to be s
                 case "ACSGroundsV1":
                   gameid = "5223287266"
                 break;
+
                 case "ACSTestingPlace":
                   gameid = "6262966584"
+                break;
+
+                case "ACSJungle": 
+                  gameid = "7120086775"
                 break;
               }
 
@@ -168,13 +173,10 @@ app.post("/webhook", (request, response) => {  //since I'm planning this to be s
                         
                         var text = ""
                         var gamename
-                        var gamekeyname
-                        var gamelink
                         var gameid
                         
                         for (const [key, value] of Object.entries(game)) {
-                        gamename = value
-                        gamekeyname = key
+                          gamename = value
                         }
                         
                         var brokenLoop = -1
@@ -191,21 +193,6 @@ app.post("/webhook", (request, response) => {  //since I'm planning this to be s
                         //if (brokenLoop != -1) {
                         
                         //}
-                        
-                        switch(gamekeyname) {
-                        case "ACSGroundsV1":
-                            gameid = "5223287266"
-                            gamelink = "https://www.roblox.com/games/5223287266/ACS-Phoenix-Grounds"
-                        break;
-                        case "ACSTestingPlace":
-                            gameid = "6262966584"
-                            gamelink = "https://www.roblox.com/games/6262966584/ACS-Testing-Place"
-                        break;
-                        case "ACSFiringRangeV1":
-                            gameid = "5187794761"
-                            gamelink = "https://www.roblox.com/games/5187794761/ACS-CQB-Firing-Range"
-                        break;
-                        }
                         
                         var timeend = Date.now()
                         
@@ -286,11 +273,18 @@ app.post("/webhook", (request, response) => {  //since I'm planning this to be s
                         gamekeyname = key
                         }
                         
-                        if (gamekeyname === "ACSGroundsV1") {
-                        gameid = "5223287266"
-                        }
-                        if (gamekeyname === "ACSTestingPlace") {
-                        gameid = "6262966584"
+                        switch(gamekeyname) {
+                          case "ACSGroundsV1":
+                            gameid = "5223287266"
+                          break;
+
+                          case "ACSTestingPlace":
+                            gameid = "6262966584"
+                          break;
+
+                          case "ACSJungle": 
+                            gameid = "7120086775"
+                          break;
                         }
                         
                         var timeend = Date.now()
