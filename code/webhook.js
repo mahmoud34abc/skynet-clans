@@ -1,5 +1,6 @@
 //webhook handling for roblox
 import { createRequire } from 'module';
+import { parse } from 'path';
 const require = createRequire(import.meta.url);
 const https = require("https")
 const express = require("express");
@@ -58,7 +59,7 @@ app.post("/webhook", (request, response) => {  //since I'm planning this to be s
           switch(requesttype) {
             case "modcall":
               var dataToSend = {
-                MessageTo: "Discord",
+                MessageTo: "discordbot.js",
                 Type: "Embed",
                 Payload: {
                   ServerToSendTo: "719673864111652936",
@@ -153,7 +154,7 @@ app.post("/webhook", (request, response) => {  //since I'm planning this to be s
                     break;
                     case "logging":
                         var dataToSend = {
-                            MessageTo: "Discord",
+                            MessageTo: "discordbot.js",
                             Type: "Embed",
                             Payload: {
                                 ServerToSendTo: "719673864111652936",
@@ -235,7 +236,7 @@ app.post("/webhook", (request, response) => {  //since I'm planning this to be s
                     break;
                     case "suspicion":
                         var dataToSend = {
-                            MessageTo: "Discord",
+                            MessageTo: "discordbot.js",
                             Type: "Embed",
                             Payload: {
                                 ServerToSendTo: "719673864111652936",
@@ -413,7 +414,7 @@ var listener = app.listen(process.env.PORT, () => {
   console.log(`Your app is listening on port ${listener.address().port}`);
 });
 
-function performOpenCloudBan(userId, gameName, banType, banReason, issuedBy) {
+async function performOpenCloudBan(userId, gameName, banType, banReason, issuedBy, callbackFunction) {
   var requestPath = null
   var duration = null
   
@@ -425,7 +426,8 @@ function performOpenCloudBan(userId, gameName, banType, banReason, issuedBy) {
   
   if (requestPath == null) {
     //console.log("No request path was defined. Stopping request")
-    return false, 0, "Code error or arguements weren't supplied. No request path was defined."
+    callbackFunction(false, 0, "Code error or arguements weren't supplied. No request path was defined.")
+    return
   }
 
   if (banType !== "perm") {
@@ -482,19 +484,24 @@ function performOpenCloudBan(userId, gameName, banType, banReason, issuedBy) {
             parsedData = data ? JSON.parse(data) : data;
             console.log('Response:', parsedData);
         } catch (e) {
+            parsedData = data
             console.log('Raw Response:', data);
+        }
+
+        if (res.statusCode == 200) {
+          callbackFunction(true, res.statusCode, parsedData)
+          return
+        } else {
+          //console.log(parsedData)
+          callbackFunction(false, res.statusCode, parsedData.code + "; " + parsedData.message)
+          return
         }
     });
     
-    if (res.statusCode == 200) {
-      return true, res.statusCode, parsedData
-    } else {
-      return false, res.statusCode, parsedData
-    }
-    
     }).on('error', e => {
       console.error(e);
-      return false, 0, e
+      callbackFunction(false, 0, e)
+      return
   });
   
   req.write(requestBodyString);
@@ -503,72 +510,86 @@ function performOpenCloudBan(userId, gameName, banType, banReason, issuedBy) {
 
 // Receive messages
 async function handleSharedData(data) {
-    if (data.MessageTo == "Webhook") {
+  //console.log(data)
+    if (data.MessageTo == "webhook.js") {
+      //console.log("Recieved something on webhook")
+      var timestart = Date.now()
       switch(data.Type) {
         case "OpenCloudBan":
-          var userId = data.Payload.UserId
-          var gameName = data.Payload.GameName
-          var banType = data.Payload.BanType
-          var banReason = data.Payload.BanReason
-          var issuedBy = data.Payload.IssuedBy
+          var userId = data.Payload.Arguements[0]
+          var gameName = data.Payload.Arguements[1]
+          var banType = data.Payload.Arguements[2]
+          var banReason = data.Payload.Arguements[3]
+          var issuedBy = data.Payload.Arguements[4]
           var originalChannelId = data.Payload.OriginalChannelId
 
-          var result, statusCode, errorMsg = performOpenCloudBan(userId, gameName, banType, banReason, issuedBy)
-          if (result) {
-            //working
-            var dataToSend = [
-              {
-                MessageTo: "Discord",
-                Type: "Embed",
-                Payload: {
-                  ServerToSendTo: "719673864111652936",
-                  ChannelToSendTo: "1291040473242271886",
-                  Embed: {
-                    ["title"]: ":hammer: Ban",
-                    ["footer"]: "Skynet Clans • Version " + process.env.VERSION + " • Took " + (timeend - timestart) + "ms",
-                    //["image"]: images[0], //reported
-                    ["color"]: 0x600000,
-                    ["fields"]: [
-                      {name: "Open Cloud Ban - Issued by " + issuedBy, value: details}
-                    ]
-                  }
-                },
-              },
-              {
-                MessageTo: "Discord",
-                Type: "Message",
-                Payload: {
-                  ServerToSendTo: "719673864111652936",
-                  ChannelToSendTo: originalChannelId,
-                  Message: ":white_check_mark: Successfully sent Open Cloud Ban to ROBLOX!"
-                },
-              },
-            ]
+          //console.log(data.Payload)
 
-            shareData(dataToSend)
-          } else {
-            //errored
-            var dataToSend = {
-              MessageTo: "Discord",
-              Type: "Embed",
-              Payload: {
-                ServerToSendTo: "719673864111652936",
-                ChannelToSendTo: originalChannelId,
-                Embed: {
-                  ["title"]: ":no_entry: Error while performing Open Cloud Ban",
-                  ["footer"]: "Skynet Clans • Version " + process.env.VERSION + " • Took " + (timeend - timestart) + "ms",
-                  //["image"]: images[0], //reported
-                  ["color"]: 0x600000,
-                  ["fields"]: [
-                    {name: ":pager: Status Code:", value: statusCode},
-                    {name: ":bangbang: Error Message:", value: "`" + errorMsg + "`"}
-                  ]
+          function callbackFunction(result, statusCode, errorMsg) {
+            //console.log(result, statusCode, errorMsg)
+
+            var timeend = Date.now()
+            //console.log(timestart, timeend)
+            if (result) {
+              //working
+              var dataToSend = [
+                {
+                  MessageTo: "discordbot.js",
+                  Type: "Embed",
+                  Payload: {
+                    ServerToSendTo: "719673864111652936",
+                    ChannelToSendTo: "1291040473242271886",
+                    Embed: {
+                      ["title"]: ":hammer: Ban",
+                      ["footer"]: "Skynet Clans • Version " + process.env.VERSION + " • Took " + (timeend - timestart) + "ms",
+                      //["image"]: images[0], //reported
+                      ["color"]: 0x600000,
+                      ["fields"]: [
+                        {name: "Open Cloud Ban - Issued by " + issuedBy, value: banReason}
+                      ]
+                    }
+                  },
+                },
+                {
+                  MessageTo: "discordbot.js",
+                  Type: "Message",
+                  Payload: {
+                    ServerToSendTo: "719673864111652936",
+                    ChannelToSendTo: originalChannelId,
+                    Message: ":white_check_mark: Successfully sent Open Cloud Ban to ROBLOX!"
+                  },
+                },
+              ]
+
+              shareData(dataToSend)
+            } else {
+              //errored
+              var dataToSend = [
+                  {
+                  MessageTo: "discordbot.js",
+                  Type: "Embed",
+                  Payload: {
+                    ServerToSendTo: "719673864111652936",
+                    ChannelToSendTo: originalChannelId,
+                    Embed: {
+                      ["title"]: ":no_entry: Error while performing Open Cloud Ban",
+                      ["footer"]: "Skynet Clans • Version " + process.env.VERSION + " • Took " + (timeend - timestart) + "ms",
+                      //["image"]: images[0], //reported
+                      ["color"]: 0x600000,
+                      ["fields"]: [
+                        {name: ":pager: Status Code:", value: statusCode.toString()},
+                        {name: ":bangbang: Error Message:", value: "`" + errorMsg + "`"}
+                      ]
+                    }
+                  },
                 }
-              },
-            }
+              ]
 
-            shareData(dataToSend)
+              shareData(dataToSend)
+            }
           }
+
+          await performOpenCloudBan(userId, gameName, banType, banReason, issuedBy, callbackFunction)
         break;
       }
     }

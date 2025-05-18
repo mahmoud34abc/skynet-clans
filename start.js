@@ -14,24 +14,9 @@ const codeFolder = join(__dirname, 'code');
 const restartDelay = 3000; //1 second
 var stopRestarting = false;
 
-const processes = new Map();
+const processes = {}
 
-function scheduleRestart(child) {
-  const processInfo = processes.get(child.pid);
-  
-  if (!processInfo) return;
-  if (stopRestarting) return;
-
-  processInfo.restarts++;
-  console.log(`Restarting ${processInfo.scriptName} (attempt ${processInfo.restarts}) in ${restartDelay}ms`);
-  
-  setTimeout(() => {
-    spawnScript(processInfo.filePath);
-    processes.delete(child.pid);
-  }, restartDelay);
-}
-
-function spawnScript(filePath) {
+async function spawnScript(filePath) {
   const scriptName = basename(filePath);
   
   console.log(`Starting script: ${scriptName}`);
@@ -42,12 +27,13 @@ function spawnScript(filePath) {
   });
 
   // Store process info
-  processes.set(child.pid, {
+  processes[scriptName] = {
     child: child,
-    filePath,
+    filePath: filePath,
     restarts: 0,
-    scriptName
-  });
+    scriptName: scriptName,
+    pid: child.pid
+  }
 
   //Handle different child stuff
 
@@ -60,47 +46,71 @@ function spawnScript(filePath) {
 
   child.on('error', (err) => {
     console.error(`Error in ${scriptName}:`, err);
-    scheduleRestart(child);
+    scheduleRestart(processes[scriptName]);
   });
 
   child.on('exit', (code, signal) => {
     console.log(`Script ${scriptName} exited with code ${code} (signal: ${signal})`);
     
-    if (code !== 0) { // Only restart if non-clean exit
-      scheduleRestart(child);
-    } else {
-      processes.delete(child.pid);
-    }
+    scheduleRestart(processes[scriptName]);
+    //if (code !== 0) { // Only restart if non-clean exit
+      
+    //} else {
+    //  processes.delete(child.scriptName);
+    //}
   });
 
   child.on('message', (message) => {
-    console.log("Recieved a message")
+    //console.log("Recieved a message")
     // Broadcast to all other processes
-    processes.forEach((info, pid) => {
-      if (pid !== child.pid) {
+    for (let i = 0; i < message.length; i++) {
+      var actualMessage = message[i]
+      var scriptToSendTo = actualMessage.MessageTo
+      //console.log(scriptToSendTo)
+      //console.log(processes)
+
+      if (!scriptToSendTo) return
+      var info = processes[scriptToSendTo]
+      if (!info) return
+
+      if (info.pid !== child.pid) {
         // Get the actual child process reference
-        var otherChild = processes.get(pid)?.child;
+        var otherChild = info?.child;
         if (otherChild && otherChild.connected) {
-          otherChild.send(message);
-          //console.log(`Forwarded to ${pid}`);
+          otherChild.send(actualMessage);
+          //console.log(`Forwarded to ${info.scriptName}`);
         } else {
           function retrySendingMessage() {
-            var otherChild = processes.get(pid)?.child;
+            var otherChild = info?.child;
             if (otherChild && otherChild.connected) {
-              otherChild.send(message);
-              //console.log(`Forwarded to ${pid}`);
+              otherChild.send(actualMessage);
+              //console.log(`Forwarded to ${info.scriptName}`);
             } else {
+              console.log("Not connected, retrying later..")
               setTimeout(retrySendingMessage, restartDelay)
             }
           }
           setTimeout(retrySendingMessage, restartDelay)
         }
       }
-    });
+    }
   });
 }
 
-function startAllScripts() {
+async function scheduleRestart(child) {
+  if (!child) return;
+  if (stopRestarting) return;
+
+  child.restarts++;
+  console.log(`Restarting ${child.scriptName} (attempt ${child.restarts}) in ${restartDelay}ms`);
+  
+  setTimeout(() => {
+    processes[child.scriptName] = null
+    spawnScript(child.filePath);
+  }, restartDelay);
+}
+
+async function startAllScripts() {
   // Read all .js files in the scripts folder
   fs.readdir(codeFolder, (err, files) => {
     if (err) {
@@ -121,19 +131,20 @@ function startAllScripts() {
 process.on('exit', () => {
   stopRestarting = true;
   console.log('Parent process exiting - cleaning up child processes');
-  processes.forEach((info, pid) => {
+
+  for (const [scriptName, info] of Object.entries(processes)) {
     try {
       // Check if process still exists before killing
-      process.kill(pid, 0); // Signal 0 checks process existence
-      process.kill(pid); // Actually kill if it exists
+      process.kill(processes[scriptName].pid, 0); // Signal 0 checks process existence
+      process.kill(processes[scriptName].pid); // Actually kill if it exists
     } catch (e) {
       if (e.code === 'ESRCH') {
-        console.log(`Process ${pid} already dead`);
+        console.log(`Process ${scriptName} already dead`);
       } else {
-        console.error(`Error killing process ${pid}:`, e);
+        console.error(`Error killing process ${scriptName}:`, e);
       }
     }
-  });
+  };
 });
 
 // Handle Ctrl+C

@@ -11,8 +11,8 @@ const client = new Client({intents: [
     ],
 });
 
+const isUpdatedDiscord = true;
 const botPrefix = "c!"
-
 var botOnline = false
 
 // Send script messages
@@ -23,6 +23,7 @@ function shareData(data) {
 function embedMessage(details, preEmbed) {
     function performEmbedChanges(anEmbed) {
         for (const [key, value] of Object.entries(details)) {
+            //console.log(key, value)
             switch(key) {
                 case "title":
                     anEmbed.setTitle(value)
@@ -37,7 +38,19 @@ function embedMessage(details, preEmbed) {
                     anEmbed.setDescription(value)
                 break;
                 case "footer":
-                    anEmbed.setFooter({ text: value.text, iconURL: value.iconURL })
+                    if (isUpdatedDiscord) {
+                        if (value.iconURL) {
+                            anEmbed.setFooter({ text: value.text, iconURL: value.iconURL })
+                        } else {
+                            if (value.text) {
+                                anEmbed.setFooter({ text: value.text })
+                            } else {
+                                anEmbed.setFooter({ text: value })
+                            }
+                        }
+                    } else {
+                        anEmbed.setFooter(value.text)
+                    }
                 break;
                 case "image":
                     anEmbed.setImage(value)
@@ -108,7 +121,7 @@ function messageHandler(message) {
             var skip = 0
             for (const word of args) {
                 if (skip > 3) {
-                    console.log(word);
+                    //console.log(word);
                     banReason = banReason + word + " "
                 }
                 skip = skip + 1
@@ -121,11 +134,11 @@ function messageHandler(message) {
             var issuedBy = message.member.displayName + " (" + message.member.user.id + ")"
 
             var dataToSend = [{
-                MessageTo: "Webhook",
+                MessageTo: "webhook.js",
                 Type: "OpenCloudBan",
                 Payload: {
                   ServerToSendTo: "719673864111652936",
-                  ChannelToSendTo: message.channel.channelId,
+                  OriginalChannelId: message.channel.id,
                   Arguements: [args[1], "phoenix", args[3], banReason, issuedBy]
                 },
             }]
@@ -178,7 +191,7 @@ async function handleSharedData(data) {
 
     //console.log('Received shared data:', data);
 
-    if (data.MessageTo == "Discord") {
+    if (data.MessageTo == "discordbot.js") {
         switch(data.Type) {
             case "Embed":
                 var guildId = data.Payload.ServerToSendTo
@@ -188,7 +201,7 @@ async function handleSharedData(data) {
 
                 var guild = await client.guilds.fetch(guildId);
                 var channel = await guild.channels.fetch(channelId);
-                if (channelId !== "1291314421511094272") {
+                if (channelId == "908390430863929404") {
                     await channel.send({ content: "<@&941348501151961108>", embeds: [embed] });
                 } else {
                     await channel.send({ embeds: [embed] });
