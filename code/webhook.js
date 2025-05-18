@@ -540,7 +540,7 @@ async function handleSharedData(data) {
                     ServerToSendTo: "719673864111652936",
                     ChannelToSendTo: "1291040473242271886",
                     Embed: {
-                      ["title"]: ":hammer: Ban - " + gameName,
+                      ["title"]: ":hammer: Ban - `" + gameName + "`",
                       ["footer"]: "Skynet Clans • Version " + process.env.VERSION + " • Took " + (timeend - timestart) + "ms",
                       //["image"]: images[0], //reported
                       ["color"]: 0x600000,
