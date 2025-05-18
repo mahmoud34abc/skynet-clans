@@ -119,8 +119,20 @@ function messageHandler(message) {
             }
         
             var issuedBy = message.member.displayName + " (" + message.member.user.id + ")"
-            performOpenCloudBan(args[1], "phoenix", args[3], banReason, issuedBy)
-            message.channel.send("Sent ban to Roblox. Please double-check #mod-logs and see if the ban went through!")
+
+            var dataToSend = [{
+                MessageTo: "Webhook",
+                Type: "OpenCloudBan",
+                Payload: {
+                  ServerToSendTo: "719673864111652936",
+                  ChannelToSendTo: message.channel.channelId,
+                  Arguements: [args[1], "phoenix", args[3], banReason, issuedBy]
+                },
+            }]
+            shareData(dataToSend)
+
+            //performOpenCloudBan(args[1], "phoenix", args[3], banReason, issuedBy)
+            message.channel.send(":clock3: Sending to ROBLOX...")
             break;
         }
     }
@@ -166,18 +178,32 @@ async function handleSharedData(data) {
 
     //console.log('Received shared data:', data);
 
-    if (data.MessageTo == "Discord" && data.Type == "Embed") {
-        const guildId = data.Payload.ServerToSendTo
-        const channelId = data.Payload.ChannelToSendTo
-        const embedable = data.Payload.Embed
-        var embed = embedMessage(embedable)
+    if (data.MessageTo == "Discord") {
+        switch(data.Type) {
+            case "Embed":
+                var guildId = data.Payload.ServerToSendTo
+                var channelId = data.Payload.ChannelToSendTo
+                var embedable = data.Payload.Embed
+                var embed = embedMessage(embedable)
 
-        const guild = await client.guilds.fetch(guildId);
-        const channel = await guild.channels.fetch(channelId);
-        if (channelId !== "1291314421511094272") {
-            await channel.send({ content: "<@&941348501151961108>", embeds: [embed] });
-        } else {
-            await channel.send({ embeds: [embed] });
+                var guild = await client.guilds.fetch(guildId);
+                var channel = await guild.channels.fetch(channelId);
+                if (channelId !== "1291314421511094272") {
+                    await channel.send({ content: "<@&941348501151961108>", embeds: [embed] });
+                } else {
+                    await channel.send({ embeds: [embed] });
+                }
+            break;
+            
+            case "Message":
+                var guildId = data.Payload.ServerToSendTo
+                var channelId = data.Payload.ChannelToSendTo
+                var messageString = data.Payload.Message
+
+                var guild = await client.guilds.fetch(guildId);
+                var channel = await guild.channels.fetch(channelId);
+                await channel.send({ content: messageString });
+            break;
         }
     }
 }
