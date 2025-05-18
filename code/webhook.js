@@ -46,9 +46,9 @@ app.post("/webhook", (request, response) => {  //since I'm planning this to be s
   const body = request.body
   const payload = body.payload //requests will be sent every 2 seconds, so they'll be in a dictionary called payload
   for (const [key, value] of Object.entries(payload)) {
-      if (key == "requestType") {
-          console.log(value)
-      }
+      //if (key == "requestType") {
+      //    console.log(value)
+      //}
       const payload2 = value.payload
       switch(value.requestType) {
         case "heartbeat":
@@ -331,7 +331,7 @@ app.post("/skynetwebhook", (request, response) => {
     var requestCorrect = true
     for (var [key, value] of Object.entries(body)) {
       if ((key !== "feedbackmessage" || key !== "originalfeedbackmessage") && value == null) {
-        console.log("Error: " + key + " is null, please send the correct value!")
+        //console.log("Error: " + key + " is null, please send the correct value!")
         response.status(200).send({
           type: "error",
           message: "Error: " + key + " is null, please resend the request!",
@@ -482,10 +482,10 @@ async function performOpenCloudBan(userId, gameName, banType, banReason, issuedB
         try {
             // Try to parse as JSON, but fall back to raw data if it fails
             parsedData = data ? JSON.parse(data) : data;
-            console.log('Response:', parsedData);
+            //console.log('Response:', parsedData);
         } catch (e) {
             parsedData = data
-            console.log('Raw Response:', data);
+            //console.log('Raw Response:', data);
         }
 
         if (res.statusCode == 200) {

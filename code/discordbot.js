@@ -2,18 +2,28 @@
 import { createRequire } from 'module';
 const require = createRequire(import.meta.url);
 //const fs = require('node:fs');
-const { Client, GatewayIntentBits, EmbedBuilder, SlashCommandBuilder } = require('discord.js');
+const { Client, GatewayIntentBits, EmbedBuilder, SlashCommandBuilder, MessageEmbed } = require('discord.js');
 
-const client = new Client({intents: [
+const isUpdatedDiscord = false;
+const botPrefix = "c!"
+var botOnline = false
+
+function getClient() {
+  if (isUpdatedDiscord) {
+    return new Client({intents: [
         GatewayIntentBits.Guilds,
         GatewayIntentBits.GuildMessages,
         GatewayIntentBits.MessageContent,
-    ],
-});
+      ],
+    });
+  } else {
+    const { Intents } = require(`discord.js`);
+    return new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES, Intents.FLAGS.MESSAGE_CONTENT] });
+  }
+}
 
-const isUpdatedDiscord = true;
-const botPrefix = "c!"
-var botOnline = false
+const client = getClient() 
+
 
 // Send script messages
 function shareData(data) {
@@ -49,7 +59,11 @@ function embedMessage(details, preEmbed) {
                             }
                         }
                     } else {
-                        anEmbed.setFooter(value.text)
+                      if (value.text) {
+                            anEmbed.setFooter(value.text)
+                        } else {
+                            anEmbed.setFooter(value)
+                        }
                     }
                 break;
                 case "image":
@@ -76,10 +90,16 @@ function embedMessage(details, preEmbed) {
         performEmbedChanges(preEmbed)
         return
     }
-
-    var embed = new EmbedBuilder()
+    
+    var embed 
+    if (isUpdatedDiscord) {
+      embed = new EmbedBuilder()
+    } else {
+      embed = new MessageEmbed()
+    }
+  
     performEmbedChanges(embed)
-
+      
     return embed
 }
 
