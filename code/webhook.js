@@ -540,12 +540,14 @@ async function handleSharedData(data) {
                     ServerToSendTo: "719673864111652936",
                     ChannelToSendTo: "1291040473242271886",
                     Embed: {
-                      ["title"]: ":hammer: Ban",
+                      ["title"]: ":hammer: Ban - " + gameName,
                       ["footer"]: "Skynet Clans • Version " + process.env.VERSION + " • Took " + (timeend - timestart) + "ms",
                       //["image"]: images[0], //reported
                       ["color"]: 0x600000,
                       ["fields"]: [
-                        {name: "Open Cloud Ban - Issued by " + issuedBy, value: banReason}
+                        {name: ":warning: Open Cloud Ban - Issued by " + issuedBy, value: "- Ban reason: `" + banReason + "`"},
+                        {name: ":name_badge: Banned User", value: "**[" + userId + "](https://www.roblox.com/users/" + userId + "/profile)**", inline: true},
+                        {name: ":pager: Duration", value: banType, inline: true},
                       ]
                     }
                   },
