@@ -161,7 +161,7 @@ function messageHandler(message) {
                 Payload: {
                   ServerToSendTo: "719673864111652936",
                   OriginalChannelId: message.channel.id,
-                  Arguements: [args[1], "phoenix", args[3], banReason, issuedBy]
+                  Arguements: [args[1], args[2], args[3], banReason, issuedBy]
                 },
             }]
             shareData(dataToSend)
