@@ -1,7 +1,7 @@
 import { createRequire } from 'module';
 const require = createRequire(import.meta.url);
 const fs = require('fs');
-const { spawn } = require('child_process');
+const { spawn, exec  } = require('child_process');
 require('dotenv').config(); //loading env
 
 import { fileURLToPath } from 'url';
@@ -10,6 +10,13 @@ import { dirname, join, basename } from 'path';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const codeFolder = join(__dirname, 'code');
+
+const shouldRunNgrok = true;
+const platform = process.env.PLATFORM
+var port = process.env.PORT 
+if (port == null || port == undefined) {
+  port = 3000
+}
 
 const restartDelay = 500; //500ms
 var stopRestarting = false;
@@ -155,3 +162,37 @@ process.on('SIGINT', () => {
 
 // Start the system
 startAllScripts();
+
+if (shouldRunNgrok) {
+  //Start ngrok
+
+  switch(platform) {
+    case "Windows":
+      exec('ngrokwin http --url=moccasin-caring-ladybird.ngrok-free.app ' + port + ' --pooling-enabled', (error, stdout, stderr) => {
+        if (error) {
+            console.log(`error: ${error.message}`);
+            return;
+        }
+        if (stderr) {
+            console.log(`stderr: ${stderr}`);
+            return;
+        }
+        console.log(`stdout: ${stdout}`)
+      });
+    break;
+    
+    case "Linux": 
+      exec('ngrok http --url=moccasin-caring-ladybird.ngrok-free.app ' + port + ' --pooling-enabled', (error, stdout, stderr) => {
+        if (error) {
+            console.log(`error: ${error.message}`);
+            return;
+        }
+        if (stderr) {
+            console.log(`stderr: ${stderr}`);
+            return;
+        }
+        console.log(`stdout: ${stdout}`)
+      });
+    break;
+  }
+}

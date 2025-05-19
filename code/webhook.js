@@ -249,7 +249,6 @@ app.post("/webhook", (request, response) => {  //since I'm planning this to be s
                             },
                         }
 
-                        var timestart = Date.now()
                         var modcallpayload = payload2.payload
                         var reporteduser = modcallpayload.reporteduser //the user that as reported
                         var suspicionpercent = modcallpayload.suspicionpercent
@@ -257,8 +256,6 @@ app.post("/webhook", (request, response) => {  //since I'm planning this to be s
                         var game = modcallpayload.game //used to indicate the game
                         var jobid = modcallpayload.jobid
                         //var reportdetails = modcallpayload.reportdetails //which mod joined
-                        var discordmodcallserver = "719673864111652936"
-                        var discordmodcallchannel = "908390430863929404"
                         
                         var reportedusername
                         var reporteduserid
@@ -291,12 +288,10 @@ app.post("/webhook", (request, response) => {  //since I'm planning this to be s
                             gameid = "7120086775"
                           break;
                         }
-                        
-                        var timeend = Date.now()
                                   
                         var newEmbed = {
                             ["title"]: ":loudspeaker: Suspicion Report",
-                            ["footer"]: defaultFooter + " • Took " + (timeend - timestart) + "ms",
+                            ["footer"]: defaultFooter,
                             //["image"]: images[0], //reported
                             ["color"]: 0xFE9900,
                             ["description"]: "From: " + gamename,
@@ -381,7 +376,7 @@ app.post("/skynetwebhook", (request, response) => {
               ["title"]: "Game",
               ["author"]: displayname + " (" + username + ")",
               ["description"]: gamename,
-              ["footer"]: defaultFooter + " • Took " + (timeend - timestart) + "ms",
+              ["footer"]: defaultFooter,
               //["thumbnail"]
               ["fields"]: [
                 {name: ":speech_balloon: Feedback", value: originalfeedbackmessage},
