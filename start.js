@@ -11,7 +11,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const codeFolder = join(__dirname, 'code');
 
-const restartDelay = 3000; //1 second
+const restartDelay = 500; //500ms
 var stopRestarting = false;
 
 const processes = {}

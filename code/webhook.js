@@ -345,27 +345,22 @@ app.post("/skynetwebhook", (request, response) => {
       }
     }
     
-      if (requestCorrect == true) {
+    if (requestCorrect == true) {
       var channeltosend
-      var logchanneltosend
       var gamename
       var mobilestatus
       
       if (game == "ACSGroundsV1") {
         channeltosend = "738407389669097492"
-        logchanneltosend = "864112225652178958"
         gamename = "ACS Grounds v1.7.7"
       } else if (game == "ACSGroundsV2") {
         channeltosend = "738407389669097492"
-        logchanneltosend = "864112225652178958"
         gamename = "ACS Grounds v2.0.1"
       } else if (game == "ACSFiringRange") {
         channeltosend = "738407354013581383"
-        logchanneltosend = "864112163487219722"
         gamename = "ACS Firing Range"
       } else if (game == "ACSJungle") {
         channeltosend = "876525691150172161"
-        logchanneltosend = "876525854837051402"
         gamename = "ACS Jungle"
       }
       
@@ -375,43 +370,41 @@ app.post("/skynetwebhook", (request, response) => {
         mobilestatus = "No"
       }
       
-      async function sendTheFeedback() {
-        var embed = new EmbedBuilder()
-          .setTitle("Game")
-          .setAuthor(displayname + " (" + username + ")")
-          //.setColor()
-          .setDescription(gamename)
-          //.setFooter("Made with <3 by Mahmoud! - Version " + process.env.VERSION)
-          //.setImage("http://i.imgur.com/yVpymuV.png")
-          .setThumbnail(avatarpic)
-          .setTimestamp()
-          //.setURL()
-          .addFields(
-            {name: ":speech_balloon: Feedback", value: originalfeedbackmessage},
-            //{name: ":globe_with_meridians: Translation", value: translatedText},
-            {name: ":mobile_phone: On Mobile?", value: mobilestatus, inline: true},
-            {name: ":pager: User ID", value: userid, inline: true},
-            {name: ":link: Profile Link", value: "[" + username + "](https://www.roblox.com/users/" + userid + "/profile)", inline: true}
-          )
-      
-        client.guilds.fetch("719673864111652936").then(
-          serverinstance => serverinstance.channels.resolve(channeltosend).send({embed}).catch(console.error));
-      //setTimeout(function(){
-        //client.guilds.fetch("864110943570100254").then(
-          //serverinstance => serverinstance.channels.resolve(logchanneltosend).send({embed}).catch(console.error))
-      //}, 1000);
-        response.status(200).send({
-            type: "success",
-            message: "Successfully sent feedback!",
-          })
-        }
-        sendTheFeedback()
-      }
+      var dataToSend = [
+        {
+          MessageTo: "discordbot.js",
+          Type: "Embed",
+          Payload: {
+            ServerToSendTo: "719673864111652936",
+            ChannelToSendTo: channeltosend,
+            Embed: {
+              ["title"]: "Game",
+              ["author"]: displayname + " (" + username + ")",
+              ["description"]: gamename,
+              ["footer"]: defaultFooter + " • Took " + (timeend - timestart) + "ms",
+              //["thumbnail"]
+              ["fields"]: [
+                {name: ":speech_balloon: Feedback", value: originalfeedbackmessage},
+                //{name: ":globe_with_meridians: Translation", value: translatedText},
+                {name: ":mobile_phone: On Mobile?", value: mobilestatus, inline: true},
+                {name: ":pager: User ID", value: userid, inline: true},
+                {name: ":link: Profile Link", value: "[" + username + "](https://www.roblox.com/users/" + userid + "/profile)", inline: true}
+              ]
+            }
+          },
+        },
+      ]
+
+      shareData(dataToSend)
+    response.status(200).send({
+      type: "success",
+      message: "Successfully sent feedback!",
+    })
   } else {
     response.status(403).send("Forbidden")
   }
   requestCorrect = true
-});
+}});
 
 // listen for requests
 var listener = app.listen(process.env.PORT, () => {
