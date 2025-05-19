@@ -1,4 +1,5 @@
 //webhook handling for roblox
+import { error } from 'console';
 import { createRequire } from 'module';
 import { parse } from 'path';
 const require = createRequire(import.meta.url);
@@ -15,6 +16,9 @@ app.use(bodyParser.json());
 function shareData(data) {
   process.send(data);
 }
+
+var defaultFooter = "Skynet Clans • Version " + process.env.VERSION + " • Hosting on: " + process.env.HOSTING
+
 
 app.use(express.static("website/public")); //put anything in the public/ folder accessible (for website) (like css, js, etc.)
 
@@ -118,7 +122,7 @@ app.post("/webhook", (request, response) => {  //since I'm planning this to be s
                     
               var newEmbed = {
                 ["title"]: ":loudspeaker: Modcall",
-                ["footer"]: {text: "Skynet Clans • Version " + process.env.VERSION + " • Took " + (timeend - timestart) + "ms"},
+                ["footer"]: defaultFooter + " • Took " + (timeend - timestart) + "ms",
                 //["image"]: images[0], //reported
                 //["thumbnail"]: images[1], //reporter
                 ["color"]: 0x990000,
@@ -199,7 +203,7 @@ app.post("/webhook", (request, response) => {  //since I'm planning this to be s
                         
                         var newEmbed = {
                             ["title"]: ":minidisc: Logs",
-                            ["footer"]: "Skynet Clans • Version " + process.env.VERSION + " • Took " + (timeend - timestart) + "ms",
+                            ["footer"]: defaultFooter + " • Took " + (timeend - timestart) + "ms",
                             //["image"]: images[0], //reported
                             //["thumbnail"]: images[1], //reporter
                             ["color"]: 0x006080,
@@ -292,7 +296,7 @@ app.post("/webhook", (request, response) => {  //since I'm planning this to be s
                                   
                         var newEmbed = {
                             ["title"]: ":loudspeaker: Suspicion Report",
-                            ["footer"]: "Skynet Clans • Version " + process.env.VERSION + " • Took " + (timeend - timestart) + "ms",
+                            ["footer"]: defaultFooter + " • Took " + (timeend - timestart) + "ms",
                             //["image"]: images[0], //reported
                             ["color"]: 0xFE9900,
                             ["description"]: "From: " + gamename,
@@ -414,6 +418,89 @@ var listener = app.listen(process.env.PORT, () => {
   console.log(`Your app is listening on port ${listener.address().port}`);
 });
 
+async function openCloudFunction(requestType, requestPath, requestBody, callbackFunction) {
+  var requestBodyString = JSON.stringify(requestBody); // Stringify here
+
+  var options = {
+    hostname: 'apis.roblox.com',
+    port: 443,
+    path: requestPath,
+    method: requestType,
+    headers: {
+      'x-api-key': process.env.ROBLOXOPENCLOUD,
+      'Content-Type': 'application/json',
+      'Content-Length': Buffer.byteLength(requestBodyString)
+    }
+  }
+
+  var req = https.request(options, res => {
+    let data = '';
+
+    //console.log('Status: ', res.statusCode);
+    //console.log('Headers: ', JSON.stringify(res.headers));
+
+    res.setEncoding('utf8');
+
+    res.on('data', chunk => {
+      data += chunk;
+    });
+
+    res.on('end', () => {
+      var parsedData = null
+
+      try {
+        // Try to parse as JSON, but fall back to raw data if it fails
+        data = data ? JSON.parse(data) : data;
+        //console.log('Response:', parsedData);
+      } catch (e) {
+        //console.log('Raw Response:', data);
+      }
+
+      if (res.statusCode == 200) {
+        callbackFunction(true, res.statusCode, data)
+        return
+      } else {
+        //console.log(parsedData)
+        callbackFunction(false, res.statusCode, data.code + "; " + data.message)
+      return
+      }
+    });
+  }).on('error', e => {
+      console.error(e);
+      callbackFunction(false, 0, e)
+      return
+  });
+  
+  req.write(requestBodyString);
+  req.end();
+}
+
+async function performOpenCloudViewBan(userId, gameName, callbackFunction) {
+  var requestPath = null
+
+  switch(gameName) {
+    case "phoenix":
+      requestPath = "/cloud/v2/universes/1826628366/user-restrictions/" + userId
+    break;
+
+    case "firing":
+      requestPath = "/cloud/v2/universes/1810450591/user-restrictions/" + userId
+    break;
+
+    case "jungle":
+      requestPath = "/cloud/v2/universes/2756038974/user-restrictions/" + userId
+    break;
+  }
+
+  if (requestPath == null) {
+    //console.log("No request path was defined. Stopping request")
+    callbackFunction(false, 0, "Code error or arguements weren't supplied. No request path was defined. Make sure you spelled the gameName correctly")
+    return
+  }
+
+  openCloudFunction("GET", requestPath, {}, callbackFunction)
+}
+
 async function performOpenCloudBan(userId, gameName, banType, banReason, issuedBy, callbackFunction) {
   var requestPath = null
   var duration = null
@@ -421,6 +508,14 @@ async function performOpenCloudBan(userId, gameName, banType, banReason, issuedB
   switch(gameName) {
     case "phoenix":
       requestPath = "/cloud/v2/universes/1826628366/user-restrictions/" + userId
+    break;
+
+    case "firing":
+      requestPath = "/cloud/v2/universes/1810450591/user-restrictions/" + userId
+    break;
+
+    case "jungle":
+      requestPath = "/cloud/v2/universes/2756038974/user-restrictions/" + userId
     break;
   }
   
@@ -444,68 +539,7 @@ async function performOpenCloudBan(userId, gameName, banType, banReason, issuedB
       "excludeAltAccounts": false
     }
   }
-  
-  const requestBodyString = JSON.stringify(requestBody); // Stringify here
-  
-  var options = {
-    hostname: 'apis.roblox.com',
-    port: 443,
-    path: requestPath,
-    method: 'PATCH',
-    headers: {
-      'x-api-key': process.env.ROBLOXOPENCLOUD,
-      'Content-Type': 'application/json',
-      'Content-Length': Buffer.byteLength(requestBodyString)
-    }
-    //headers: {
-    //    "Content-Type": 'application/x-www-form-urlencoded'
-    //}
-  }
-  
-  //console.log("prepared the request")
-  
-  var req = https.request(options, res => {
-    let data = '';
-
-    //console.log('Status: ', res.statusCode);
-    //console.log('Headers: ', JSON.stringify(res.headers));
-
-    res.setEncoding('utf8');
-
-    res.on('data', chunk => {
-        data += chunk;
-    });
-
-    var parsedData = null
-
-    res.on('end', () => {
-        try {
-            // Try to parse as JSON, but fall back to raw data if it fails
-            parsedData = data ? JSON.parse(data) : data;
-            //console.log('Response:', parsedData);
-        } catch (e) {
-            parsedData = data
-            //console.log('Raw Response:', data);
-        }
-
-        if (res.statusCode == 200) {
-          callbackFunction(true, res.statusCode, parsedData)
-          return
-        } else {
-          //console.log(parsedData)
-          callbackFunction(false, res.statusCode, parsedData.code + "; " + parsedData.message)
-          return
-        }
-    });
-    
-    }).on('error', e => {
-      console.error(e);
-      callbackFunction(false, 0, e)
-      return
-  });
-  
-  req.write(requestBodyString);
-  req.end();
+  openCloudFunction("PATCH", requestPath, requestBody, callbackFunction)
 }
 
 // Receive messages
@@ -523,9 +557,7 @@ async function handleSharedData(data) {
           var issuedBy = data.Payload.Arguements[4]
           var originalChannelId = data.Payload.OriginalChannelId
 
-          //console.log(data.Payload)
-
-          function callbackFunction(result, statusCode, errorMsg) {
+          await performOpenCloudBan(userId, gameName, banType, banReason, issuedBy, (result, statusCode, errorMsg) => {
             //console.log(result, statusCode, errorMsg)
 
             var timeend = Date.now()
@@ -541,7 +573,7 @@ async function handleSharedData(data) {
                     ChannelToSendTo: "1291040473242271886",
                     Embed: {
                       ["title"]: ":hammer: Ban - `" + gameName + "`",
-                      ["footer"]: "Skynet Clans • Version " + process.env.VERSION + " • Took " + (timeend - timestart) + "ms",
+                      ["footer"]: defaultFooter + " • Took " + (timeend - timestart) + "ms",
                       //["image"]: images[0], //reported
                       ["color"]: 0x600000,
                       ["fields"]: [
@@ -575,7 +607,7 @@ async function handleSharedData(data) {
                     ChannelToSendTo: originalChannelId,
                     Embed: {
                       ["title"]: ":no_entry: Error while performing Open Cloud Ban",
-                      ["footer"]: "Skynet Clans • Version " + process.env.VERSION + " • Took " + (timeend - timestart) + "ms",
+                      ["footer"]: defaultFooter + " • Took " + (timeend - timestart) + "ms",
                       //["image"]: images[0], //reported
                       ["color"]: 0x600000,
                       ["fields"]: [
@@ -589,9 +621,106 @@ async function handleSharedData(data) {
 
               shareData(dataToSend)
             }
-          }
+          })
+        break;
 
-          await performOpenCloudBan(userId, gameName, banType, banReason, issuedBy, callbackFunction)
+        case "OpenCloudViewBan":
+          var userId = data.Payload.Arguements[0]
+          var gameName = data.Payload.Arguements[1]
+          var originalChannelId = data.Payload.OriginalChannelId
+
+          await performOpenCloudViewBan(userId, gameName, (result, statusCode, errorMsg) => {
+            //console.log(errorMsg)
+            //console.log(result, statusCode, errorMsg)
+            var isBanned = errorMsg.gameJoinRestriction.active
+            var privateBanReason = errorMsg.gameJoinRestriction.privateReason
+            var publicBanReason = errorMsg.gameJoinRestriction.displayReason
+            var areAltAccountsExcluded = errorMsg.gameJoinRestriction.excludeAltAccounts
+            var isBanInherited = errorMsg.gameJoinRestriction.inherited
+            var startTime = errorMsg.gameJoinRestriction.startTime
+            var duration = errorMsg.gameJoinRestriction.duration
+
+            if (duration == undefined || duration == null) {
+              duration = "Permanent"
+            }
+
+            var timeend = Date.now()
+            //console.log(timestart, timeend)
+            if (result) {
+              //working
+              var embed = null
+
+              //console.log(isBanned)
+
+              if (isBanned == true) {
+                embed = {
+                  ["title"]: ":pager: View Ban - `" + gameName + "`",
+                  ["footer"]: defaultFooter + " • Took " + (timeend - timestart) + "ms",
+                  //["image"]: images[0], //reported
+                  ["color"]: 0x600000,
+                  ["fields"]: [
+                    {name: ":identification_card: User", value: "**[" + userId + "](https://www.roblox.com/users/" + userId + "/profile)**", inline: true},
+                    {name: ":name_badge: Currently banned?", value: isBanned.toString(), inline: true},
+                    {name: ":clock3: Banned at:", value: "`" + startTime + "`", inline: true},
+                    {name: ":clock3: Duration", value: duration.toString(), inline: true},
+                    {name: ":pager: Alt accounts excluded from ban?", value: areAltAccountsExcluded.toString(), inline: true},
+                    {name: ":pager: Is ban inherited?", value: isBanInherited.toString() + " (aka is this an alt ban?)", inline: true},
+                    {name: ":hammer: Public Ban Reason", value: "`" + publicBanReason + "`"},
+                    {name: ":hammer: Private Ban Reason", value: "||`" + privateBanReason + "`||"},
+                  ]
+                }
+              } else {
+                embed = {
+                  ["title"]: ":pager: View Ban - `" + gameName + "`",
+                  ["footer"]: defaultFooter + " • Took " + (timeend - timestart) + "ms",
+                  //["image"]: images[0], //reported
+                  ["color"]: 0x002060,
+                  ["fields"]: [
+                    {name: ":identification_card: User", value: "**[" + userId + "](https://www.roblox.com/users/" + userId + "/profile)**", inline: true},
+                    {name: ":name_badge: Currently banned?", value: isBanned.toString(), inline: true},
+                  ]
+                }
+              }
+
+              var dataToSend = [
+                {
+                  MessageTo: "discordbot.js",
+                  Type: "Embed",
+                  Payload: {
+                    ServerToSendTo: "719673864111652936",
+                    ChannelToSendTo: originalChannelId,
+                    Embed: embed
+                  },
+                }
+              ]
+
+              shareData(dataToSend)
+            } else {
+              //errored
+              var dataToSend = [
+                  {
+                  MessageTo: "discordbot.js",
+                  Type: "Embed",
+                  Payload: {
+                    ServerToSendTo: "719673864111652936",
+                    ChannelToSendTo: originalChannelId,
+                    Embed: {
+                      ["title"]: ":no_entry: Error while performing Open Cloud Ban",
+                      ["footer"]: defaultFooter + " • Took " + (timeend - timestart) + "ms",
+                      //["image"]: images[0], //reported
+                      ["color"]: 0x600000,
+                      ["fields"]: [
+                        {name: ":pager: Status Code:", value: statusCode},
+                        {name: ":bangbang: Error Message:", value: "`" + errorMsg + "`"}
+                      ]
+                    }
+                  },
+                }
+              ]
+
+              shareData(dataToSend)
+            }
+          })
         break;
       }
     }

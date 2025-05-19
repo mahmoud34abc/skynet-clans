@@ -4,9 +4,11 @@ const require = createRequire(import.meta.url);
 //const fs = require('node:fs');
 const { Client, GatewayIntentBits, EmbedBuilder, SlashCommandBuilder, MessageEmbed } = require('discord.js');
 
-const isUpdatedDiscord = false;
+const isUpdatedDiscord = true;
 const botPrefix = "c!"
 var botOnline = false
+
+var defaultFooter = "Skynet Clans • Version " + process.env.VERSION + " • Hosted on: " + process.env.HOSTING
 
 function getClient() {
   if (isUpdatedDiscord) {
@@ -116,7 +118,7 @@ function messageHandler(message) {
 
     switch(cmd) {
         case "gameban":
-            const allowedRoles = ["719857755036581908", "719857778675417098", "727939786815569981", "1282069297186865152", "1291525088159727737", "720057768459108425"]
+            var allowedRoles = ["719857755036581908", "719857778675417098", "727939786815569981", "1282069297186865152", "1291525088159727737", "720057768459108425"]
             //const allowedRoles = []
             var allowed = false
             
@@ -166,6 +168,43 @@ function messageHandler(message) {
 
             //performOpenCloudBan(args[1], "phoenix", args[3], banReason, issuedBy)
             message.channel.send(":clock3: Sending to ROBLOX...")
+        break;
+
+        case "viewban":
+            var allowedRoles = ["726746155970461769", "727940388765040650", "719857755036581908", "719857778675417098", "727939786815569981", "1282069297186865152", "1291525088159727737", "720057768459108425"]
+            //const allowedRoles = []
+            var allowed = false
+            for (const roleId of allowedRoles) {
+                if (message.member.roles.cache.has(roleId)) {
+                    allowed = true
+                    break
+                }
+            }
+            
+            if (allowed !== true) {
+                message.channel.send("You do not have permission to use this command!")
+                return
+            }
+                
+            if (args[1] == null) {
+                message.channel.send("Missing arguements! `c!viewban [userId] [gameName]`")
+                return
+            }
+
+            var dataToSend = [{
+                MessageTo: "webhook.js",
+                Type: "OpenCloudViewBan",
+                Payload: {
+                  ServerToSendTo: "719673864111652936",
+                  OriginalChannelId: message.channel.id,
+                  Arguements: [args[1], args[2]]
+                },
+            }]
+            shareData(dataToSend)
+
+            //performOpenCloudBan(args[1], "phoenix", args[3], banReason, issuedBy)
+            message.channel.send(":clock3: Fetching from ROBLOX...")
+
             break;
         }
     }
