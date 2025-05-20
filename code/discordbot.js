@@ -29,7 +29,8 @@ const client = getClient()
 
 // Send script messages
 function shareData(data) {
-  process.send(data);
+    //console.log("Sent from Discord")
+    process.send(data);
 }
 
 function embedMessage(details, preEmbed) {
@@ -41,7 +42,23 @@ function embedMessage(details, preEmbed) {
                     anEmbed.setTitle(value)
                 break;
                 case "author":
-                    anEmbed.setAuthor({ name: value.name, iconURL: value.iconURL, url: value.URL })
+                    var changed = false
+                    if (value.name) {
+                        anEmbed.setAuthor({ name: value.name })
+                        changed = true
+                    }
+                    if (value.iconURL) {
+                        anEmbed.setAuthor({ iconURL: value.iconURL })
+                        changed = true
+                    }
+                    if (value.URL) {
+                        anEmbed.setAuthor({ url: value.URL })
+                        changed = true
+                    }
+
+                    if (!changed) {
+                        anEmbed.setAuthor({ name: value })
+                    }
                 break;
                 case "color":
                     anEmbed.setColor(value)
@@ -281,6 +298,7 @@ async function handleSharedData(data) {
 }
 
 process.on('message', (data) => {
+    //console.log("Received on Discord")
     handleSharedData(data)
 });
 

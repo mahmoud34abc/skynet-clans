@@ -14,6 +14,7 @@ app.use(bodyParser.json());
 
 // Send messages
 function shareData(data) {
+  //console.log("Sent from Webhook")
   process.send(data);
 }
 
@@ -62,17 +63,7 @@ app.post("/webhook", (request, response) => {  //since I'm planning this to be s
           var requesttype = payload2.requestType
           switch(requesttype) {
             case "modcall":
-              var dataToSend = {
-                MessageTo: "discordbot.js",
-                Type: "Embed",
-                Payload: {
-                  ServerToSendTo: "719673864111652936",
-                  ChannelToSendTo: "908390430863929404",
-                  Embed: null
-                },
-              }
-                        
-              var timestart = Date.now()
+              //console.log(payload)       
               var modcallpayload = payload2.payload
               var reporteduser = modcallpayload.reporteduser //the user that as reported
               var reportinguser = modcallpayload.reportinguser //the user that reported
@@ -117,12 +108,10 @@ app.post("/webhook", (request, response) => {  //since I'm planning this to be s
                   gameid = "7120086775"
                 break;
               }
-
-              var timeend = Date.now()
                     
               var newEmbed = {
                 ["title"]: ":loudspeaker: Modcall",
-                ["footer"]: defaultFooter + " • Took " + (timeend - timestart) + "ms",
+                ["footer"]: defaultFooter,
                 //["image"]: images[0], //reported
                 //["thumbnail"]: images[1], //reporter
                 ["color"]: 0x990000,
@@ -132,7 +121,7 @@ app.post("/webhook", (request, response) => {  //since I'm planning this to be s
                   //{name: ":pencil: `group`", value: groupid, inline: true},
                   {name: ":shield: Reporting User", value: "||[" + reportingusername + "](https://www.roblox.com/users/" + reportinguserid + "/profile)||", inline: true},
                   {name: ":pager: Report Reason", value: reportreason},
-                  {name: ":triangular_flag_on_post: Suspicion Meter", value: "**" + suspicionpercent + "%**", inline: true},
+                  {name: ":triangular_flag_on_post: Suspicion Meter", value: "**" + suspicionpercent.toString() + "%**", inline: true},
                   //{name: ":globe_with_meridians: Translation", value: translatedText},
                   {name: ":link: Join Link 1", value: "[Launch & autojoin (1)](https://www.roblox.com/games/start?placeId=" + gameid + '&launchData={"ReportJobId":"' + jobid + '"})', inline: true},
                   {name: ":link: Join Link 2", value: "[Launch & autojoin (2)](https://www.roblox.com/games/5223287266/ACS-Phoenix-Grounds?serverJobId=" + jobid + ")", inline: true},
@@ -140,33 +129,21 @@ app.post("/webhook", (request, response) => {  //since I'm planning this to be s
                 ]
               }
                         
-                        dataToSend.Payload.Embed = newEmbed
-                        shareData(dataToSend)
+              var dataToSend = [
+                  {
+                  MessageTo: "discordbot.js",
+                  Type: "Embed",
+                  Payload: {
+                    ServerToSendTo: "719673864111652936",
+                    ChannelToSendTo: "908390430863929404",
+                    Embed: newEmbed
+                  },
+                }
+              ]
 
-                        //client.guilds.fetch(discordmodcallserver).then(serverinstance => serverinstance.channels.resolve(discordmodcallchannel).send("<@&941348501151961108>",embed))
-                        //makeResponse(true, "",value.id, {})
-                        //}
-                        //function sendTheThingy() {
-                        //if (botOnline) {
-                        //    sendTheReport()
-                        //} else {
-                        //    setTimeout(sendTheThingy, 1000)
-                        //}
-                        //}
-                        
-                        //sendTheThingy()
-                    break;
+              shareData(dataToSend)
+            break;
                     case "logging":
-                        var dataToSend = {
-                            MessageTo: "discordbot.js",
-                            Type: "Embed",
-                            Payload: {
-                                ServerToSendTo: "719673864111652936",
-                                ChannelToSendTo: "1291314421511094272",
-                                Embed: null
-                            },
-                        }
-
                         var timestart = Date.now()
                         var modcallpayload = payload2.payload
                         var game = modcallpayload.game //used to indicate the game
@@ -203,7 +180,7 @@ app.post("/webhook", (request, response) => {  //since I'm planning this to be s
                         
                         var newEmbed = {
                             ["title"]: ":minidisc: Logs",
-                            ["footer"]: defaultFooter + " • Took " + (timeend - timestart) + "ms",
+                            ["footer"]: defaultFooter,
                             //["image"]: images[0], //reported
                             //["thumbnail"]: images[1], //reporter
                             ["color"]: 0x006080,
@@ -222,7 +199,18 @@ app.post("/webhook", (request, response) => {  //since I'm planning this to be s
                             ]
                         }
 
-                        dataToSend.Payload.Embed = newEmbed
+                        var dataToSend = [
+                            {
+                              MessageTo: "discordbot.js",
+                              Type: "Embed",
+                              Payload: {
+                                  ServerToSendTo: "719673864111652936",
+                                  ChannelToSendTo: "1291314421511094272",
+                                  Embed: newEmbed
+                              },
+                          }
+                        ]
+
                         shareData(dataToSend)
 
                         //client.guilds.fetch(discordmodcallserver).then(serverinstance => serverinstance.channels.resolve(discordmodcallchannel).send(embed))
@@ -239,16 +227,6 @@ app.post("/webhook", (request, response) => {  //since I'm planning this to be s
                         //sendTheThingy2()
                     break;
                     case "suspicion":
-                        var dataToSend = {
-                            MessageTo: "discordbot.js",
-                            Type: "Embed",
-                            Payload: {
-                                ServerToSendTo: "719673864111652936",
-                                ChannelToSendTo: "908390430863929404",
-                                Embed: null
-                            },
-                        }
-
                         var modcallpayload = payload2.payload
                         var reporteduser = modcallpayload.reporteduser //the user that as reported
                         var suspicionpercent = modcallpayload.suspicionpercent
@@ -307,7 +285,18 @@ app.post("/webhook", (request, response) => {  //since I'm planning this to be s
                             ]
                         }
 
-                        dataToSend.Payload.Embed = newEmbed
+                        var dataToSend = [
+                            {
+                              MessageTo: "discordbot.js",
+                              Type: "Embed",
+                              Payload: {
+                                  ServerToSendTo: "719673864111652936",
+                                  ChannelToSendTo: "908390430863929404",
+                                  Embed: newEmbed
+                              },
+                          }
+                        ]
+
                         shareData(dataToSend)
                     break;
                 }
@@ -381,8 +370,8 @@ app.post("/skynetwebhook", (request, response) => {
               ["fields"]: [
                 {name: ":speech_balloon: Feedback", value: originalfeedbackmessage},
                 //{name: ":globe_with_meridians: Translation", value: translatedText},
-                {name: ":mobile_phone: On Mobile?", value: mobilestatus, inline: true},
-                {name: ":pager: User ID", value: userid, inline: true},
+                {name: ":mobile_phone: On Mobile?", value: mobilestatus.toString(), inline: true},
+                {name: ":pager: User ID", value: userid.toString(), inline: true},
                 {name: ":link: Profile Link", value: "[" + username + "](https://www.roblox.com/users/" + userid + "/profile)", inline: true}
               ]
             }
@@ -715,5 +704,6 @@ async function handleSharedData(data) {
 }
 
 process.on('message', (data) => {
+    //console.log("Received on Webhook")
     handleSharedData(data)
 });

@@ -1,7 +1,7 @@
 import { createRequire } from 'module';
 const require = createRequire(import.meta.url);
 const fs = require('fs');
-const { spawn, exec  } = require('child_process');
+const { spawn, execSync, exec } = require('child_process');
 require('dotenv').config(); //loading env
 
 import { fileURLToPath } from 'url';
@@ -73,6 +73,7 @@ async function spawnScript(filePath) {
     for (let i = 0; i < message.length; i++) {
       var actualMessage = message[i]
       var scriptToSendTo = actualMessage.MessageTo
+      //console.log("Forwarding to " + scriptToSendTo)
       //console.log(scriptToSendTo)
       //console.log(processes)
 
@@ -93,7 +94,7 @@ async function spawnScript(filePath) {
               otherChild.send(actualMessage);
               //console.log(`Forwarded to ${info.scriptName}`);
             } else {
-              console.log("Not connected, retrying later..")
+              //console.log("Not connected, retrying later..")
               setTimeout(retrySendingMessage, restartDelay)
             }
           }
@@ -134,10 +135,54 @@ async function startAllScripts() {
   });
 }
 
+
+var ngrok
+async function startNgrok() {
+  if (shouldRunNgrok) {
+    //Start ngrok
+
+    switch(platform) {
+      case "Windows":
+        ngrok = spawn('ngrokwin', ['http','--url=moccasin-caring-ladybird.ngrok-free.app', port, '--pooling-enabled'])
+      break;
+      
+      case "Linux": 
+        spawn('chmod', ['u+x', './ngrok'])
+        ngrok = spawn('./ngrok', ['http','--url=moccasin-caring-ladybird.ngrok-free.app', port, '--pooling-enabled'])
+      break;
+    }
+
+    
+    ngrok.stdout.on('data', (data) => {
+      console.log(`Output: ${data}`);
+    });
+
+    ngrok.stderr.on('data', (data) => {
+      console.error(`Error: ${data}`);
+    });
+
+    ngrok.on('close', (code) => {
+      console.log(`Process exited with code ${code}`);
+    });
+  }
+}
+
 // Handle parent process exit
 process.on('exit', () => {
   stopRestarting = true;
   console.log('Parent process exiting - cleaning up child processes');
+
+  try {
+    process.kill(ngrok.pid, 0);
+    process.kill(ngrok.pid);
+  } catch (e) {
+    if (e.code === 'ESRCH') {
+      console.log(`Process ngrok already dead`);
+    } else {
+      console.error(`Error killing process ${scriptName}:`, e);
+    }
+  }
+  
 
   for (const [scriptName, info] of Object.entries(processes)) {
     try {
@@ -162,37 +207,4 @@ process.on('SIGINT', () => {
 
 // Start the system
 startAllScripts();
-
-if (shouldRunNgrok) {
-  //Start ngrok
-
-  switch(platform) {
-    case "Windows":
-      exec('ngrokwin http --url=moccasin-caring-ladybird.ngrok-free.app ' + port + ' --pooling-enabled', (error, stdout, stderr) => {
-        if (error) {
-            console.log(`error: ${error.message}`);
-            return;
-        }
-        if (stderr) {
-            console.log(`stderr: ${stderr}`);
-            return;
-        }
-        console.log(`stdout: ${stdout}`)
-      });
-    break;
-    
-    case "Linux": 
-      exec('ngrok http --url=moccasin-caring-ladybird.ngrok-free.app ' + port + ' --pooling-enabled', (error, stdout, stderr) => {
-        if (error) {
-            console.log(`error: ${error.message}`);
-            return;
-        }
-        if (stderr) {
-            console.log(`stderr: ${stderr}`);
-            return;
-        }
-        console.log(`stdout: ${stdout}`)
-      });
-    break;
-  }
-}
+startNgrok()
