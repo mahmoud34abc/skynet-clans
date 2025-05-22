@@ -1,7 +1,6 @@
 //webhook handling for roblox
-import { error } from 'console';
 import { createRequire } from 'module';
-import { parse } from 'path';
+
 const require = createRequire(import.meta.url);
 const https = require("https")
 const express = require("express");
@@ -26,9 +25,67 @@ app.use(express.static("website/public")); //put anything in the public/ folder 
   //app.get("/", (request, response) => { //listener for get requests (website)
   //  response.sendFile(`${__dirname}/views/index.html`);
   //});
+
+async function getRobloxAvatarPic(userid, size, type) {
+  return new Promise((resolve) => {
+    https.get("https://thumbnails.roblox.com/v1/users/" + type + "?userIds=" + userid + "&size=" + size + "x" + size + "&format=Png&isCircular=false", res => {
+      let output = '';
+      var imageUrl1
+      res.setEncoding('utf8');
+      res.on('data', chunk => {
+        output += chunk;
+      });
+      
+      res.on('end', () => {
+        let data = JSON.parse(output);
+        imageUrl1 = data.data[0].imageUrl
+        resolve(imageUrl1)
+      });
+    })
+  })
+}
+
+function getRobloxID(discordID, callback) { //saving this for later
+  var playerid = robloxuserstore.get(discordID)
+  if (playerid !== undefined || playerid !== null) {
+    callback(
+      {error: false,
+       id: playerid})
+  } else {
+    var options = {
+      hostname: 'api.blox.link',
+      port: 443,
+      path: '/v1/user/' + discordID,
+      method: 'GET'
+    }
+    var req = https.request(options, res => {
+      res.setEncoding('utf8');
+      res.on('data', function (chunk) {
+        var body = JSON.parse(chunk)
+        if (body.status === "ok") {
+          robloxuserstore.put(discordID, body.primaryAccount)
+          callback({
+            error: false,
+            id: body.primaryAccount})
+        } else {
+          callback({
+            error: true,
+            message: body.error})
+        }
+      });
+    })
+    req.on('error', error => {
+      console.error(error)
+      callback({
+        error: true,
+        message: error})
+    })        
+    req.end()
+  }
+}
   
-  
-app.post("/webhook", (request, response) => {  //since I'm planning this to be semi-public, it'll require authkeys
+
+app.post("/webhook", async(request, response) => {  //since I'm planning this to be semi-public, it'll require authkeys
   var responseBody = []                        //to make clans and make changes to them and give them credit
                                                //authkeys will only be given to trusted ones, and exploiting them
                                                //will cause deactivation to their authkey
@@ -108,12 +165,12 @@ app.post("/webhook", (request, response) => {  //since I'm planning this to be s
                   gameid = "7120086775"
                 break;
               }
-                    
+
               var newEmbed = {
                 ["title"]: ":loudspeaker: Modcall",
                 ["footer"]: defaultFooter,
-                //["image"]: images[0], //reported
-                //["thumbnail"]: images[1], //reporter
+                ["image"]: await getRobloxAvatarPic(reporteduserid, 420, "avatar-headshot"),
+                ["thumbnail"]: await getRobloxAvatarPic(reportinguserid, 150, "avatar"),
                 ["color"]: 0x990000,
                 ["description"]: "From: " + gamename,
                 ["fields"]: [
@@ -181,8 +238,6 @@ app.post("/webhook", (request, response) => {  //since I'm planning this to be s
                         var newEmbed = {
                             ["title"]: ":minidisc: Logs",
                             ["footer"]: defaultFooter,
-                            //["image"]: images[0], //reported
-                            //["thumbnail"]: images[1], //reporter
                             ["color"]: 0x006080,
                             ["description"]: "From: " + gamename,
                             ["fields"]: [
@@ -270,7 +325,7 @@ app.post("/webhook", (request, response) => {  //since I'm planning this to be s
                         var newEmbed = {
                             ["title"]: ":loudspeaker: Suspicion Report",
                             ["footer"]: defaultFooter,
-                            //["image"]: images[0], //reported
+                            ["image"]: await getRobloxAvatarPic(reporteduserid, 420, "avatar"),
                             ["color"]: 0xFE9900,
                             ["description"]: "From: " + gamename,
                             ["fields"]: [
@@ -306,7 +361,7 @@ app.post("/webhook", (request, response) => {  //since I'm planning this to be s
     }
 ); //listener for post requests (webhook)
 
-app.post("/skynetwebhook", (request, response) => {
+app.post("/skynetwebhook", async(request, response) => {
   var body = request.body
   if (body.requesttype == "Feedback") {
     var avatarpic = body.avatarurl
@@ -366,7 +421,7 @@ app.post("/skynetwebhook", (request, response) => {
               ["author"]: displayname + " (" + username + ")",
               ["description"]: gamename,
               ["footer"]: defaultFooter,
-              //["thumbnail"]
+              ["thumbnail"]: await getRobloxAvatarPic(userid, 150, "avatar-headshot"),
               ["fields"]: [
                 {name: ":speech_balloon: Feedback", value: originalfeedbackmessage},
                 //{name: ":globe_with_meridians: Translation", value: translatedText},
@@ -534,7 +589,7 @@ async function handleSharedData(data) {
           var issuedBy = data.Payload.Arguements[4]
           var originalChannelId = data.Payload.OriginalChannelId
 
-          await performOpenCloudBan(userId, gameName, banType, banReason, issuedBy, (result, statusCode, errorMsg) => {
+          await performOpenCloudBan(userId, gameName, banType, banReason, issuedBy, async(result, statusCode, errorMsg) => {
             //console.log(result, statusCode, errorMsg)
 
             var timeend = Date.now()
@@ -551,7 +606,7 @@ async function handleSharedData(data) {
                     Embed: {
                       ["title"]: ":hammer: Ban - `" + gameName + "`",
                       ["footer"]: defaultFooter + " • Took " + (timeend - timestart) + "ms",
-                      //["image"]: images[0], //reported
+                      ["thumbnail"]: await getRobloxAvatarPic(userId, 150, "avatar-headshot"),
                       ["color"]: 0x600000,
                       ["fields"]: [
                         {name: ":warning: Open Cloud Ban - Issued by " + issuedBy, value: "- Ban reason: `" + banReason + "`"},
@@ -585,7 +640,6 @@ async function handleSharedData(data) {
                     Embed: {
                       ["title"]: ":no_entry: Error while performing Open Cloud Ban",
                       ["footer"]: defaultFooter + " • Took " + (timeend - timestart) + "ms",
-                      //["image"]: images[0], //reported
                       ["color"]: 0x600000,
                       ["fields"]: [
                         {name: ":pager: Status Code:", value: statusCode.toString()},
@@ -606,21 +660,32 @@ async function handleSharedData(data) {
           var gameName = data.Payload.Arguements[1]
           var originalChannelId = data.Payload.OriginalChannelId
 
-          await performOpenCloudViewBan(userId, gameName, (result, statusCode, errorMsg) => {
+          await performOpenCloudViewBan(userId, gameName, async(result, statusCode, errorMsg) => {
             //console.log(errorMsg)
             //console.log(result, statusCode, errorMsg)
-            var isBanned = errorMsg.gameJoinRestriction.active
-            var privateBanReason = errorMsg.gameJoinRestriction.privateReason
-            var publicBanReason = errorMsg.gameJoinRestriction.displayReason
-            var areAltAccountsExcluded = errorMsg.gameJoinRestriction.excludeAltAccounts
-            var isBanInherited = errorMsg.gameJoinRestriction.inherited
-            var startTime = errorMsg.gameJoinRestriction.startTime
-            var duration = errorMsg.gameJoinRestriction.duration
+            var isBanned
+            var privateBanReason
+            var publicBanReason
+            var areAltAccountsExcluded
+            var isBanInherited
+            var startTime
+            var duration
+
+            if (!(errorMsg.gameJoinRestriction == undefined || errorMsg.gameJoinRestriction == null)) {
+              isBanned = errorMsg.gameJoinRestriction.active
+              privateBanReason = errorMsg.gameJoinRestriction.privateReason
+              publicBanReason = errorMsg.gameJoinRestriction.displayReason
+              areAltAccountsExcluded = errorMsg.gameJoinRestriction.excludeAltAccounts
+              isBanInherited = errorMsg.gameJoinRestriction.inherited
+              startTime = errorMsg.gameJoinRestriction.startTime
+              duration = errorMsg.gameJoinRestriction.duration
+            } else {
+              isBanned = false
+            }
 
             if (duration == undefined || duration == null) {
               duration = "Permanent"
             }
-
             var timeend = Date.now()
             //console.log(timestart, timeend)
             if (result) {
@@ -633,7 +698,7 @@ async function handleSharedData(data) {
                 embed = {
                   ["title"]: ":pager: View Ban - `" + gameName + "`",
                   ["footer"]: defaultFooter + " • Took " + (timeend - timestart) + "ms",
-                  //["image"]: images[0], //reported
+                  ["thumbnail"]: await getRobloxAvatarPic(userId, 150, "avatar-headshot"),
                   ["color"]: 0x600000,
                   ["fields"]: [
                     {name: ":identification_card: User", value: "**[" + userId + "](https://www.roblox.com/users/" + userId + "/profile)**", inline: true},
@@ -650,7 +715,7 @@ async function handleSharedData(data) {
                 embed = {
                   ["title"]: ":pager: View Ban - `" + gameName + "`",
                   ["footer"]: defaultFooter + " • Took " + (timeend - timestart) + "ms",
-                  //["image"]: images[0], //reported
+                  ["thumbnail"]: await getRobloxAvatarPic(userId, 150, "avatar-headshot"),
                   ["color"]: 0x002060,
                   ["fields"]: [
                     {name: ":identification_card: User", value: "**[" + userId + "](https://www.roblox.com/users/" + userId + "/profile)**", inline: true},
@@ -684,7 +749,6 @@ async function handleSharedData(data) {
                     Embed: {
                       ["title"]: ":no_entry: Error while performing Open Cloud Ban",
                       ["footer"]: defaultFooter + " • Took " + (timeend - timestart) + "ms",
-                      //["image"]: images[0], //reported
                       ["color"]: 0x600000,
                       ["fields"]: [
                         {name: ":pager: Status Code:", value: statusCode},

@@ -11,7 +11,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const codeFolder = join(__dirname, 'code');
 
-const shouldRunNgrok = true;
+const shouldRunNgrok = process.env.USENGROK == "TRUE";
 const platform = process.env.PLATFORM
 var port = process.env.PORT 
 if (port == null || port == undefined) {

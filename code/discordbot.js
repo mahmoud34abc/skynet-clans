@@ -4,7 +4,7 @@ const require = createRequire(import.meta.url);
 //const fs = require('node:fs');
 const { Client, GatewayIntentBits, EmbedBuilder, SlashCommandBuilder, MessageEmbed } = require('discord.js');
 
-const isUpdatedDiscord = true;
+const isUpdatedDiscord = process.env.UPDATEDDISCORD == "TRUE";
 const botPrefix = "c!"
 var botOnline = false
 
