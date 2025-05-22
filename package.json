@@ -17,7 +17,7 @@
     "dotenv": "^16.5.0"
   },
   "engines": {
-    "node": "22.15.0"
+    "node": "22.X"
   },
   "repository": {
     "url": "https://glitch.com/edit/#!/hello-sqlite"
