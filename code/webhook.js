@@ -169,8 +169,8 @@ app.post("/webhook", async(request, response) => {  //since I'm planning this to
               var newEmbed = {
                 ["title"]: ":loudspeaker: Modcall",
                 ["footer"]: defaultFooter,
-                ["image"]: await getRobloxAvatarPic(reporteduserid, 420, "avatar-headshot"),
-                ["thumbnail"]: await getRobloxAvatarPic(reportinguserid, 150, "avatar"),
+                ["image"]: await getRobloxAvatarPic(reportinguserid, 150, "avatar"),
+                ["thumbnail"]: await getRobloxAvatarPic(reporteduserid, 420, "avatar-headshot"),
                 ["color"]: 0x990000,
                 ["description"]: "From: " + gamename,
                 ["fields"]: [
