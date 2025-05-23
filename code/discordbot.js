@@ -33,6 +33,45 @@ function shareData(data) {
     process.send(data);
 }
 
+function convertToString(value) {
+    var valueType = typeof(value)
+
+    switch(valueType) {
+        case "string":
+            return value
+        break
+
+        case "number":
+            return value.toString()
+        break
+
+        case "boolean":
+            if (value) return "Yes"
+            return "No"
+        break
+
+        case "bigint":
+            return value.toString()
+        break
+
+        case "symbol":
+            return value.toString()
+        break
+
+        case "null":
+            return "[null]"
+        break
+
+        case "undefined":
+            return "[undefined]"
+        break
+
+        default:
+            return "[An " + valueType + " was passed as a value]"
+        break
+    }
+}
+
 function embedMessage(details, preEmbed) {
     function performEmbedChanges(anEmbed) {
         for (const [key, value] of Object.entries(details)) {
@@ -41,63 +80,74 @@ function embedMessage(details, preEmbed) {
                 case "title":
                     anEmbed.setTitle(value)
                 break;
+
                 case "author":
-                    var changed = false
-                    if (value.name) {
-                        anEmbed.setAuthor({ name: value.name })
-                        changed = true
-                    }
-                    if (value.iconURL) {
-                        anEmbed.setAuthor({ iconURL: value.iconURL })
-                        changed = true
-                    }
-                    if (value.URL) {
-                        anEmbed.setAuthor({ url: value.URL })
-                        changed = true
+                    if (!value.name && !value.iconURL && !value.URL) {
+                        anEmbed.setAuthor({ name:convertToString(value) })
                     }
 
-                    if (!changed) {
-                        anEmbed.setAuthor({ name: value })
+                    if (value.name) {
+                        anEmbed.setAuthor({ name: convertToString(value.name) })
+                    }
+                    if (value.iconURL) {
+                        anEmbed.setAuthor({ iconURL: convertToString(value.iconURL) })
+                    }
+                    if (value.URL) {
+                        anEmbed.setAuthor({ url: convertToString(value.URL) })
                     }
                 break;
+
                 case "color":
                     anEmbed.setColor(value)
                 break;
+
                 case "description":
-                    anEmbed.setDescription(value)
+                    anEmbed.setDescription(convertToString(value))
                 break;
+
                 case "footer":
                     if (isUpdatedDiscord) {
                         if (value.iconURL) {
-                            anEmbed.setFooter({ text: value.text, iconURL: value.iconURL })
+                            anEmbed.setFooter({ text: convertToString(value.text), iconURL: convertToString(value.iconURL) })
                         } else {
                             if (value.text) {
-                                anEmbed.setFooter({ text: value.text })
+                                anEmbed.setFooter({ text: convertToString(value.text) })
                             } else {
-                                anEmbed.setFooter({ text: value })
+                                anEmbed.setFooter({ text: convertToString(value) })
                             }
                         }
                     } else {
                       if (value.text) {
-                            anEmbed.setFooter(value.text)
+                            anEmbed.setFooter(convertToString(value.text))
                         } else {
-                            anEmbed.setFooter(value)
+                            anEmbed.setFooter(convertToString(value))
                         }
                     }
                 break;
+                
                 case "image":
-                    anEmbed.setImage(value)
+                    anEmbed.setImage(convertToString(value))
                 break;
+
                 case "thumbnail":
-                    anEmbed.setThumbnail(value)
+                    anEmbed.setThumbnail(convertToString(value))
                 break;
+
                 case "url":
-                    anEmbed.setUrl(value)
+                    anEmbed.setUrl(convertToString(value))
                 break;
+
                 case "timestamp":
                     anEmbed.setTitle(value)
                 break;
+
                 case "fields":
+                    Object.keys(value).forEach(function(key) {
+                        var localValue = value[key]
+                        localValue.name = convertToString(localValue.name)
+                        localValue.value = convertToString(localValue.value)
+                    });
+
                     anEmbed.addFields(value)
                 break;
             }

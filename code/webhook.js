@@ -178,7 +178,7 @@ app.post("/webhook", async(request, response) => {  //since I'm planning this to
                   //{name: ":pencil: `group`", value: groupid, inline: true},
                   {name: ":shield: Reporting User", value: "||[" + reportingusername + "](https://www.roblox.com/users/" + reportinguserid + "/profile)||", inline: true},
                   {name: ":pager: Report Reason", value: reportreason},
-                  {name: ":triangular_flag_on_post: Suspicion Meter", value: "**" + suspicionpercent.toString() + "%**", inline: true},
+                  {name: ":triangular_flag_on_post: Suspicion Meter", value: "**" + suspicionpercent + "%**", inline: true},
                   //{name: ":globe_with_meridians: Translation", value: translatedText},
                   {name: ":link: Join Link 1", value: "[Launch & autojoin (1)](https://www.roblox.com/games/start?placeId=" + gameid + '&launchData={"ReportJobId":"' + jobid + '"})', inline: true},
                   {name: ":link: Join Link 2", value: "[Launch & autojoin (2)](https://www.roblox.com/games/5223287266/ACS-Phoenix-Grounds?serverJobId=" + jobid + ")", inline: true},
@@ -425,8 +425,8 @@ app.post("/skynetwebhook", async(request, response) => {
               ["fields"]: [
                 {name: ":speech_balloon: Feedback", value: originalfeedbackmessage},
                 //{name: ":globe_with_meridians: Translation", value: translatedText},
-                {name: ":mobile_phone: On Mobile?", value: mobilestatus.toString(), inline: true},
-                {name: ":pager: User ID", value: userid.toString(), inline: true},
+                {name: ":mobile_phone: On Mobile?", value: mobilestatus, inline: true},
+                {name: ":pager: User ID", value: userid, inline: true},
                 {name: ":link: Profile Link", value: "[" + username + "](https://www.roblox.com/users/" + userid + "/profile)", inline: true}
               ]
             }
@@ -642,7 +642,7 @@ async function handleSharedData(data) {
                       ["footer"]: defaultFooter + " • Took " + (timeend - timestart) + "ms",
                       ["color"]: 0x600000,
                       ["fields"]: [
-                        {name: ":pager: Status Code:", value: statusCode.toString()},
+                        {name: ":pager: Status Code:", value: statusCode},
                         {name: ":bangbang: Error Message:", value: "`" + errorMsg + "`"}
                       ]
                     }
@@ -702,11 +702,11 @@ async function handleSharedData(data) {
                   ["color"]: 0x600000,
                   ["fields"]: [
                     {name: ":identification_card: User", value: "**[" + userId + "](https://www.roblox.com/users/" + userId + "/profile)**", inline: true},
-                    {name: ":name_badge: Currently banned?", value: isBanned.toString(), inline: true},
+                    {name: ":name_badge: Currently banned?", value: isBanned, inline: true},
                     {name: ":clock3: Banned at:", value: "`" + startTime + "`", inline: true},
-                    {name: ":clock3: Duration", value: duration.toString(), inline: true},
-                    {name: ":pager: Alt accounts excluded from ban?", value: areAltAccountsExcluded.toString(), inline: true},
-                    {name: ":pager: Is ban inherited?", value: isBanInherited.toString() + " (aka is this an alt ban?)", inline: true},
+                    {name: ":clock3: Duration", value: duration, inline: true},
+                    {name: ":pager: Alt accounts excluded from ban?", value: areAltAccountsExcluded, inline: true},
+                    {name: ":pager: Is ban inherited?", value: isBanInherited + " (aka is this an alt ban?)", inline: true},
                     {name: ":hammer: Public Ban Reason", value: "`" + publicBanReason + "`"},
                     {name: ":hammer: Private Ban Reason", value: "||`" + privateBanReason + "`||"},
                   ]
@@ -719,7 +719,7 @@ async function handleSharedData(data) {
                   ["color"]: 0x002060,
                   ["fields"]: [
                     {name: ":identification_card: User", value: "**[" + userId + "](https://www.roblox.com/users/" + userId + "/profile)**", inline: true},
-                    {name: ":name_badge: Currently banned?", value: isBanned.toString(), inline: true},
+                    {name: ":name_badge: Currently banned?", value: isBanned, inline: true},
                   ]
                 }
               }
