@@ -17,14 +17,22 @@ function shareData(data) {
   process.send(data);
 }
 
+var MessageListeners = {}
+
+function WaitForMessage(MessageType) {
+    if (MessageListeners[MessageType] == undefined || MessageListeners[MessageType] == null) {
+        MessageListeners[MessageType] = []
+    }
+
+    return new Promise((resolve) => {
+        MessageListeners[MessageType].push(resolve)
+    });
+}
+
 var defaultFooter = "Skynet Clans • Version " + process.env.VERSION + " • Hosting on: " + process.env.HOSTING
 
 
 app.use(express.static("website/public")); //put anything in the public/ folder accessible (for website) (like css, js, etc.)
-
-  //app.get("/", (request, response) => { //listener for get requests (website)
-  //  response.sendFile(`${__dirname}/views/index.html`);
-  //});
 
 async function getRobloxAvatarPic(userid, size, type) {
   return new Promise((resolve) => {
@@ -169,8 +177,8 @@ app.post("/webhook", async(request, response) => {  //since I'm planning this to
               var newEmbed = {
                 ["title"]: ":loudspeaker: Modcall",
                 ["footer"]: defaultFooter,
-                ["image"]: await getRobloxAvatarPic(reportinguserid, 150, "avatar"),
-                ["thumbnail"]: await getRobloxAvatarPic(reporteduserid, 420, "avatar-headshot"),
+                ["image"]: await getRobloxAvatarPic(reporteduserid, 420, "avatar"),
+                ["thumbnail"]: await getRobloxAvatarPic(reportinguserid, 150, "avatar-headshot"),
                 ["color"]: 0x990000,
                 ["description"]: "From: " + gamename,
                 ["fields"]: [
@@ -267,19 +275,6 @@ app.post("/webhook", async(request, response) => {  //since I'm planning this to
                         ]
 
                         shareData(dataToSend)
-
-                        //client.guilds.fetch(discordmodcallserver).then(serverinstance => serverinstance.channels.resolve(discordmodcallchannel).send(embed))
-                        //makeResponse(true, "",value.id, {})
-                        //}
-                        //function sendTheThingy2() {
-                        //if (botOnline) {
-                        //    sendLogs()
-                        //} else {
-                        //    setTimeout(sendTheThingy2, 1000)
-                        //}
-                        //}
-                        
-                        //sendTheThingy2()
                     break;
                     case "suspicion":
                         var modcallpayload = payload2.payload
@@ -577,6 +572,14 @@ async function performOpenCloudBan(userId, gameName, banType, banReason, issuedB
 // Receive messages
 async function handleSharedData(data) {
   //console.log(data)
+  //console.log(MessageListeners)
+    if (!(MessageListeners[data.Type] == null || MessageListeners[data.Type] == undefined)) {
+        MessageListeners[data.Type].forEach((value, index) => {
+            //console.log(value)
+            value(data)
+        });
+    }
+
     if (data.MessageTo == "webhook.js") {
       //console.log("Recieved something on webhook")
       var timestart = Date.now()
@@ -762,6 +765,17 @@ async function handleSharedData(data) {
               shareData(dataToSend)
             }
           })
+        break;
+
+        case "Ping":
+          var dataToSend = [
+            {
+              MessageTo: "discordbot.js",
+              Type: "Pong",
+            }
+          ]
+
+          shareData(dataToSend)
         break;
       }
     }

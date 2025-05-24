@@ -24,6 +24,18 @@ function getClient() {
   }
 }
 
+var MessageListeners = {}
+
+function WaitForMessage(MessageType) {
+    if (MessageListeners[MessageType] == undefined || MessageListeners[MessageType] == null) {
+        MessageListeners[MessageType] = []
+    }
+
+    return new Promise((resolve) => {
+        MessageListeners[MessageType].push(resolve)
+    });
+}
+
 const client = getClient() 
 
 
@@ -176,7 +188,7 @@ function embedMessage(details, preEmbed) {
 
 //}
 
-function messageHandler(message) {
+async function messageHandler(message) {
     const user = message.author
     const messageContent = message.content
 
@@ -272,7 +284,27 @@ function messageHandler(message) {
             //performOpenCloudBan(args[1], "phoenix", args[3], banReason, issuedBy)
             message.channel.send(":clock3: Fetching from ROBLOX...")
 
-            break;
+        break;
+
+        case "ping":
+            var messageSendingTime = Date.now()
+            var messageReceivedTime = null
+            var orgMsg = await message.channel.send({ content: ":ping_pong: Ping.."})
+            messageReceivedTime = Date.now();
+
+            var dataToSend = [{
+                MessageTo: "webhook.js",
+                Type: "Ping",
+                Payload: {}
+            }]
+            
+            var frameworkSendingTime = Date.now()
+            shareData(dataToSend)
+            await WaitForMessage("Pong")
+            var frameworkReceivedTime = Date.now()
+
+            orgMsg.edit({ content: ":ping_pong: Ping.. Pong!\n\n:globe_with_meridians: Discord Ping: `" + (messageReceivedTime - messageSendingTime) + "ms`\n:gear: Framework Ping: `" + (frameworkReceivedTime - frameworkSendingTime) + "ms`"})
+        break;
         }
     }
 
@@ -315,7 +347,15 @@ async function handleSharedData(data) {
         return
     }
 
-    //console.log('Received shared data:', data);
+    //console.log(data)
+    //console.log(MessageListeners)
+
+    if (!(MessageListeners[data.Type] == null || MessageListeners[data.Type] == undefined)) {
+        MessageListeners[data.Type].forEach((value, index) => {
+            //console.log(value)
+            value(data)
+        });
+    }
 
     if (data.MessageTo == "discordbot.js") {
         switch(data.Type) {
