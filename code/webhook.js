@@ -574,10 +574,11 @@ async function handleSharedData(data) {
   //console.log(data)
   //console.log(MessageListeners)
     if (!(MessageListeners[data.Type] == null || MessageListeners[data.Type] == undefined)) {
-        MessageListeners[data.Type].forEach((value, index) => {
-            //console.log(value)
-            value(data)
-        });
+      MessageListeners[data.Type].forEach((value, index) => {
+        //console.log(value)
+        value(data)
+      });
+      MessageListeners[data.Type] = {}
     }
 
     if (data.MessageTo == "webhook.js") {
