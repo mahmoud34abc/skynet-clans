@@ -355,7 +355,7 @@ async function handleSharedData(data) {
             //console.log(value)
             value(data)
         });
-        MessageListeners[data.Type] = {}
+        MessageListeners[data.Type] = []
     }
 
     if (data.MessageTo == "discordbot.js") {
