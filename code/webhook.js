@@ -276,6 +276,47 @@ app.post("/webhook", async(request, response) => {  //since I'm planning this to
 
                         shareData(dataToSend)
                     break;
+                    case "anticheatlogging":
+                        var timestart = Date.now()
+                        var modcallpayload = payload2.payload
+                        var game = modcallpayload.game //used to indicate the game
+                        var userId = modcallpayload.userId
+                        var username = modcallpayload.username
+                        var caseNum = modcallpayload.case
+                        //var reportdetails = modcallpayload.reportdetails //which mod joined
+                        
+                        var gamename
+                        var gameid
+                        
+                        for (const [key, value] of Object.entries(game)) {
+                          gamename = value
+                        }
+
+                        var newEmbed = {
+                            ["title"]: ":hammer: Anticheat Ban",
+                            ["footer"]: defaultFooter,
+                            ["color"]: 0x600080,
+                            ["description"]: "From: " + gamename,
+                            ["fields"]: [
+                                {name: ":name_badge: User", value: "**[" + username + "](https://www.roblox.com/users/" + userId + "/profile)**"},
+                                {name: ":pager: Case", value: "`" + caseNum + "`"},
+                            ]
+                        }
+
+                        var dataToSend = [
+                            {
+                              MessageTo: "discordbot.js",
+                              Type: "Embed",
+                              Payload: {
+                                  ServerToSendTo: "719673864111652936",
+                                  ChannelToSendTo: "1291040473242271886",
+                                  Embed: newEmbed
+                              },
+                          }
+                        ]
+
+                        shareData(dataToSend)
+                    break;
                     case "suspicion":
                         var modcallpayload = payload2.payload
                         var reporteduser = modcallpayload.reporteduser //the user that as reported
