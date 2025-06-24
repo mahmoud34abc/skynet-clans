@@ -93,25 +93,30 @@ function getRobloxID(discordID, callback) { //saving this for later
 }
   
 
+var responseBody = []
+
+function makeResponse(bool,message,id,payload) {
+  const theResponse = {
+    id,
+    status: bool?200:400,
+    responseStatus: bool?'OK':'BAD REQUEST',
+    message,
+    payload,
+  }
+
+  var arraylength = responseBody.length
+  var newResponse = {...theResponse}
+  newResponse.message = message
+  newResponse.id = id
+  newResponse.payload = {...payload}
+  responseBody[arraylength + 1] = newResponse
+}
+
 app.post("/webhook", async(request, response) => {  //since I'm planning this to be semi-public, it'll require authkeys
-  var responseBody = []                        //to make clans and make changes to them and give them credit
+                                               //to make clans and make changes to them and give them credit
                                                //authkeys will only be given to trusted ones, and exploiting them
                                                //will cause deactivation to their authkey
-  function makeResponse(bool,message,id,payload) {
-    const theResponse = {
-      id,
-      status: bool?200:400,
-      responseStatus: bool?'OK':'BAD REQUEST',
-      message,
-      payload,
-    }
-    var arraylength = responseBody.length
-    var newResponse = {...theResponse}
-    newResponse.message = message
-    newResponse.id = id
-    newResponse.payload = {...payload}
-    responseBody[arraylength + 1] = newResponse
-  }
+  
     
   const body = request.body
   const payload = body.payload //requests will be sent every 2 seconds, so they'll be in a dictionary called payload
@@ -201,7 +206,8 @@ app.post("/webhook", async(request, response) => {  //since I'm planning this to
                   Payload: {
                     ServerToSendTo: "719673864111652936",
                     ChannelToSendTo: "908390430863929404",
-                    Embed: newEmbed
+                    Embed: newEmbed,
+                    Text: "<@&941348501151961108>",
                   },
                 }
               ]
@@ -383,7 +389,8 @@ app.post("/webhook", async(request, response) => {  //since I'm planning this to
                               Payload: {
                                   ServerToSendTo: "719673864111652936",
                                   ChannelToSendTo: "908390430863929404",
-                                  Embed: newEmbed
+                                  Embed: newEmbed,
+                                  Text: "<@&941348501151961108>",
                               },
                           }
                         ]
@@ -807,6 +814,13 @@ async function handleSharedData(data) {
               shareData(dataToSend)
             }
           })
+        break;
+
+        case "SendToRoblox":
+          var gameName = data.Payload.GameName
+          var payload = data.Payload.DataToSend
+    
+          makeResponse(true, "CustomMessage", null, payload)
         break;
 
         case "Ping":

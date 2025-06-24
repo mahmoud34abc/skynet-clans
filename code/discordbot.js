@@ -189,10 +189,10 @@ function embedMessage(details, preEmbed) {
 //}
 
 async function messageHandler(message) {
-    const user = message.author
+    const member = message.member
     const messageContent = message.content
 
-    var args = message.content.trim().split(/ +/g);
+    var args = messageContent.trim().split(/ +/g);
     const cmd = args[0].slice(botPrefix.length).toLowerCase();
 
     switch(cmd) {
@@ -202,7 +202,7 @@ async function messageHandler(message) {
             var allowed = false
             
             for (const roleId of allowedRoles) {
-                if (message.member.roles.cache.has(roleId)) {
+                if (member.roles.cache.has(roleId)) {
                     allowed = true
                     break
                 }
@@ -232,7 +232,7 @@ async function messageHandler(message) {
                 banReason = "No reason provided"
             }
         
-            var issuedBy = message.member.displayName + " (" + message.member.user.id + ")"
+            var issuedBy = member.displayName + " (" + member.user.id + ")"
 
             var dataToSend = [{
                 MessageTo: "webhook.js",
@@ -254,7 +254,7 @@ async function messageHandler(message) {
             //const allowedRoles = []
             var allowed = false
             for (const roleId of allowedRoles) {
-                if (message.member.roles.cache.has(roleId)) {
+                if (member.roles.cache.has(roleId)) {
                     allowed = true
                     break
                 }
@@ -286,6 +286,44 @@ async function messageHandler(message) {
 
         break;
 
+        case "robloxcommand":
+            var dataToSend = [{
+                MessageTo: "webhook.js",
+                Type: "SendToRoblox",
+                Payload: {
+                  GameName: "phoenix",
+                  Payload: {
+                    MessageType: "Command",
+                    Arguements: {},
+                  },
+                },
+            }]
+
+            shareData(dataToSend)
+            message.channel.send(":clock3: Sending command to game.. This may take a while.")
+        break;
+
+        case "adonis":
+            var adonisCommandToSend = messageContent.split(botPrefix + cmd + " ")[1]; 
+
+            var dataToSend = [{
+                MessageTo: "webhook.js",
+                Type: "SendToRoblox",
+                Payload: {
+                  GameName: "phoenix",
+                  Payload: {
+                    MessageType: "AdonisCommand",
+                    Arguements: {
+                        Command: adonisCommandToSend,
+                    },
+                  },
+                },
+            }]
+
+            shareData(dataToSend)
+            message.channel.send(":clock3: Sending global adonis command to game.. This may take a while.")
+        break;
+
         case "ping":
             var messageSendingTime = Date.now()
             var messageReceivedTime = null
@@ -303,12 +341,12 @@ async function messageHandler(message) {
             await WaitForMessage("Pong")
             var frameworkReceivedTime = Date.now()
 
-            orgMsg.edit({ content: ":ping_pong: Ping.. Pong!\n\n:globe_with_meridians: Discord Ping: `" + (messageReceivedTime - messageSendingTime) + "ms`\n:gear: Framework Ping: `" + (frameworkReceivedTime - frameworkSendingTime) + "ms`"})
+            orgMsg.edit({ content: ":ping_pong: Ping.. Pong!\n\n:globe_with_meridians: Discord Ping: `" + (messageReceivedTime - messageSendingTime)/2 + "ms`\n:gear: Framework Ping: `" + (frameworkReceivedTime - frameworkSendingTime)/2 + "ms`"})
         break;
         }
     }
 
-client.on('messageCreate', (message) => {
+client.on('messageCreate', async (message) => {
     // Ignore messages from bots
     if (!message.content.startsWith(botPrefix)) return; 
     if (message.author.bot) return;
@@ -321,7 +359,16 @@ client.on('messageCreate', (message) => {
     //if (message.attachments.size > 0) {
     //  console.log('Attachments:', message.attachments.map(a => a.url));
     //}
-    messageHandler(message)
+    try {
+        await messageHandler(message)
+    } catch (e) {
+        console.warn("Error occured while handling message: " + e)
+        try {
+            await message.channel.send(":x: An error occured while processing the message. Please review the logs")
+        } catch(e) {
+            console.warn(e) 
+        }
+    }
 });
 
 //START
@@ -363,13 +410,15 @@ async function handleSharedData(data) {
             case "Embed":
                 var guildId = data.Payload.ServerToSendTo
                 var channelId = data.Payload.ChannelToSendTo
+                var extraText = data.Payload.Text
                 var embedable = data.Payload.Embed
                 var embed = embedMessage(embedable)
 
                 var guild = await client.guilds.fetch(guildId);
                 var channel = await guild.channels.fetch(channelId);
-                if (channelId == "908390430863929404") {
-                    await channel.send({ content: "<@&941348501151961108>", embeds: [embed] });
+
+                if (extraText !== null) {
+                    await channel.send({ content: extraText, embeds: [embed] });
                 } else {
                     await channel.send({ embeds: [embed] });
                 }
