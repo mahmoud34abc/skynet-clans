@@ -142,7 +142,9 @@ function embedMessage(details, preEmbed) {
                 break;
 
                 case "thumbnail":
-                    anEmbed.setThumbnail(convertToString(value))
+                    if (convertToString(value) !== "") {
+                        anEmbed.setThumbnail(convertToString(value))
+                    }
                 break;
 
                 case "url":
