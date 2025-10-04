@@ -293,6 +293,7 @@ app.post("/webhook", async(request, response) => {  //since I'm planning this to
                         var userId = modcallpayload.userId
                         var username = modcallpayload.username
                         var caseNum = modcallpayload.case
+                        var reason = modcallpayload.reason
                         //var reportdetails = modcallpayload.reportdetails //which mod joined
                         
                         var gamename
@@ -309,7 +310,8 @@ app.post("/webhook", async(request, response) => {  //since I'm planning this to
                             ["description"]: "From: " + gamename,
                             ["fields"]: [
                                 {name: ":name_badge: User", value: "**[" + username + "](https://www.roblox.com/users/" + userId + "/profile)**"},
-                                {name: ":pager: Case", value: "`" + caseNum + "`"},
+                                {name: ":pager: Case", value: "`" + caseNum + "`", inline: true},
+                                {name: ":notepad_spiral: Reason", value: reason, inline: true},
                             ]
                         }
 
