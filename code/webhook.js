@@ -46,8 +46,12 @@ async function getRobloxAvatarPic(userid, size, type) {
       
       res.on('end', () => {
         let data = JSON.parse(output);
-        imageUrl1 = data.data[0].imageUrl
-        resolve(imageUrl1)
+        if ((data !== undefined | data !== null) & data.data !== undefined) {
+          imageUrl1 = data.data[0].imageUrl
+          resolve(imageUrl1)
+        } else {
+          resolve("https://media.discordapp.net/attachments/846381103349628938/1424126341112008754/image.png")
+        }
       });
     })
   })

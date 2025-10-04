@@ -51,36 +51,21 @@ function convertToString(value) {
     switch(valueType) {
         case "string":
             return value
-        break
-
         case "number":
             return value.toString()
-        break
-
         case "boolean":
             if (value) return "Yes"
             return "No"
-        break
-
         case "bigint":
             return value.toString()
-        break
-
         case "symbol":
             return value.toString()
-        break
-
         case "null":
             return "[null]"
-        break
-
         case "undefined":
             return "[undefined]"
-        break
-
         default:
             return "[An " + valueType + " was passed as a value]"
-        break
     }
 }
 
@@ -138,7 +123,9 @@ function embedMessage(details, preEmbed) {
                 break;
                 
                 case "image":
-                    anEmbed.setImage(convertToString(value))
+                     if (convertToString(value) !== "") {
+                        anEmbed.setImage(convertToString(value))
+                    }
                 break;
 
                 case "thumbnail":
