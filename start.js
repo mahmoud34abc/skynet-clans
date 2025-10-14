@@ -1,7 +1,7 @@
 import { createRequire } from 'module';
 const require = createRequire(import.meta.url);
 const fs = require('fs');
-const { spawn, execSync, exec } = require('child_process');
+const { spawn } = require('child_process');
 require('dotenv').config(); //loading env
 
 import { fileURLToPath } from 'url';
@@ -184,7 +184,7 @@ process.on('exit', () => {
   }
   
 
-  for (const [scriptName, info] of Object.entries(processes)) {
+  for (const [scriptName] of Object.entries(processes)) {
     try {
       // Check if process still exists before killing
       process.kill(processes[scriptName].pid, 0); // Signal 0 checks process existence

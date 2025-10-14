@@ -2,13 +2,12 @@
 import { createRequire } from 'module';
 const require = createRequire(import.meta.url);
 //const fs = require('node:fs');
-const { Client, GatewayIntentBits, EmbedBuilder, SlashCommandBuilder, MessageEmbed } = require('discord.js');
+const { Client, GatewayIntentBits, EmbedBuilder, MessageEmbed } = require('discord.js');
 
 const isUpdatedDiscord = process.env.UPDATEDDISCORD == "TRUE";
 const botPrefix = "c!"
 var botOnline = false
 
-var defaultFooter = "Skynet Clans • Version " + process.env.VERSION + " • Hosted on: " + process.env.HOSTING
 
 function getClient() {
   if (isUpdatedDiscord) {
@@ -387,7 +386,7 @@ async function handleSharedData(data) {
     //console.log(MessageListeners)
 
     if (!(MessageListeners[data.Type] == null || MessageListeners[data.Type] == undefined)) {
-        MessageListeners[data.Type].forEach((value, index) => {
+        MessageListeners[data.Type].forEach((value) => {
             //console.log(value)
             value(data)
         });

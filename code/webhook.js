@@ -19,15 +19,6 @@ function shareData(data) {
 
 var MessageListeners = {}
 
-function WaitForMessage(MessageType) {
-    if (MessageListeners[MessageType] == undefined || MessageListeners[MessageType] == null) {
-        MessageListeners[MessageType] = []
-    }
-
-    return new Promise((resolve) => {
-        MessageListeners[MessageType].push(resolve)
-    });
-}
 
 var defaultFooter = "Skynet Clans • Version " + process.env.VERSION + " • Hosting on: " + process.env.HOSTING
 
@@ -57,44 +48,6 @@ async function getRobloxAvatarPic(userid, size, type) {
   })
 }
 
-function getRobloxID(discordID, callback) { //saving this for later
-  var playerid = robloxuserstore.get(discordID)
-  if (playerid !== undefined || playerid !== null) {
-    callback(
-      {error: false,
-       id: playerid})
-  } else {
-    var options = {
-      hostname: 'api.blox.link',
-      port: 443,
-      path: '/v1/user/' + discordID,
-      method: 'GET'
-    }
-    var req = https.request(options, res => {
-      res.setEncoding('utf8');
-      res.on('data', function (chunk) {
-        var body = JSON.parse(chunk)
-        if (body.status === "ok") {
-          robloxuserstore.put(discordID, body.primaryAccount)
-          callback({
-            error: false,
-            id: body.primaryAccount})
-        } else {
-          callback({
-            error: true,
-            message: body.error})
-        }
-      });
-    })
-    req.on('error', error => {
-      console.error(error)
-      callback({
-        error: true,
-        message: error})
-    })        
-    req.end()
-  }
-}
   
 
 var responseBody = []
@@ -124,7 +77,7 @@ app.post("/webhook", async(request, response) => {  //since I'm planning this to
     
   const body = request.body
   const payload = body.payload //requests will be sent every 2 seconds, so they'll be in a dictionary called payload
-  for (const [key, value] of Object.entries(payload)) {
+  for (const [, value] of Object.entries(payload)) {
       //if (key == "requestType") {
       //    console.log(value)
       //}
@@ -225,14 +178,12 @@ app.post("/webhook", async(request, response) => {  //since I'm planning this to
                         var commands = modcallpayload.commands
                         var jobid = modcallpayload.jobid
                         //var reportdetails = modcallpayload.reportdetails //which mod joined
-                        var discordmodcallserver = "719673864111652936"
-                        var discordmodcallchannel = "1291314421511094272"
                         
                         var text = ""
                         var gamename
                         var gameid
                         
-                        for (const [key, value] of Object.entries(game)) {
+                        for (const [, value] of Object.entries(game)) {
                           gamename = value
                         }
                         
@@ -251,7 +202,6 @@ app.post("/webhook", async(request, response) => {  //since I'm planning this to
                         
                         //}
                         
-                        var timeend = Date.now()
                         
                         var newEmbed = {
                             ["title"]: ":minidisc: Logs",
@@ -299,7 +249,7 @@ app.post("/webhook", async(request, response) => {  //since I'm planning this to
                         var gamename
                         var gameid
                         
-                        for (const [key, value] of Object.entries(game)) {
+                        for (const [, value] of Object.entries(game)) {
                           gamename = value
                         }
 
@@ -342,7 +292,6 @@ app.post("/webhook", async(request, response) => {  //since I'm planning this to
                         var reporteduserid
                         var gamename
                         var gamekeyname
-                        var gamelink
                         var gameid
                         
                         
@@ -413,7 +362,6 @@ app.post("/webhook", async(request, response) => {  //since I'm planning this to
 app.post("/skynetwebhook", async(request, response) => {
   var body = request.body
   if (body.requesttype == "Feedback") {
-    var avatarpic = body.avatarurl
     var username = body.username
     var displayname = body.displayname
     var userid = body.userid
@@ -527,7 +475,6 @@ async function openCloudFunction(requestType, requestPath, requestBody, callback
     });
 
     res.on('end', () => {
-      var parsedData = null
 
       try {
         // Try to parse as JSON, but fall back to raw data if it fails
@@ -628,7 +575,7 @@ async function handleSharedData(data) {
   //console.log(data)
   //console.log(MessageListeners)
     if (!(MessageListeners[data.Type] == null || MessageListeners[data.Type] == undefined)) {
-      MessageListeners[data.Type].forEach((value, index) => {
+      MessageListeners[data.Type].forEach((value) => {
         //console.log(value)
         value(data)
       });
