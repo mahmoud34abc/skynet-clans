@@ -255,6 +255,7 @@ app.post("/webhook", async(request, response) => {  //since I'm planning this to
 
                         var newEmbed = {
                             ["title"]: ":hammer: Anticheat Ban",
+                            ["thumbnail"]: await getRobloxAvatarPic(userId, 150, "avatar-headshot"),
                             ["footer"]: defaultFooter,
                             ["color"]: 0x600080,
                             ["description"]: "From: " + gamename,
