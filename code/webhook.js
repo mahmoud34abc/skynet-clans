@@ -148,7 +148,7 @@ app.post("/webhook", async(request, response) => {  //since I'm planning this to
                   {name: ":name_badge: Reported User", value: "**[" + reportedusername + "](https://www.roblox.com/users/" + reporteduserid + "/profile)**", inline: true},
                   //{name: ":pencil: `group`", value: groupid, inline: true},
                   {name: ":shield: Reporting User", value: "||[" + reportingusername + "](https://www.roblox.com/users/" + reportinguserid + "/profile)||", inline: true},
-                  {name: ":warning: Flagged by Ruben's system", value: isFlagged, inline: true},
+                  {name: ":warning: Flagged by Ruben's system", value: isFlagged},
                   {name: ":pager: Report Reason", value: reportreason},
                   {name: ":triangular_flag_on_post: Suspicion Meter", value: "**" + suspicionpercent + "%**", inline: true},
                   //{name: ":globe_with_meridians: Translation", value: translatedText},
