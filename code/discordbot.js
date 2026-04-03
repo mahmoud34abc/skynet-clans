@@ -202,10 +202,26 @@ async function messageHandler(message) {
             }
             
             if (args[1] == null | args[2] == null | args[3] == null) {
-                message.channel.send("Missing arguements! `c!gameban [userId] [gameName] [banType] [banReason]`")
+                message.channel.send("Missing arguements! `[c!gameban <userId> <gameName> <banType> <banReason>]`")
                 return
             }
-        
+
+            const raw = args[3].toLowerCase();
+            const numbers = raw.match(/-?\d+(\.\d+)?/g);
+            const value = numbers ? parseFloat(numbers[0]) : 0;
+
+            if (raw.includes("perm")) {
+                args[3] = "perm";
+            } else if (raw.includes("d")) {
+                args[3] = (value * 60 * 60 * 24).toString() + "s";
+            } else if (raw.includes("h")) {
+                args[3] = (value * 60 * 60).toString() + "s";
+            } else if (raw.includes("m")) {
+                args[3] = (value * 60).toString() + "s";
+            } else if (raw.includes("s")) {
+                args[3] = value.toString() + "s";
+            }
+                    
             var banReason = ""
             var skip = 0
             for (const word of args) {

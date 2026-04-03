@@ -525,7 +525,7 @@ async function performOpenCloudViewBan(userId, gameName, callbackFunction) {
 
   if (requestPath == null) {
     //console.log("No request path was defined. Stopping request")
-    callbackFunction(false, 0, "Code error or arguements weren't supplied. No request path was defined. Make sure you spelled the gameName correctly")
+    callbackFunction(false, 0, "Request path was not defined. Did you write the correct gameName? [c!gameban <userId> <gameName> <banDuration> <reason>]")
     return
   }
 
