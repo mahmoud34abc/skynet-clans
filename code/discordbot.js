@@ -360,7 +360,7 @@ client.on('messageCreate', async (message) => {
 });
 
 //START
-client.on("ready", () => { //set the bot status
+client.on("clientReady", () => { //set the bot status
   botOnline = true
   console.log("Skynet Clans bot is online");
   client.user.setPresence({

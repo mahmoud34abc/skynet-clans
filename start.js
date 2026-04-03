@@ -148,7 +148,7 @@ async function startNgrok() {
       
       case "Linux": 
         spawn('chmod', ['u+x', './ngrok'])
-        ngrok = spawn('./ngrok', ['http','--url=moccasin-caring-ladybird.ngrok-free.app', port, '--pooling-enabled'])
+        ngrok = spawn('./ngroklinux', ['http','--url=moccasin-caring-ladybird.ngrok-free.app', port, '--pooling-enabled'])
       break;
     }
 
