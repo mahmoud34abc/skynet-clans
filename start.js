@@ -146,8 +146,9 @@ async function startNgrok() {
         ngrok = spawn('ngrokwin', ['http','--url=moccasin-caring-ladybird.ngrok-free.app', port, '--pooling-enabled'])
       break;
       
-      case "Linux": 
-        spawn('chmod', ['u+x', './ngrok'])
+      case "Linux":
+        const { execSync } = require('child_process');
+        execSync('chmod u+x ./ngroklinux');
         ngrok = spawn('./ngroklinux', ['http','--url=moccasin-caring-ladybird.ngrok-free.app', port, '--pooling-enabled'])
       break;
     }
