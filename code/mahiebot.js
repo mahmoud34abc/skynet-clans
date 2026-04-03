@@ -28,7 +28,7 @@ const app = express();
 //const pidusage = require("pidusage");
 
 
-console.log("Mahie bot is starting...");
+//console.log("Mahie bot is starting...");
 
 client.on("message", message => { //basic command processor
   if (!message.content.startsWith(prefix)) return;
@@ -174,7 +174,7 @@ function checkTimes() {
 //setInterval(checkTimes, 60*1000);
 
 client.on("clientReady", () => {
-  console.log("Mahie bot is ready!");
+  console.log("Mahie bot is online");
   discordbotonline = true
   client.user.setPresence({
     status: "online",
