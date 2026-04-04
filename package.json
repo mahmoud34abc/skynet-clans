@@ -15,7 +15,7 @@
     "discord.js": "^14.26.0",
     "express": "^5.2.1",
     "express-useragent": "^2.1.0",
-    "dotenv": "^17.4.0"
+    "varlock": "^0.7.1"
   },
   "engines": {
     "node": "22.X"

@@ -2,7 +2,8 @@ import { createRequire } from 'module';
 const require = createRequire(import.meta.url);
 const fs = require('fs');
 const { spawn } = require('child_process');
-require('dotenv').config(); //loading env
+import 'varlock/auto-load'; //new env loader
+//require('dotenv').config(); //loading env
 
 import { fileURLToPath } from 'url';
 import { dirname, join, basename } from 'path';
@@ -11,7 +12,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const codeFolder = join(__dirname, 'code');
 
-const shouldRunNgrok = process.env.USENGROK == "TRUE";
+const shouldRunNgrok = process.env.USENGROK;
 const platform = process.env.PLATFORM
 var port = process.env.PORT 
 if (port == null || port == undefined) {

@@ -364,7 +364,7 @@ app.post("/webhook", async(request, response) => {  //since I'm planning this to
 
 app.post("/skynetwebhook", async(request, response) => {
   var body = request.body
-  if (body.requesttype == "Feedback") {
+  if (body.requesttype.toLowerCase() == "feedback") {
     var username = body.username
     var displayname = body.displayname
     var userid = body.userid
