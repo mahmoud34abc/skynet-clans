@@ -12,7 +12,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const codeFolder = join(__dirname, 'code');
 
-const shouldRunNgrok = process.env.USENGROK;
+const shouldRunNgrok = process.env.USENGROK == "true";
 const platform = process.env.PLATFORM
 var port = process.env.PORT 
 if (port == null || port == undefined) {
@@ -166,6 +166,7 @@ async function startNgrok() {
     ngrok.on('close', (code) => {
       console.log(`Process exited with code ${code}`);
     });
+    console.log("Started ngrok with PID " + ngrok.pid);
   }
 }
 
