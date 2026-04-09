@@ -332,10 +332,10 @@ async function messageHandler(message) {
         case "ping":
             var messageSendingTime = Date.now()
             var messageReceivedTime = null
-            var orgMsg = await message.channel.send({ content: ":ping_pong: Ping.."})
+            //var orgMsg = await message.channel.send({ content: ":ping_pong: Ping.."})
+            await message.channel.sendTyping();
             messageReceivedTime = Date.now();
-            message.channel.sendTyping();
-
+            
             var dataToSend = [{
                 MessageTo: "webhook.js",
                 Type: "Ping",
@@ -356,7 +356,7 @@ async function messageHandler(message) {
             var response = await WaitForMessage("RobloxAPIPong")
             var robloxPing = response.Payload.Ping
 
-            orgMsg.edit({ content: ":ping_pong: Ping.. Pong!\n\n:globe_with_meridians: Discord Ping: `" + (messageReceivedTime - messageSendingTime) + "ms`\n:video_game: Roblox API Ping: `" + (robloxPing) + "`\n:gear: Framework Ping: `" + (frameworkReceivedTime - frameworkSendingTime) + "ms`\n-# Hosting on: " + process.env.HOSTING })
+            message.channel.send({ content: ":ping_pong: Ping.. Pong!\n\n:globe_with_meridians: Discord Ping: `" + (messageReceivedTime - messageSendingTime) + "ms`\n:video_game: Roblox API Ping: `" + (robloxPing) + "`\n:gear: Framework Ping: `" + (frameworkReceivedTime - frameworkSendingTime) + "ms`\n-# Hosting on: " + process.env.HOSTING })
         break;
         }
     }
