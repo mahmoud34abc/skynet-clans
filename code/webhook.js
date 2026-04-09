@@ -49,14 +49,10 @@ async function getRobloxAvatarPic(userid, size, type) {
 }
 
 async function pingWebsite(url) {
-    const start = Date.now();
     try {
-        const res = await fetch(url, {
-            method: 'HEAD', // HEAD is lighter — no body needed, just headers
-            //headers: {
-                //'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-                //'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-            //},
+      const start = Date.now();
+        await fetch(url, {
+            method: 'HEAD',
             signal: AbortSignal.timeout(5000)
         });
         const latency = Date.now() - start;
@@ -64,11 +60,11 @@ async function pingWebsite(url) {
         return `${latency}ms`;
     } catch (err) {
         if (err.name === 'TimeoutError') {
-            console.error('Request timed out');
+            //console.error('Request timed out');
             return 'Timed out';
         }
         console.error(`Error pinging ${url}:`, err.message);
-        return 'HTTP Error';
+        return 'Error';
     }
 }
   

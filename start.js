@@ -22,11 +22,45 @@ if (port == null || port == undefined) {
 const restartDelay = 500; //500ms
 var stopRestarting = false;
 
+const COLORS = {
+  reset:   '\x1b[0m',
+  red:     '\x1b[31m',
+  yellow:  '\x1b[33m',
+  cyan:    '\x1b[36m',
+  green:   '\x1b[32m',
+  magenta: '\x1b[35m',
+};
+
+// Assign each script a different color for its prefix
+const SCRIPT_COLORS = [COLORS.cyan, COLORS.green, COLORS.magenta, COLORS.yellow];
+let scriptColorIndex = 0;
+
+function prefixLines(data, prefix, isError = false) {
+  return data.toString()
+    .split('\n')
+    .filter(line => line.trim() !== '')
+    .map(line => {
+      const coloredLine = isError
+        ? `${COLORS.red}${line}${COLORS.reset}`
+        : line;
+      return `${prefix} ${coloredLine}`;
+    })
+    .join('\n') + '\n';
+}
+
 const processes = {}
 
 async function spawnScript(filePath) {
   const scriptName = basename(filePath);
-  
+  var scriptColor
+  if (processes[scriptName]) {
+    scriptColor = processes[scriptName].scriptColor;
+  } else {
+    scriptColor = SCRIPT_COLORS[scriptColorIndex++ % SCRIPT_COLORS.length];
+  }
+  const prefix = `${scriptColor}[${scriptName}]${COLORS.reset}`;
+  const errorPrefix = `${COLORS.red}[${scriptName}]${COLORS.reset}`;
+
   console.log(`Starting script: ${scriptName}`);
   
   const child = spawn('node', [filePath], {
@@ -38,6 +72,7 @@ async function spawnScript(filePath) {
   processes[scriptName] = {
     child: child,
     filePath: filePath,
+    scriptColor: scriptColorIndex,
     restarts: 0,
     scriptName: scriptName,
     pid: child.pid
@@ -45,12 +80,15 @@ async function spawnScript(filePath) {
 
   //Handle different child stuff
 
+  // stdout — prefixed in script's color
   child.stdout.on('data', (data) => {
-      process.stdout.write(data);
+    process.stdout.write(prefixLines(data, prefix));
   });
 
-  // Still show errors
-  child.stderr.pipe(process.stderr);
+  // stderr — prefixed in red
+  child.stderr.on('data', (data) => {
+    process.stderr.write(prefixLines(data, prefix, true));
+  });
 
   child.on('error', (err) => {
     console.error(`Error in ${scriptName}:`, err);
