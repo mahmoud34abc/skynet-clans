@@ -48,6 +48,29 @@ async function getRobloxAvatarPic(userid, size, type) {
   })
 }
 
+async function pingWebsite(url) {
+    const start = Date.now();
+    try {
+        const res = await fetch(url, {
+            method: 'HEAD', // HEAD is lighter — no body needed, just headers
+            //headers: {
+                //'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                //'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+            //},
+            signal: AbortSignal.timeout(4000)
+        });
+        const latency = Date.now() - start;
+        //console.log(`Status: ${res.status}, Latency: ${latency}ms`);
+        return `${latency}ms`;
+    } catch (err) {
+        if (err.name === 'TimeoutError') {
+            console.error('Request timed out');
+            return 'Timed out';
+        }
+        console.error(`Error pinging ${url}:`, err.message);
+        return 'HTTP Error';
+    }
+}
   
 
 var responseBody = []
@@ -784,6 +807,20 @@ async function handleSharedData(data) {
             {
               MessageTo: "discordbot.js",
               Type: "Pong",
+            }
+          ]
+
+          shareData(dataToSend)
+        break;
+
+        case "RobloxAPIPing":
+          var robloxPing = await pingWebsite("https://apis.roblox.com/")
+
+          var dataToSend = [
+            {
+              MessageTo: "discordbot.js",
+              Type: "RobloxAPIPong",
+              Payload: {Ping: robloxPing}
             }
           ]
 
