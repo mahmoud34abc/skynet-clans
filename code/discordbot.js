@@ -250,7 +250,8 @@ async function messageHandler(message) {
             shareData(dataToSend)
 
             //performOpenCloudBan(args[1], "phoenix", args[3], banReason, issuedBy)
-            message.channel.send(":clock3: Sending to ROBLOX...")
+            //await message.channel.send(":clock3: Sending to ROBLOX...")
+            message.channel.sendTyping();
         break;
 
         case "viewban":
@@ -286,8 +287,8 @@ async function messageHandler(message) {
             shareData(dataToSend)
 
             //performOpenCloudBan(args[1], "phoenix", args[3], banReason, issuedBy)
-            message.channel.send(":clock3: Fetching from ROBLOX...")
-
+            //await message.channel.send(":clock3: Fetching from ROBLOX...")
+            message.channel.sendTyping()
         break;
 
         case "robloxcommand":
