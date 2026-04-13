@@ -84,18 +84,23 @@ async function getRobloxUsername(userId) {
 }
 
 async function getRobloxUserId(username) {
+    //if (!username || typeof username !== "string") return "#INVALIDINPUT";
+
     const res = await fetch("https://users.roblox.com/v1/usernames/users", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ usernames: [username], excludeBannedUsers: false })
     });
+
     if (!res.ok) {
-      console.error(`HTTP ${res.status}`)
-      return "#HTTPERROR"
-    };
-    var data = await res.json()
-    if (data.length === 0) return "#USERNOTFOUND";
-    return data[0];
+        console.error(`HTTP ${res.status}`, await res.text());
+        return "#HTTPERROR";
+    }
+
+    var data = await res.json();
+    console.log(data)
+    if (!data || data.length === 0) return "#USERNOTFOUND";
+    return data.data[0]; // { id, name, displayName }
 }
 
 
@@ -671,11 +676,11 @@ async function handleSharedData(data) {
           await performOpenCloudBan(userId, gameName, banType, banReason, issuedBy, async(result, statusCode, errorMsg) => {
             //console.log(result, statusCode, errorMsg)
             //console.log(timestart, timeend)
-            var timeend = Date.now()
 
             if (result) {
               //working
               var userName = await getRobloxUsername(userId)
+              var timeend = Date.now()
               var dataToSend = [
                 {
                   MessageTo: "discordbot.js",
@@ -710,6 +715,8 @@ async function handleSharedData(data) {
               shareData(dataToSend)
             } else {
               //errored
+              var timeend = Date.now()
+
               var dataToSend = [
                   {
                   MessageTo: "discordbot.js",
@@ -766,7 +773,6 @@ async function handleSharedData(data) {
             if (duration == undefined || duration == null) {
               duration = "Permanent"
             }
-            var timeend = Date.now()
             //console.log(timestart, timeend)
             if (result) {
               //working
@@ -774,6 +780,7 @@ async function handleSharedData(data) {
 
               //console.log(isBanned)
               var userName = await getRobloxUsername(userId)
+              var timeend = Date.now()
 
               if (isBanned == true) {
                 embed = {
@@ -820,6 +827,7 @@ async function handleSharedData(data) {
 
               shareData(dataToSend)
             } else {
+              var timeend = Date.now()
               //errored
               var dataToSend = [
                   {
