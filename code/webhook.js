@@ -98,9 +98,9 @@ async function getRobloxUserId(username) {
     }
 
     var data = await res.json();
-    console.log(data)
+    //console.log(data)
     if (!data || data.length === 0) return "#USERNOTFOUND";
-    return data.data[0]; // { id, name, displayName }
+    return data.data[0].id; // { id, name, displayName }
 }
 
 
