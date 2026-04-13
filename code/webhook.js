@@ -1,4 +1,6 @@
 //webhook handling for roblox
+import { warn } from 'console';
+import { get } from 'http';
 import { createRequire } from 'module';
 
 const require = createRequire(import.meta.url);
@@ -67,7 +69,35 @@ async function pingWebsite(url) {
         return 'Error';
     }
 }
-  
+
+async function getRobloxUsername(userId) {
+    const res = await fetch("https://users.roblox.com/v1/users/" + userId);
+    if (!res.ok) {
+      console.error(`HTTP ${res.status}`)
+      return "N/A"
+    };
+    var data = await res.json()
+    //console.log(data)
+    //const { data } = await res.json();
+
+    return data.name
+}
+
+async function getRobloxUserId(username) {
+    const res = await fetch("https://users.roblox.com/v1/usernames/users", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ usernames: [username], excludeBannedUsers: false })
+    });
+    if (!res.ok) {
+      console.error(`HTTP ${res.status}`)
+      return "#HTTPERROR"
+    };
+    var data = await res.json()
+    if (data.length === 0) return "#USERNOTFOUND";
+    return data[0];
+}
+
 
 var responseBody = []
 
@@ -185,7 +215,7 @@ app.post("/webhook", async(request, response) => {  //since I'm planning this to
                     ServerToSendTo: "719673864111652936",
                     ChannelToSendTo: "908390430863929404",
                     Embed: newEmbed,
-                    Text: "<@&941348501151961108>",
+                    Text: "<@&941348501151961108> " + reportedusername + " (" + reporteduserid + ")",
                   },
                 }
               ]
@@ -294,6 +324,7 @@ app.post("/webhook", async(request, response) => {  //since I'm planning this to
                               Payload: {
                                   ServerToSendTo: "719673864111652936",
                                   ChannelToSendTo: "1291040473242271886",
+                                  Text:  reportedusername + " (" + reporteduserid + ")",
                                   Embed: newEmbed
                               },
                           }
@@ -528,6 +559,18 @@ async function openCloudFunction(requestType, requestPath, requestBody, callback
 async function performOpenCloudViewBan(userId, gameName, callbackFunction) {
   var requestPath = null
 
+  if (!/^\d+$/.test(userId)) {
+    userId = await getRobloxUserId(userId)
+    if (userId == "#USERNOTFOUND") {
+      //user not found, quit
+      callbackFunction(false, 0, "Could not find the user with the provided Username.")
+      return
+    } else if (userId == "#HTTPERROR") { 
+      callbackFunction(false, 0, "HTTP error occured while fetching userId of the provided Username. Please use UserIDs instead for now.")
+      return
+    }
+  }
+
   switch(gameName) {
     case "phoenix":
       requestPath = "/cloud/v2/universes/1826628366/user-restrictions/" + userId
@@ -555,6 +598,15 @@ async function performOpenCloudBan(userId, gameName, banType, banReason, issuedB
   var requestPath = null
   var duration = null
   
+  if (!/^\d+$/.test(userId)) {
+    userId = await getRobloxUserId(userId)
+    if (userId == "#USERNOTFOUND") {
+      //user not found, quit
+      callbackFunction(false, 0, "Could not find the user with the provided Username.")
+      return
+    }
+  }
+
   switch(gameName) {
     case "phoenix":
       requestPath = "/cloud/v2/universes/1826628366/user-restrictions/" + userId
@@ -618,11 +670,12 @@ async function handleSharedData(data) {
 
           await performOpenCloudBan(userId, gameName, banType, banReason, issuedBy, async(result, statusCode, errorMsg) => {
             //console.log(result, statusCode, errorMsg)
-
-            var timeend = Date.now()
             //console.log(timestart, timeend)
+            var timeend = Date.now()
+
             if (result) {
               //working
+              var userName = await getRobloxUsername(userId)
               var dataToSend = [
                 {
                   MessageTo: "discordbot.js",
@@ -637,7 +690,7 @@ async function handleSharedData(data) {
                       ["color"]: 0x600000,
                       ["fields"]: [
                         {name: ":warning: Open Cloud Ban - Issued by " + issuedBy, value: "- Ban reason: `" + banReason + "`"},
-                        {name: ":name_badge: Banned User", value: "**[" + userId + "](https://www.roblox.com/users/" + userId + "/profile)**", inline: true},
+                        {name: ":name_badge: Banned User", value: "**[" + userName + "](https://www.roblox.com/users/" + userId + "/profile)** (" + userId + ")", inline: true},
                         {name: ":pager: Duration", value: banType, inline: true},
                       ]
                     }
@@ -720,6 +773,7 @@ async function handleSharedData(data) {
               var embed = null
 
               //console.log(isBanned)
+              var userName = await getRobloxUsername(userId)
 
               if (isBanned == true) {
                 embed = {
@@ -728,7 +782,7 @@ async function handleSharedData(data) {
                   ["thumbnail"]: await getRobloxAvatarPic(userId, 150, "avatar-headshot"),
                   ["color"]: 0x600000,
                   ["fields"]: [
-                    {name: ":identification_card: User", value: "**[" + userId + "](https://www.roblox.com/users/" + userId + "/profile)**", inline: true},
+                    {name: ":identification_card: User", value: "**[" + userName + "](https://www.roblox.com/users/" + userId + "/profile)** (" + userId + ")", inline: true},
                     {name: ":name_badge: Currently banned?", value: isBanned, inline: true},
                     {name: ":clock3: Banned at:", value: "`" + startTime + "`", inline: true},
                     {name: ":clock3: Duration", value: duration, inline: true},
@@ -745,7 +799,7 @@ async function handleSharedData(data) {
                   ["thumbnail"]: await getRobloxAvatarPic(userId, 150, "avatar-headshot"),
                   ["color"]: 0x002060,
                   ["fields"]: [
-                    {name: ":identification_card: User", value: "**[" + userId + "](https://www.roblox.com/users/" + userId + "/profile)**", inline: true},
+                    {name: ":identification_card: User", value: "**[" + userName + "](https://www.roblox.com/users/" + userId + "/profile)** (" + userId + ")", inline: true},
                     {name: ":name_badge: Currently banned?", value: isBanned, inline: true},
                   ]
                 }
@@ -758,6 +812,7 @@ async function handleSharedData(data) {
                   Payload: {
                     ServerToSendTo: "719673864111652936",
                     ChannelToSendTo: originalChannelId,
+                    Text:  userName + " (" + userId + ")",
                     Embed: embed
                   },
                 }

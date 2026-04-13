@@ -202,7 +202,7 @@ async function messageHandler(message) {
             }
             
             if (args[1] == null | args[2] == null | args[3] == null) {
-                message.channel.send("Missing arguements! `[c!gameban <userId> <gameName> <banType> <banReason>]`")
+                message.channel.send("Missing arguements! `[c!gameban <userId/userName> <gameName> <banType> [banReason>]`")
                 return
             }
 
@@ -271,7 +271,7 @@ async function messageHandler(message) {
             }
                 
             if (args[1] == null) {
-                message.channel.send("Missing arguements! `c!viewban [userId] [gameName]`")
+                message.channel.send("Missing arguements! `c!viewban <userId/userName> <gameName>`")
                 return
             }
 
