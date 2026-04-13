@@ -70,7 +70,7 @@ function convertToString(value) {
 
 function embedMessage(details, preEmbed) {
     function performEmbedChanges(anEmbed) {
-        for (const [key, value] of Object.entries(details)) {
+        for (var [key, value] of Object.entries(details)) {
             //console.log(key, value)
             switch(key) {
                 case "title":
@@ -177,19 +177,19 @@ function embedMessage(details, preEmbed) {
 //}
 
 async function messageHandler(message) {
-    const member = message.member
-    const messageContent = message.content
+    var member = message.member
+    var messageContent = message.content
 
     var args = messageContent.trim().split(/ +/g);
-    const cmd = args[0].slice(botPrefix.length).toLowerCase();
+    var cmd = args[0].slice(botPrefix.length).toLowerCase();
 
     switch(cmd) {
         case "gameban":
             var allowedRoles = ["719857755036581908", "719857778675417098", "727939786815569981", "1282069297186865152", "1291525088159727737", "720057768459108425"]
-            //const allowedRoles = []
+            //var allowedRoles = []
             var allowed = false
             
-            for (const roleId of allowedRoles) {
+            for (var roleId of allowedRoles) {
                 if (member.roles.cache.has(roleId)) {
                     allowed = true
                     break
@@ -206,9 +206,9 @@ async function messageHandler(message) {
                 return
             }
 
-            const raw = args[3].toLowerCase();
-            const numbers = raw.match(/-?\d+(\.\d+)?/g);
-            const value = numbers ? parseFloat(numbers[0]) : 0;
+            var raw = args[3].toLowerCase();
+            var numbers = raw.match(/-?\d+(\.\d+)?/g);
+            var value = numbers ? parseFloat(numbers[0]) : 0;
 
             if (raw.includes("perm")) {
                 args[3] = "perm";
@@ -224,7 +224,7 @@ async function messageHandler(message) {
                     
             var banReason = ""
             var skip = 0
-            for (const word of args) {
+            for (var word of args) {
                 if (skip > 3) {
                     //console.log(word);
                     banReason = banReason + word + " "
@@ -256,9 +256,9 @@ async function messageHandler(message) {
 
         case "viewban":
             var allowedRoles = ["726746155970461769", "727940388765040650", "719857755036581908", "719857778675417098", "727939786815569981", "1282069297186865152", "1291525088159727737", "720057768459108425"]
-            //const allowedRoles = []
+            //var allowedRoles = []
             var allowed = false
-            for (const roleId of allowedRoles) {
+            for (var roleId of allowedRoles) {
                 if (member.roles.cache.has(roleId)) {
                     allowed = true
                     break

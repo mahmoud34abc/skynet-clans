@@ -52,12 +52,12 @@ async function getRobloxAvatarPic(userid, size, type) {
 
 async function pingWebsite(url) {
     try {
-      const start = Date.now();
+      var start = Date.now();
         await fetch(url, {
             method: 'HEAD',
             signal: AbortSignal.timeout(5000)
         });
-        const latency = Date.now() - start;
+        var latency = Date.now() - start;
         //console.log(`Status: ${res.status}, Latency: ${latency}ms`);
         return `${latency}ms`;
     } catch (err) {
@@ -70,36 +70,67 @@ async function pingWebsite(url) {
     }
 }
 
+var userIdCache = {}
+var userNameCache = {}
+
+function getUserType(userIdOrName) {
+  if (/^\d+$/.test(userIdOrName) == true) {
+    return "userId"
+  } else {
+    return "userName"
+  }
+}
+
 async function getRobloxUsername(userId) {
-    const res = await fetch("https://users.roblox.com/v1/users/" + userId);
+  if (userNameCache[userId]) {
+    return userNameCache[userId]
+  }
+
+    var res = await fetch("https://users.roblox.com/v1/users/" + userId);
     if (!res.ok) {
       console.error(`HTTP ${res.status}`)
+      //console.log(userId)
+      //console.log(res)
       return "N/A"
     };
     var data = await res.json()
     //console.log(data)
     //const { data } = await res.json();
+    userNameCache[userId] = data.name
+    userIdCache[data.name] = userId
 
     return data.name
 }
 
-async function getRobloxUserId(username) {
-    //if (!username || typeof username !== "string") return "#INVALIDINPUT";
+async function getRobloxUserId(userName) {
+  if (userIdCache[userName]) {
+    return userIdCache[userName]
+  }
 
-    const res = await fetch("https://users.roblox.com/v1/usernames/users", {
+    //console.log(userName)
+    var res = await fetch("https://users.roblox.com/v1/usernames/users", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ usernames: [username], excludeBannedUsers: false })
+        headers: {
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+            "User-Agent": "Mozilla/5.0"
+        },
+        body: JSON.stringify({ usernames: [userName], excludeBannedUsers: false })
     });
 
     if (!res.ok) {
-        console.error(`HTTP ${res.status}`, await res.text());
+        console.error(`HTTP ${res.status}`);
         return "#HTTPERROR";
     }
 
     var data = await res.json();
     //console.log(data)
-    if (!data || data.length === 0) return "#USERNOTFOUND";
+    //console.log(data)
+    if (!data || data.data.length === 0) return "#USERNOTFOUND";
+
+    userIdCache[userName] = data.data[0].id
+    userNameCache[data.data[0].id] = userName
+
     return data.data[0].id; // { id, name, displayName }
 }
 
@@ -107,7 +138,7 @@ async function getRobloxUserId(username) {
 var responseBody = []
 
 function makeResponse(bool,message,id,payload) {
-  const theResponse = {
+  var theResponse = {
     id,
     status: bool?200:400,
     responseStatus: bool?'OK':'BAD REQUEST',
@@ -129,13 +160,13 @@ app.post("/webhook", async(request, response) => {  //since I'm planning this to
                                                //will cause deactivation to their authkey
   
     
-  const body = request.body
-  const payload = body.payload //requests will be sent every 2 seconds, so they'll be in a dictionary called payload
-  for (const [, value] of Object.entries(payload)) {
+  var body = request.body
+  var payload = body.payload //requests will be sent every 2 seconds, so they'll be in a dictionary called payload
+  for (var [, value] of Object.entries(payload)) {
       //if (key == "requestType") {
       //    console.log(value)
       //}
-      const payload2 = value.payload
+      var payload2 = value.payload
       switch(value.requestType) {
         case "heartbeat":
           makeResponse(true, "",value.id, {})
@@ -162,17 +193,17 @@ app.post("/webhook", async(request, response) => {  //since I'm planning this to
               var gamekeyname
               var gameid
                         
-              for (const [key, value] of Object.entries(reportinguser)) {
+              for (var [key, value] of Object.entries(reportinguser)) {
                 reportingusername = value
                 reportinguserid = key
               }
                         
-              for (const [key, value] of Object.entries(reporteduser)) {
+              for (var [key, value] of Object.entries(reporteduser)) {
                 reportedusername = value
                 reporteduserid = key
               }
                     
-              for (const [key, value] of Object.entries(game)) {
+              for (var [key, value] of Object.entries(game)) {
                 gamename = value
                 gamekeyname = key
               }
@@ -239,12 +270,12 @@ app.post("/webhook", async(request, response) => {  //since I'm planning this to
                         var gamename
                         var gameid
                         
-                        for (const [, value] of Object.entries(game)) {
+                        for (var [, value] of Object.entries(game)) {
                           gamename = value
                         }
                         
                         var brokenLoop = -1
-                        for (const [key, value] of Object.entries(commands)) {
+                        for (var [key, value] of Object.entries(commands)) {
                         var tempText = text + "**[" +  value[0] + "]** " + value[1] + "\n"
                         if (tempText.length > 1024) {
                             brokenLoop = key
@@ -305,7 +336,7 @@ app.post("/webhook", async(request, response) => {  //since I'm planning this to
                         var gamename
                         var gameid
                         
-                        for (const [, value] of Object.entries(game)) {
+                        for (var [, value] of Object.entries(game)) {
                           gamename = value
                         }
 
@@ -353,12 +384,12 @@ app.post("/webhook", async(request, response) => {  //since I'm planning this to
                         var gameid
                         
                         
-                        for (const [key, value] of Object.entries(reporteduser)) {
+                        for (var [key, value] of Object.entries(reporteduser)) {
                         reportedusername = value
                         reporteduserid = key
                         }
                         
-                        for (const [key, value] of Object.entries(game)) {
+                        for (var [key, value] of Object.entries(game)) {
                         gamename = value
                         gamekeyname = key
                         }
@@ -564,8 +595,9 @@ async function openCloudFunction(requestType, requestPath, requestBody, callback
 async function performOpenCloudViewBan(userId, gameName, callbackFunction) {
   var requestPath = null
 
-  if (!/^\d+$/.test(userId)) {
+  if (getUserType(userId) == "userName") {
     userId = await getRobloxUserId(userId)
+
     if (userId == "#USERNOTFOUND") {
       //user not found, quit
       callbackFunction(false, 0, "Could not find the user with the provided Username.")
@@ -596,6 +628,7 @@ async function performOpenCloudViewBan(userId, gameName, callbackFunction) {
     return
   }
 
+  //console.log(requestPath)
   openCloudFunction("GET", requestPath, {}, callbackFunction)
 }
 
@@ -603,11 +636,15 @@ async function performOpenCloudBan(userId, gameName, banType, banReason, issuedB
   var requestPath = null
   var duration = null
   
-  if (!/^\d+$/.test(userId)) {
+  if (getUserType(userId) == "userName") {
     userId = await getRobloxUserId(userId)
+
     if (userId == "#USERNOTFOUND") {
       //user not found, quit
       callbackFunction(false, 0, "Could not find the user with the provided Username.")
+      return
+    } else if (userId == "#HTTPERROR") { 
+      callbackFunction(false, 0, "HTTP error occured while fetching userId of the provided Username. Please use UserIDs instead for now.")
       return
     }
   }
@@ -679,7 +716,34 @@ async function handleSharedData(data) {
 
             if (result) {
               //working
-              var userName = await getRobloxUsername(userId)
+              var userName
+
+              if (getUserType(userId) == "userName") {
+                userName = userId
+                userId = await getRobloxUserId(userId)
+
+                if (userId == "#USERNOTFOUND") {
+                  //user not found, quit
+                  callbackFunction(false, 0, "Could not find the user with the provided Username.")
+                  return
+                } else if (userId == "#HTTPERROR") { 
+                  callbackFunction(false, 0, "HTTP error occured while fetching userId of the provided Username. Please use UserIDs instead for now.")
+                  return
+                }
+              } else {
+                userName = await getRobloxUsername(userId)
+                if (userName == "#USERNOTFOUND") {
+                  userName = "N/A"
+                  //user not found, quit
+                  //callbackFunction(false, 0, "Could not find the user with the provided Username.")
+                  //return
+                } else if (userName == "#HTTPERROR") {
+                  userName = "N/A" 
+                  //callbackFunction(false, 0, "HTTP error occured while fetching userId of the provided Username. Please use UserIDs instead for now.")
+                  //return
+                }
+              }
+
               var timeend = Date.now()
               var dataToSend = [
                 {
@@ -779,7 +843,34 @@ async function handleSharedData(data) {
               var embed = null
 
               //console.log(isBanned)
-              var userName = await getRobloxUsername(userId)
+              var userName
+
+              if (getUserType(userId) == "userName") {
+                userName = userId
+                userId = await getRobloxUserId(userId)
+
+                if (userId == "#USERNOTFOUND") {
+                  //user not found, quit
+                  callbackFunction(false, 0, "Could not find the user with the provided Username.")
+                  return
+                } else if (userId == "#HTTPERROR") { 
+                  callbackFunction(false, 0, "HTTP error occured while fetching userId of the provided Username. Please use UserIDs instead for now.")
+                  return
+                }
+              } else {
+                userName = await getRobloxUsername(userId)
+                if (userName == "#USERNOTFOUND") {
+                  userName = "N/A"
+                  //user not found, quit
+                  //callbackFunction(false, 0, "Could not find the user with the provided Username.")
+                  //return
+                } else if (userName == "#HTTPERROR") {
+                  userName = "N/A" 
+                  //callbackFunction(false, 0, "HTTP error occured while fetching userId of the provided Username. Please use UserIDs instead for now.")
+                  //return
+                }
+              }
+
               var timeend = Date.now()
 
               if (isBanned == true) {
