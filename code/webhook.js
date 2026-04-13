@@ -434,7 +434,7 @@ app.post("/webhook", async(request, response) => {  //since I'm planning this to
                                   ServerToSendTo: "719673864111652936",
                                   ChannelToSendTo: "908390430863929404",
                                   Embed: newEmbed,
-                                  Text: "<@&941348501151961108>",
+                                  Text: "<@&941348501151961108>" + reportedusername + " (" + reporteduserid + ")",
                               },
                           }
                         ]
@@ -515,7 +515,8 @@ app.post("/skynetwebhook", async(request, response) => {
                 {name: ":pager: User ID", value: userid, inline: true},
                 {name: ":link: Profile Link", value: "[" + username + "](https://www.roblox.com/users/" + userid + "/profile)", inline: true}
               ]
-            }
+            },
+            Text: username + " (" + userid + ")"
           },
         },
       ]
@@ -762,7 +763,8 @@ async function handleSharedData(data) {
                         {name: ":name_badge: Banned User", value: "**[" + userName + "](https://www.roblox.com/users/" + userId + "/profile)** (" + userId + ")", inline: true},
                         {name: ":pager: Duration", value: banType, inline: true},
                       ]
-                    }
+                    },
+                    Text: userName + " (" + userId + ")"
                   },
                 },
                 {
