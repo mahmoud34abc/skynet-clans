@@ -1,12 +1,11 @@
 //webhook handling for roblox
-import { warn } from 'console';
-import { get } from 'http';
 import { createRequire } from 'module';
 
 const require = createRequire(import.meta.url);
 const https = require("https")
 const express = require("express");
 const bodyParser = require("body-parser");
+const querystring = require('querystring');
 const app = express();
 
 app.disable('x-powered-by'); //safety
@@ -27,42 +26,107 @@ var defaultFooter = "Skynet Clans • Version " + process.env.VERSION + " • Ho
 
 app.use(express.static("website/public")); //put anything in the public/ folder accessible (for website) (like css, js, etc.)
 
-async function getRobloxAvatarPic(userid, size, type) {
+const commonOpenCloudHeaders = {
+  'x-api-key': process.env.ROBLOXOPENCLOUD,
+  'Content-Type': 'application/json',
+}
+
+var commonWebRequestOptions = {
+  hostname: "apis.roblox.com",
+  port: 443,
+  path: "",
+  method: "GET",
+  headers: commonOpenCloudHeaders
+}
+
+async function webRequest(options, requestBodyString) {
   return new Promise((resolve) => {
-    https.get("https://thumbnails.roblox.com/v1/users/" + type + "?userIds=" + userid + "&size=" + size + "x" + size + "&format=Png&isCircular=false", res => {
-      let output = '';
-      var imageUrl1
+    if (requestBodyString) {
+      options.headers = {...options.headers, 'Content-Length': Buffer.byteLength(requestBodyString)}
+    }
+
+    var req = https.request(options, res => {
+      let data = '';
+
       res.setEncoding('utf8');
+
       res.on('data', chunk => {
-        output += chunk;
+        data += chunk;
       });
-      
+
       res.on('end', () => {
-        let data = JSON.parse(output);
-        if ((data !== undefined | data !== null) & data.data !== undefined) {
-          imageUrl1 = data.data[0].imageUrl
-          resolve(imageUrl1)
+
+        try {
+          // Try to parse as JSON, but fall back to raw data if it fails
+          data = data ? JSON.parse(data) : data;
+          //console.log('Response:', parsedData);
+        } catch (e) {
+          //console.log('Raw Response:', data);
+        }
+
+        if (res.statusCode == 200) {
+          //console.log(options.path, res.statusCode, data)
+          resolve({ success: true, statusCode: res.statusCode, data })
+          return
         } else {
-          resolve("https://media.discordapp.net/attachments/846381103349628938/1424126341112008754/image.png")
+          //console.log(parsedData)
+          console.warn(options.path, res.statusCode, data)
+          resolve({ success: false, statusCode: res.statusCode, data: data.code + "; " + data.message })
+          return
         }
       });
+    }).on('error', e => {
+        console.warn(options.path, e);
+        resolve({ success: false, statusCode: 0, data: e })
+        return
+    });
+    
+    //console.log(requestBodyString)
+    if (requestBodyString) {
+      req.write(requestBodyString);
+    }
+    req.end();
+  })
+}
+
+async function getRobloxAvatarPic(userid, size, type) {
+  return new Promise(async (resolve) => {
+    var queryString = querystring.stringify({
+      userIds: userid,
+      size: size + "x" + size,
+      format: "Png",
+      isCircular: false
     })
+
+    var options = {...commonWebRequestOptions}
+    options.hostname = "thumbnails.roblox.com"
+    options.path = "/v1/users/" + type + "?" + queryString
+
+    var {success, statusCode, data} = await webRequest(options, null)
+
+    if (success && statusCode == 200 && ((data !== undefined && data !== null) && data.data !== undefined)) {
+      var imageUrl1 = data.data[0].imageUrl
+      resolve(imageUrl1)
+    } else {
+      resolve("https://media.discordapp.net/attachments/846381103349628938/1424126341112008754/image.png")
+    }
   })
 }
 
 async function pingWebsite(url) {
     try {
+      var options = {...commonWebRequestOptions}
+      options.hostname = url
+      options.path = "/"
+      options.method = "HEAD"
+
       var start = Date.now();
-        await fetch(url, {
-            method: 'HEAD',
-            signal: AbortSignal.timeout(5000)
-        });
-        var latency = Date.now() - start;
-        //console.log(`Status: ${res.status}, Latency: ${latency}ms`);
-        return `${latency}ms`;
+      await webRequest(options, "")
+      var latency = Date.now() - start;
+
+      return `${latency}ms`;
     } catch (err) {
         if (err.name === 'TimeoutError') {
-            //console.error('Request timed out');
             return 'Timed out';
         }
         console.error(`Error pinging ${url}:`, err.message);
@@ -86,20 +150,21 @@ async function getRobloxUsername(userId) {
     return userNameCache[userId]
   }
 
-    var res = await fetch("https://users.roblox.com/v1/users/" + userId);
-    if (!res.ok) {
-      console.error(`HTTP ${res.status}`)
-      //console.log(userId)
-      //console.log(res)
-      return "N/A"
-    };
-    var data = await res.json()
-    //console.log(data)
-    //const { data } = await res.json();
-    userNameCache[userId] = data.name
-    userIdCache[data.name] = userId
+  var options = {...commonWebRequestOptions}
+  options.hostname = "users.roblox.com"
+  options.path = "/v1/users/" + userId
+  options.method = "GET"
 
-    return data.name
+  var {success, statusCode, data} = await webRequest(options, null)
+  if (!success || statusCode != 200) {
+    console.error(`HTTP ${statusCode}`)
+    return "N/A"
+  };
+
+  userNameCache[userId] = data.name
+  userIdCache[data.name] = userId
+
+  return data.name
 }
 
 async function getRobloxUserId(userName) {
@@ -107,31 +172,26 @@ async function getRobloxUserId(userName) {
     return userIdCache[userName]
   }
 
-    //console.log(userName)
-    var res = await fetch("https://users.roblox.com/v1/usernames/users", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            "Accept": "application/json",
-            "User-Agent": "Mozilla/5.0"
-        },
-        body: JSON.stringify({ usernames: [userName], excludeBannedUsers: false })
-    });
+  var responseBodyString = JSON.stringify({ usernames: [userName], excludeBannedUsers: false })
 
-    if (!res.ok) {
-        console.error(`HTTP ${res.status}`);
-        return "#HTTPERROR";
-    }
+  var options = {...commonWebRequestOptions}
+  options.hostname = "users.roblox.com"
+  options.path = "/v1/usernames/users"
+  options.method = "GET"
 
-    var data = await res.json();
-    //console.log(data)
-    //console.log(data)
-    if (!data || data.data.length === 0) return "#USERNOTFOUND";
+  var {success, statusCode, data} = await webRequest(options, responseBodyString)
 
-    userIdCache[userName] = data.data[0].id
-    userNameCache[data.data[0].id] = userName
+  if (!success) {
+      console.error(`HTTP ${statusCode}`);
+      return "#HTTPERROR";
+  }
 
-    return data.data[0].id; // { id, name, displayName }
+  if (!data || data.data.length === 0) return "#USERNOTFOUND";
+
+  userIdCache[userName] = data.data[0].id
+  userNameCache[data.data[0].id] = userName
+
+  return data.data[0].id; // { id, name, displayName }
 }
 
 
@@ -230,9 +290,9 @@ app.post("/webhook", async(request, response) => {  //since I'm planning this to
                 ["color"]: 0x990000,
                 ["description"]: "From: " + gamename,
                 ["fields"]: [
-                  {name: ":name_badge: Reported User", value: "**[" + reportedusername + "](https://www.roblox.com/users/" + reporteduserid + "/profile)**", inline: true},
+                  {name: ":name_badge: Reported User", value: "**[" + reportedusername + "](https://www.roblox.com/users/" + reporteduserid + "/profile)** (" + reporteduserid + ")", inline: true},
                   //{name: ":pencil: `group`", value: groupid, inline: true},
-                  {name: ":shield: Reporting User", value: "||[" + reportingusername + "](https://www.roblox.com/users/" + reportinguserid + "/profile)||", inline: true},
+                  {name: ":shield: Reporting User", value: "||[" + reportingusername + "](https://www.roblox.com/users/" + reportinguserid + "/profile) (" + reportinguserid + ") ||", inline: true},
                   {name: ":warning: Flagged by Ruben's system", value: isFlagged},
                   {name: ":pager: Report Reason", value: reportreason},
                   {name: ":triangular_flag_on_post: Suspicion Meter", value: "**" + suspicionpercent + "%**", inline: true},
@@ -347,7 +407,7 @@ app.post("/webhook", async(request, response) => {  //since I'm planning this to
                             ["color"]: 0x600080,
                             ["description"]: "From: " + gamename,
                             ["fields"]: [
-                                {name: ":name_badge: User", value: "**[" + username + "](https://www.roblox.com/users/" + userId + "/profile)**"},
+                                {name: ":name_badge: User", value: "**[" + username + "](https://www.roblox.com/users/" + userId + "/profile)** (" + userId + ")"},
                                 {name: ":pager: Case", value: "`" + caseNum + "`", inline: true},
                                 {name: ":notepad_spiral: Reason", value: reason, inline: true},
                             ]
@@ -360,7 +420,7 @@ app.post("/webhook", async(request, response) => {  //since I'm planning this to
                               Payload: {
                                   ServerToSendTo: "719673864111652936",
                                   ChannelToSendTo: "1291040473242271886",
-                                  Text:  reportedusername + " (" + reporteduserid + ")",
+                                  Text:  username + " (" + userId + ")",
                                   Embed: newEmbed
                               },
                           }
@@ -415,7 +475,7 @@ app.post("/webhook", async(request, response) => {  //since I'm planning this to
                             ["color"]: 0xFE9900,
                             ["description"]: "From: " + gamename,
                             ["fields"]: [
-                                 {name: ":name_badge: Suspicious User", value: "**[" + reportedusername + "](https://www.roblox.com/users/" + reporteduserid + "/profile)**", inline: true},
+                                 {name: ":name_badge: Suspicious User", value: "**[" + reportedusername + "](https://www.roblox.com/users/" + reporteduserid + "/profile)** (" + reporteduserid + ")", inline: true},
                                 //{name: ":pencil: `group`", value: groupid, inline: true},
                                 {name: ":pager: Suspicion Details", value: suspiciondetails, inline: false},
                                 //{name: ":globe_with_meridians: Translation", value: translatedText},
@@ -538,59 +598,17 @@ var listener = app.listen(process.env.PORT, () => {
 });
 
 async function openCloudFunction(requestType, requestPath, requestBody, callbackFunction) {
+  console.log(requestBody)
   var requestBodyString = JSON.stringify(requestBody); // Stringify here
 
-  var options = {
-    hostname: 'apis.roblox.com',
-    port: 443,
-    path: requestPath,
-    method: requestType,
-    headers: {
-      'x-api-key': process.env.ROBLOXOPENCLOUD,
-      'Content-Type': 'application/json',
-      'Content-Length': Buffer.byteLength(requestBodyString)
-    }
-  }
+  var options = {...commonWebRequestOptions}
+  options.hostname = "apis.roblox.com"
+  options.path = requestPath
+  options.method = requestType
 
-  var req = https.request(options, res => {
-    let data = '';
-
-    //console.log('Status: ', res.statusCode);
-    //console.log('Headers: ', JSON.stringify(res.headers));
-
-    res.setEncoding('utf8');
-
-    res.on('data', chunk => {
-      data += chunk;
-    });
-
-    res.on('end', () => {
-
-      try {
-        // Try to parse as JSON, but fall back to raw data if it fails
-        data = data ? JSON.parse(data) : data;
-        //console.log('Response:', parsedData);
-      } catch (e) {
-        //console.log('Raw Response:', data);
-      }
-
-      if (res.statusCode == 200) {
-        callbackFunction(true, res.statusCode, data)
-        return
-      } else {
-        //console.log(parsedData)
-        callbackFunction(false, res.statusCode, data.code + "; " + data.message)
-      return
-      }
-    });
-  }).on('error', e => {
-      console.error(e);
-      callbackFunction(false, 0, e)
-      return
-  });
-  
-  req.write(requestBodyString);
-  req.end();
+  var {success, statusCode, data} = await webRequest(options, requestBodyString)
+  callbackFunction(success, statusCode, data)
+  return
 }
 
 async function performOpenCloudViewBan(userId, gameName, callbackFunction) {
@@ -711,8 +729,8 @@ async function handleSharedData(data) {
           var issuedBy = data.Payload.Arguements[4]
           var originalChannelId = data.Payload.OriginalChannelId
 
-          await performOpenCloudBan(userId, gameName, banType, banReason, issuedBy, async(result, statusCode, errorMsg) => {
-            //console.log(result, statusCode, errorMsg)
+          performOpenCloudBan(userId, gameName, banType, banReason, issuedBy, async(result, statusCode, data) => {
+            //console.log(result, statusCode, data)
             //console.log(timestart, timeend)
 
             if (result) {
@@ -796,7 +814,7 @@ async function handleSharedData(data) {
                       ["color"]: 0x600000,
                       ["fields"]: [
                         {name: ":pager: Status Code:", value: statusCode},
-                        {name: ":bangbang: Error Message:", value: "`" + errorMsg + "`"}
+                        {name: ":bangbang: Error Message:", value: "`" + data + "`"}
                       ]
                     }
                   },
@@ -813,9 +831,9 @@ async function handleSharedData(data) {
           var gameName = data.Payload.Arguements[1]
           var originalChannelId = data.Payload.OriginalChannelId
 
-          await performOpenCloudViewBan(userId, gameName, async(result, statusCode, errorMsg) => {
-            //console.log(errorMsg)
-            //console.log(result, statusCode, errorMsg)
+          performOpenCloudViewBan(userId, gameName, async(result, statusCode, data) => {
+            //console.log(data)
+            //console.log(result, statusCode, data)
             var isBanned
             var privateBanReason
             var publicBanReason
@@ -824,24 +842,25 @@ async function handleSharedData(data) {
             var startTime
             var duration
 
-            if (!(errorMsg.gameJoinRestriction == undefined || errorMsg.gameJoinRestriction == null)) {
-              isBanned = errorMsg.gameJoinRestriction.active
-              privateBanReason = errorMsg.gameJoinRestriction.privateReason
-              publicBanReason = errorMsg.gameJoinRestriction.displayReason
-              areAltAccountsExcluded = errorMsg.gameJoinRestriction.excludeAltAccounts
-              isBanInherited = errorMsg.gameJoinRestriction.inherited
-              startTime = errorMsg.gameJoinRestriction.startTime
-              duration = errorMsg.gameJoinRestriction.duration
-            } else {
-              isBanned = false
-            }
-
-            if (duration == undefined || duration == null) {
-              duration = "Permanent"
-            }
             //console.log(timestart, timeend)
             if (result) {
               //working
+              if (!(data.gameJoinRestriction == undefined || data.gameJoinRestriction == null)) {
+                isBanned = data.gameJoinRestriction.active
+                privateBanReason = data.gameJoinRestriction.privateReason
+                publicBanReason = data.gameJoinRestriction.displayReason
+                areAltAccountsExcluded = data.gameJoinRestriction.excludeAltAccounts
+                isBanInherited = data.gameJoinRestriction.inherited
+                startTime = data.gameJoinRestriction.startTime
+                duration = data.gameJoinRestriction.duration
+              } else {
+                isBanned = false
+              }
+
+              if (duration == undefined || duration == null) {
+                duration = "Permanent"
+              }
+
               var embed = null
 
               //console.log(isBanned)
@@ -935,7 +954,7 @@ async function handleSharedData(data) {
                       ["color"]: 0x600000,
                       ["fields"]: [
                         {name: ":pager: Status Code:", value: statusCode},
-                        {name: ":bangbang: Error Message:", value: "`" + errorMsg + "`"}
+                        {name: ":bangbang: Error Message:", value: "`" + data + "`"}
                       ]
                     }
                   },
@@ -966,7 +985,7 @@ async function handleSharedData(data) {
         break;
 
         case "RobloxAPIPing":
-          var robloxPing = await pingWebsite("https://apis.roblox.com/")
+          var robloxPing = await pingWebsite("apis.roblox.com")
 
           var dataToSend = [
             {
