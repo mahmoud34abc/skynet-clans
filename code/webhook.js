@@ -598,8 +598,11 @@ var listener = app.listen(process.env.PORT, () => {
 });
 
 async function openCloudFunction(requestType, requestPath, requestBody, callbackFunction) {
-  console.log(requestBody)
-  var requestBodyString = JSON.stringify(requestBody); // Stringify here
+  //console.log(requestBody)
+  var requestBodyString = null
+  if (requestBody) {
+    requestBodyString = JSON.stringify(requestBody); // Stringify here
+  }
 
   var options = {...commonWebRequestOptions}
   options.hostname = "apis.roblox.com"
@@ -608,7 +611,6 @@ async function openCloudFunction(requestType, requestPath, requestBody, callback
 
   var {success, statusCode, data} = await webRequest(options, requestBodyString)
   callbackFunction(success, statusCode, data)
-  return
 }
 
 async function performOpenCloudViewBan(userId, gameName, callbackFunction) {
@@ -648,7 +650,7 @@ async function performOpenCloudViewBan(userId, gameName, callbackFunction) {
   }
 
   //console.log(requestPath)
-  openCloudFunction("GET", requestPath, {}, callbackFunction)
+  openCloudFunction("GET", requestPath, null, callbackFunction)
 }
 
 async function performOpenCloudBan(userId, gameName, banType, banReason, issuedBy, callbackFunction) {
