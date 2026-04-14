@@ -177,7 +177,7 @@ async function getRobloxUserId(userName) {
   var options = {...commonWebRequestOptions}
   options.hostname = "users.roblox.com"
   options.path = "/v1/usernames/users"
-  options.method = "GET"
+  options.method = "POST"
 
   var {success, statusCode, data} = await webRequest(options, responseBodyString)
 
