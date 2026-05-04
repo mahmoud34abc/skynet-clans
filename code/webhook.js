@@ -89,7 +89,24 @@ async function webRequest(options, requestBodyString) {
   })
 }
 
+var robloxAvatarPicCache = {}
+var robloxAvatarPicCacheTimeTable = {}
+var robloxAvatarPicCacheTimeout = 1000 * 60 * 60 * 0.5
+var userIdCache = {}
+var userNameCache = {}
+
 async function getRobloxAvatarPic(userid, size, type) {
+  var cacheName = toString(userid) + toString(size) + toString(type)
+
+  if (robloxAvatarPicCacheTimeTable[cacheName] && Date.now() - robloxAvatarPicCacheTimeTable[cacheName] > robloxAvatarPicCacheTimeout) {
+    delete robloxAvatarPicCache[cacheName];
+    delete robloxAvatarPicCacheTimeTable[cacheName];
+  }
+
+  if (robloxAvatarPicCache[cacheName]) {
+    return robloxAvatarPicCache[cacheName]
+  }
+
   return new Promise(async (resolve) => {
     var queryString = querystring.stringify({
       userIds: userid,
@@ -106,6 +123,8 @@ async function getRobloxAvatarPic(userid, size, type) {
 
     if (success && statusCode == 200 && ((data !== undefined && data !== null) && data.data !== undefined)) {
       var imageUrl1 = data.data[0].imageUrl
+      robloxAvatarPicCache[cacheName] = imageUrl1
+      robloxAvatarPicCacheTimeTable[cacheName] = Date.now()
       resolve(imageUrl1)
     } else {
       resolve("https://media.discordapp.net/attachments/846381103349628938/1424126341112008754/image.png")
@@ -133,9 +152,6 @@ async function pingWebsite(url) {
         return 'Error';
     }
 }
-
-var userIdCache = {}
-var userNameCache = {}
 
 function getUserType(userIdOrName) {
   if (/^\d+$/.test(userIdOrName) == true) {
