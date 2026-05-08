@@ -145,7 +145,7 @@ async function pingWebsite(url) {
 
       if (success == true) {
         return { message: `${latency}ms`, success: true };
-      } else {
+      } else if (statusCode == 0) {
         return { message: `Failed; ${statusCode} : ${data.code}`, success: false };
       }
 
