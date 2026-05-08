@@ -1,4 +1,5 @@
 //new discord bot stuff handler
+import { channel } from 'diagnostics_channel';
 import { createRequire } from 'module';
 const require = createRequire(import.meta.url);
 //const fs = require('node:fs');
@@ -9,6 +10,7 @@ const botPrefix = "c!"
 
 var botOnline = false
 var brokenTyping = false
+var brokenTypingInterval = null
 
 function getClient() {
   if (isUpdatedDiscord) {
@@ -173,15 +175,35 @@ function embedMessage(details, preEmbed) {
     return embed
 }
 
-async function sendMessageTyping(Channel) {
+async function sendMessageTyping(Channel, isTest) {
     return new Promise(async (resolve) => {
-        if (!brokenTyping) {
+        if ((!brokenTyping) || isTest) {
             var sent = false
 
             setTimeout(() =>{
                 if (!sent) {
-                    brokenTyping = true
-                    Channel.send("-# *Working on it...*")
+                    if (!brokenTyping) {
+                        brokenTyping = true
+                        console.warn("Discord typing indicator is not responding, opting to using messages instead..")
+
+                        brokenTypingInterval = setInterval(async () => {
+                            if (!brokenTyping) { return }
+
+                            var worked = await sendMessageTyping(Channel, true)
+                            if (worked) {
+                                console.warn("Discord typing indicator is now responding, returning to message typing indicators..")
+                                brokenTyping = false
+                                clearInterval(brokenTypingInterval)
+                                brokenTypingInterval = null
+                            }
+                        }, 1000 * 60 * 60);
+                    }
+
+                    if (isTest) {
+                        resolve(false)
+                    } else {
+                        Channel.send("-# *Working on it...*")
+                    }
                 }
                 resolve(false)
             }, 5000);
