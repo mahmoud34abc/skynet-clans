@@ -6,8 +6,9 @@ const { Client, GatewayIntentBits, EmbedBuilder, MessageEmbed } = require('disco
 
 const isUpdatedDiscord = process.env.UPDATEDDISCORD == "true";
 const botPrefix = "c!"
-var botOnline = false
 
+var botOnline = false
+var brokenTyping = false
 
 function getClient() {
   if (isUpdatedDiscord) {
@@ -172,6 +173,29 @@ function embedMessage(details, preEmbed) {
     return embed
 }
 
+async function sendMessageTyping(Channel) {
+    return new Promise(async (resolve) => {
+        if (!brokenTyping) {
+            var sent = false
+
+            setTimeout(() =>{
+                if (!sent) {
+                    brokenTyping = true
+                    Channel.send("-# *Working on it...*")
+                }
+                resolve(false)
+            }, 5000);
+
+            await Channel.sendTyping();
+            sent = true
+            resolve(true)
+        } else {
+            await Channel.send("-# *Working on it...*")
+            resolve(true)
+        }
+    });
+}
+
 //var SlashCommands = {
 
 //}
@@ -251,7 +275,7 @@ async function messageHandler(message) {
 
             //performOpenCloudBan(args[1], "phoenix", args[3], banReason, issuedBy)
             //await message.channel.send(":clock3: Sending to ROBLOX...")
-            message.channel.sendTyping();
+            await sendMessageTyping(message.channel);
         break;
 
         case "viewban":
@@ -288,7 +312,7 @@ async function messageHandler(message) {
 
             //performOpenCloudBan(args[1], "phoenix", args[3], banReason, issuedBy)
             //await message.channel.send(":clock3: Fetching from ROBLOX...")
-            message.channel.sendTyping()
+            sendMessageTyping(message.channel);
         break;
 
         case "robloxcommand":
@@ -333,7 +357,7 @@ async function messageHandler(message) {
             var messageSendingTime = Date.now()
             var messageReceivedTime = null
             //var orgMsg = await message.channel.send({ content: ":ping_pong: Ping.."})
-            await message.channel.sendTyping();
+            var validPing = await sendMessageTyping(message.channel);
             messageReceivedTime = Date.now();
             
             var dataToSend = [{
@@ -355,8 +379,26 @@ async function messageHandler(message) {
             shareData(dataToSend)
             var response = await WaitForMessage("RobloxAPIPong")
             var robloxPing = response.Payload.Ping
+            //console.log("got roblox api ping")
 
-            message.channel.send({ content: ":ping_pong: Ping.. Pong!\n\n:globe_with_meridians: Discord Ping: `" + (messageReceivedTime - messageSendingTime) + "ms`\n:video_game: Roblox API Ping: `" + (robloxPing) + "`\n:gear: Framework Ping: `" + (frameworkReceivedTime - frameworkSendingTime) + "ms`\n-# Hosting on: " + process.env.HOSTING })
+            var DiscordPingLine
+            var RobloxPingLine
+            var FrameworkPingLine
+
+            if (validPing) {
+                DiscordPingLine = ":globe_with_meridians: Discord Ping: `" + (messageReceivedTime - messageSendingTime) + "ms`"
+            } else {
+                DiscordPingLine = ":x: **Discord Ping:** `Failed; Timeout after 5s`"
+            }
+
+            if (response.Payload.Success) {
+                RobloxPingLine = ":video_game: Roblox API Ping: `" + robloxPing + "`"
+            } else {
+                RobloxPingLine = ":x: **Roblox API Ping:** `" + robloxPing + "`"
+            }
+
+            FrameworkPingLine = ":gear: Framework Ping: `" + (frameworkReceivedTime - frameworkSendingTime) + "ms`"
+            message.channel.send({ content: ":ping_pong: Ping.. Pong!\n\n" + DiscordPingLine + "\n" + RobloxPingLine + "\n" + FrameworkPingLine + "\n-# Hosting on: " + process.env.HOSTING })
         break;
         }
     }

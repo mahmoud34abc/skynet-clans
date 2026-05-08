@@ -140,16 +140,22 @@ async function pingWebsite(url) {
       options.method = "HEAD"
 
       var start = Date.now();
-      await webRequest(options, "")
+      var {success, statusCode, data} = await webRequest(options, "")
       var latency = Date.now() - start;
 
-      return `${latency}ms`;
+      if (success == true) {
+        return { message: `${latency}ms`, success: true };
+      } else {
+        return { message: `Failed; ${statusCode} : ${data.code}`, success: false };
+      }
+
+      return { message: `${latency}ms`, success: true };
     } catch (err) {
         if (err.name === 'TimeoutError') {
-            return 'Timed out';
+            return { message: 'Timed out', success: false };
         }
         console.error(`Error pinging ${url}:`, err.message);
-        return 'Error';
+        return { message: 'Error', success: false };
     }
 }
 
@@ -1003,13 +1009,14 @@ async function handleSharedData(data) {
         break;
 
         case "RobloxAPIPing":
-          var robloxPing = await pingWebsite("apis.roblox.com")
+          var {message, success} = await pingWebsite("apis.roblox.com")
+          //console.log(robloxPing, isSuccess)
 
           var dataToSend = [
             {
               MessageTo: "discordbot.js",
               Type: "RobloxAPIPong",
-              Payload: {Ping: robloxPing}
+              Payload: {Success: success, Ping: message}
             }
           ]
 
