@@ -204,8 +204,8 @@ async function sendMessageTyping(Channel, isTest) {
                     } else {
                         Channel.send("-# *Working on it...*")
                     }
+                    resolve(false)
                 }
-                resolve(false)
             }, 5000);
 
             await Channel.sendTyping();
