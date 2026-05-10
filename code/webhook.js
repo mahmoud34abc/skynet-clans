@@ -96,7 +96,8 @@ var userIdCache = {}
 var userNameCache = {}
 
 async function getRobloxAvatarPic(userid, size, type) {
-  var cacheName = toString(userid) + toString(size) + toString(type)
+  var cacheName = userid.toString() + type + size.toString()
+  //console.log(cacheName)
 
   if (robloxAvatarPicCacheTimeTable[cacheName] && Date.now() - robloxAvatarPicCacheTimeTable[cacheName] > robloxAvatarPicCacheTimeout) {
     delete robloxAvatarPicCache[cacheName];
