@@ -699,7 +699,7 @@ app.post("/dlswebhook", async(request, response) => {
                   Type: "Embed",
                   Payload: {
                     ServerToSendTo: "1278787772122927226",
-                    ChannelToSendTo: "1515770408584872026",
+                    ChannelToSendTo: "1307624332800819261",
                     Embed: newEmbed,
                     Text: "" + reportedusername + " (" + reporteduserid + ")",
                   },
