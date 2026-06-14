@@ -639,6 +639,7 @@ app.post("/dlswebhook", async(request, response) => {
               var reportreason = modcallpayload.reportreason //the reason for reporting
               var isFlagged = modcallpayload.isFlagged
               var game = modcallpayload.game //used to indicate the game
+              var placeid = modcallpayload.placeid
               var jobid = modcallpayload.jobid
               var suspicionpercent = modcallpayload.suspicionpercent
               //var reportdetails = modcallpayload.reportdetails //which mod joined
@@ -686,8 +687,8 @@ app.post("/dlswebhook", async(request, response) => {
                   {name: ":pager: Report Reason", value: reportreason},
                   //{name: ":triangular_flag_on_post: Suspicion Meter", value: "**" + suspicionpercent + "%**", inline: true},
                   //{name: ":globe_with_meridians: Translation", value: translatedText},
-                  {name: ":link: Join Link 1", value: "[Launch & autojoin (1)](https://www.roblox.com/games/start?placeId=" + gameid + '&launchData={"ReportJobId":"' + jobid + '"})', inline: true},
-                  {name: ":link: Join Link 2", value: "[Launch & autojoin (2)](https://www.roblox.com/games/5223287266/MZRPG?serverJobId=" + jobid + ")", inline: true},
+                  {name: ":link: Join Link 1", value: "[Launch & autojoin (1)](https://www.roblox.com/games/start?placeId=" + placeid + '&launchData={"ReportJobId":"' + jobid + '"})', inline: true},
+                  {name: ":link: Join Link 2", value: "[Launch & autojoin (2)](https://www.roblox.com/games/" + placeid + "/MZRPG?serverJobId=" + jobid + ")", inline: true},
                   {name: ":postbox: Server's JobId", value: "`" + jobid + "`"}
                 ]
               }
