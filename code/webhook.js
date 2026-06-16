@@ -764,8 +764,8 @@ app.post("/dlswebhook", async(request, response) => {
                               MessageTo: "discordbot.js",
                               Type: "Embed",
                               Payload: {
-                                  ServerToSendTo: "719673864111652936",
-                                  ChannelToSendTo: "1291314421511094272",
+                                  ServerToSendTo: "1278787772122927226",
+                                  ChannelToSendTo: "1516374354299195492",
                                   Embed: newEmbed
                               },
                           }
