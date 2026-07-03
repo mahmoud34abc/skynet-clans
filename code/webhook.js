@@ -220,24 +220,7 @@ async function getRobloxUserId(userName) {
 }
 
 
-var responseBody = []
 
-function makeResponse(bool,message,id,payload) {
-  var theResponse = {
-    id,
-    status: bool?200:400,
-    responseStatus: bool?'OK':'BAD REQUEST',
-    message,
-    payload,
-  }
-
-  var arraylength = responseBody.length
-  var newResponse = {...theResponse}
-  newResponse.message = message
-  newResponse.id = id
-  newResponse.payload = {...payload}
-  responseBody[arraylength + 1] = newResponse
-}
 
 async function openCloudFunction(requestType, requestPath, requestBody, callbackFunction) {
   //console.log(requestBody)
