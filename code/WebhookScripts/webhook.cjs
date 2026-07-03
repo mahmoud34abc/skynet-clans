@@ -2,319 +2,319 @@
 var shared
 
 function init(sharedTable) {
-    shared = sharedTable
+  shared = sharedTable
 }
 
 var defaultFooter = "Skynet Clans • Version " + process.env.VERSION + " • Hosting on: " + process.env.HOSTING
 
 var responseBody = []
 
-function makeResponse(bool,message,id,payload) {
+function makeResponse(bool, message, id, payload) {
   var theResponse = {
     id,
-    status: bool?200:400,
-    responseStatus: bool?'OK':'BAD REQUEST',
+    status: bool ? 200 : 400,
+    responseStatus: bool ? 'OK' : 'BAD REQUEST',
     message,
     payload,
   }
 
   var arraylength = responseBody.length
-  var newResponse = {...theResponse}
+  var newResponse = { ...theResponse }
   newResponse.message = message
   newResponse.id = id
-  newResponse.payload = {...payload}
+  newResponse.payload = { ...payload }
   responseBody[arraylength + 1] = newResponse
 }
 
 
 async function webhook(body, response) {
-    var payload = body.payload //requests will be sent every 2 seconds, so they'll be in a dictionary called payload
-      for (var [, value] of Object.entries(payload)) {
-          //if (key == "requestType") {
-          //    console.log(value)
-          //}
-          var payload2 = value.payload
-          switch(value.requestType) {
-            case "heartbeat":
-              makeResponse(true, "",value.id, {})
-            break;
-            case "moderation":
-              var requesttype = payload2.requestType
-              switch(requesttype) {
-                case "modcall":
-                  //console.log(payload)       
-                  var modcallpayload = payload2.payload
-                  var reporteduser = modcallpayload.reporteduser //the user that as reported
-                  var reportinguser = modcallpayload.reportinguser //the user that reported
-                  var reportreason = modcallpayload.reportreason //the reason for reporting
-                  var isFlagged = modcallpayload.isFlagged
-                  var game = modcallpayload.game //used to indicate the game
-                  var jobid = modcallpayload.jobid
-                  var suspicionpercent = modcallpayload.suspicionpercent
-                  //var reportdetails = modcallpayload.reportdetails //which mod joined
-                  var reportingusername
-                  var reportinguserid
-                  var reportedusername
-                  var reporteduserid
-                  var gamename
-                  var gamekeyname
-                  var gameid
-                            
-                  for (var [key, value] of Object.entries(reportinguser)) {
-                    reportingusername = value
-                    reportinguserid = key
-                  }
-                            
-                  for (var [key, value] of Object.entries(reporteduser)) {
-                    reportedusername = value
-                    reporteduserid = key
-                  }
-                        
-                  for (var [key, value] of Object.entries(game)) {
-                    gamename = value
-                    gamekeyname = key
-                  }
-                  
-                  switch(gamekeyname) {
-                    case "ACSGroundsV1":
-                      gameid = "5223287266"
-                    break;
-    
-                    case "ACSTestingPlace":
-                      gameid = "6262966584"
-                    break;
-    
-                    case "ACSJungle": 
-                      gameid = "7120086775"
-                    break;
-                  }
-    
-                  var newEmbed = {
-                    ["title"]: ":loudspeaker: Modcall",
-                    ["footer"]: defaultFooter,
-                    ["image"]: await shared.getRobloxAvatarPic(reporteduserid, 420, "avatar"),
-                    ["thumbnail"]: await shared.getRobloxAvatarPic(reportinguserid, 150, "avatar-headshot"),
-                    ["color"]: 0x990000,
-                    ["description"]: "From: " + gamename,
-                    ["fields"]: [
-                      {name: ":name_badge: Reported User", value: "**[" + reportedusername + "](https://www.roblox.com/users/" + reporteduserid + "/profile)** (" + reporteduserid + ")", inline: true},
-                      //{name: ":pencil: `group`", value: groupid, inline: true},
-                      {name: ":shield: Reporting User", value: "||[" + reportingusername + "](https://www.roblox.com/users/" + reportinguserid + "/profile) (" + reportinguserid + ") ||", inline: true},
-                      {name: ":warning: EASI / ~~TASE~~ Flagged", value: isFlagged},
-                      {name: ":pager: Report Reason", value: reportreason},
-                      {name: ":triangular_flag_on_post: Suspicion Meter", value: "**" + suspicionpercent + "%**", inline: true},
-                      //{name: ":globe_with_meridians: Translation", value: translatedText},
-                      {name: ":link: Join Link 1", value: "[Launch & autojoin (1)](https://www.roblox.com/games/start?placeId=" + gameid + '&launchData={"ReportJobId":"' + jobid + '"})', inline: true},
-                      {name: ":link: Join Link 2", value: "[Launch & autojoin (2)](https://www.roblox.com/games/5223287266/ACS-Phoenix-Grounds?serverJobId=" + jobid + ")", inline: true},
-                      {name: ":postbox: Server's JobId", value: "`" + jobid + "`"}
-                    ]
-                  }
-                            
-                  var dataToSend = [
-                      {
-                      MessageTo: "discordbot.js",
-                      Type: "Embed",
-                      Payload: {
-                        ServerToSendTo: "719673864111652936",
-                        ChannelToSendTo: "908390430863929404",
-                        Embed: newEmbed,
-                        Text: "<@&941348501151961108> " + reportedusername + " (" + reporteduserid + ")",
-                      },
-                    }
-                  ]
-    
-                  shared.shareData(dataToSend)
-                break;
-                        case "logging":
-                            var timestart = Date.now()
-                            var modcallpayload = payload2.payload
-                            var game = modcallpayload.game //used to indicate the game
-                            var commands = modcallpayload.commands
-                            var jobid = modcallpayload.jobid
-                            //var reportdetails = modcallpayload.reportdetails //which mod joined
-                            
-                            var text = ""
-                            var gamename
-                            var gameid
-                            
-                            for (var [, value] of Object.entries(game)) {
-                              gamename = value
-                            }
-                            
-                            var brokenLoop = -1
-                            for (var [key, value] of Object.entries(commands)) {
-                            var tempText = text + "**[" +  value[0] + "]** " + value[1] + "\n"
-                            if (tempText.length > 1024) {
-                                brokenLoop = key
-                                break;
-                            } else {
-                                text = tempText
-                            }
-                            }
-                            
-                            //if (brokenLoop != -1) {
-                            
-                            //}
-                            
-                            
-                            var newEmbed = {
-                                ["title"]: ":minidisc: Logs",
-                                ["footer"]: defaultFooter,
-                                ["color"]: 0x006080,
-                                ["description"]: "From: " + gamename,
-                                ["fields"]: [
-                                    {name: ":floppy_disk: Commands", value: text},
-                                    {name: ":postbox: Server's JobId", value: "`" + jobid + "`"},
-                                ]
-                            }
-    
-                            if (brokenLoop != -1) {
-                                newEmbed.fields = [
-                                    {name: ":floppy_disk: Commands", value: text},
-                                    {name: ":postbox: Server's JobId", value: "`" + jobid + "`"},
-                                    {name: ":warning: Warning", value: "Not enough embed space for entire command list."}
-                                ]
-                            }
-    
-                            var dataToSend = [
-                                {
-                                  MessageTo: "discordbot.js",
-                                  Type: "Embed",
-                                  Payload: {
-                                      ServerToSendTo: "719673864111652936",
-                                      ChannelToSendTo: "1291314421511094272",
-                                      Embed: newEmbed
-                                  },
-                              }
-                            ]
-    
-                            shared.shareData(dataToSend)
-                        break;
-                        case "anticheatlogging":
-                            var timestart = Date.now()
-                            var modcallpayload = payload2.payload
-                            var game = modcallpayload.game //used to indicate the game
-                            var userId = modcallpayload.userId
-                            var username = modcallpayload.username
-                            var caseNum = modcallpayload.case
-                            var reason = modcallpayload.reason
-                            //var reportdetails = modcallpayload.reportdetails //which mod joined
-                            
-                            var gamename
-                            var gameid
-                            
-                            for (var [, value] of Object.entries(game)) {
-                              gamename = value
-                            }
-    
-                            var newEmbed = {
-                                ["title"]: ":hammer: Anticheat Ban",
-                                ["thumbnail"]: await shared.getRobloxAvatarPic(userId, 150, "avatar-headshot"),
-                                ["footer"]: defaultFooter,
-                                ["color"]: 0x600080,
-                                ["description"]: "From: " + gamename,
-                                ["fields"]: [
-                                    {name: ":name_badge: User", value: "**[" + username + "](https://www.roblox.com/users/" + userId + "/profile)** (" + userId + ")"},
-                                    {name: ":pager: Case", value: "`" + caseNum + "`", inline: true},
-                                    {name: ":notepad_spiral: Reason", value: reason, inline: true},
-                                ]
-                            }
-    
-                            var dataToSend = [
-                                {
-                                  MessageTo: "discordbot.js",
-                                  Type: "Embed",
-                                  Payload: {
-                                      ServerToSendTo: "719673864111652936",
-                                      ChannelToSendTo: "1291040473242271886",
-                                      Text:  username + " (" + userId + ")",
-                                      Embed: newEmbed
-                                  },
-                              }
-                            ]
-    
-                            shared.shareData(dataToSend)
-                        break;
-                        case "suspicion":
-                            var modcallpayload = payload2.payload
-                            var reporteduser = modcallpayload.reporteduser //the user that as reported
-                            var suspicionpercent = modcallpayload.suspicionpercent
-                            var suspiciondetails = modcallpayload.suspiciondetails
-                            var game = modcallpayload.game //used to indicate the game
-                            var jobid = modcallpayload.jobid
-                            //var reportdetails = modcallpayload.reportdetails //which mod joined
-                            
-                            var reportedusername
-                            var reporteduserid
-                            var gamename
-                            var gamekeyname
-                            var gameid
-                            
-                            
-                            for (var [key, value] of Object.entries(reporteduser)) {
-                            reportedusername = value
-                            reporteduserid = key
-                            }
-                            
-                            for (var [key, value] of Object.entries(game)) {
-                            gamename = value
-                            gamekeyname = key
-                            }
-                            
-                            switch(gamekeyname) {
-                              case "ACSGroundsV1":
-                                gameid = "5223287266"
-                              break;
-    
-                              case "ACSTestingPlace":
-                                gameid = "6262966584"
-                              break;
-    
-                              case "ACSJungle": 
-                                gameid = "7120086775"
-                              break;
-                            }
-                                      
-                            var newEmbed = {
-                                ["title"]: ":loudspeaker: Suspicion Report",
-                                ["footer"]: defaultFooter,
-                                ["image"]: await shared.getRobloxAvatarPic(reporteduserid, 420, "avatar"),
-                                ["color"]: 0xFE9900,
-                                ["description"]: "From: " + gamename,
-                                ["fields"]: [
-                                     {name: ":name_badge: Suspicious User", value: "**[" + reportedusername + "](https://www.roblox.com/users/" + reporteduserid + "/profile)** (" + reporteduserid + ")", inline: true},
-                                    //{name: ":pencil: `group`", value: groupid, inline: true},
-                                    {name: ":pager: Suspicion Details", value: suspiciondetails, inline: false},
-                                    //{name: ":globe_with_meridians: Translation", value: translatedText},
-                                    {name: ":triangular_flag_on_post: Suspicion Meter", value: "**" + suspicionpercent + "%**", inline: true},
-                                    {name: ":link: Join Link 1", value: "[Launch & autojoin (1)](https://www.roblox.com/games/start?placeId=" + gameid + '&launchData={"ReportJobId":"' + jobid + '"})', inline: true},
-                                    {name: ":link: Join Link 2", value: "[Launch & autojoin (2)](https://www.roblox.com/games/5223287266/ACS-Phoenix-Grounds?serverJobId=" + jobid + ")", inline: true},
-                                    {name: ":postbox: Server's JobId", value: "`" + jobid + "`"}
-                                ]
-                            }
-    
-                            var dataToSend = [
-                                {
-                                  MessageTo: "discordbot.js",
-                                  Type: "Embed",
-                                  Payload: {
-                                      ServerToSendTo: "719673864111652936",
-                                      ChannelToSendTo: "908390430863929404",
-                                      Embed: newEmbed,
-                                      Text: "<@&941348501151961108>" + reportedusername + " (" + reporteduserid + ")",
-                                  },
-                              }
-                            ]
-    
-                            shared.shareData(dataToSend)
-                        break;
-                    }
-                }
+  var payload = body.payload //requests will be sent every 2 seconds, so they'll be in a dictionary called payload
+  for (var [, value] of Object.entries(payload)) {
+    //if (key == "requestType") {
+    //    console.log(value)
+    //}
+    var payload2 = value.payload
+    switch (value.requestType) {
+      case "heartbeat":
+        makeResponse(true, "", value.id, {})
+        break;
+      case "moderation":
+        var requesttype = payload2.requestType
+        switch (requesttype) {
+          case "modcall":
+            //console.log(payload)       
+            var modcallpayload = payload2.payload
+            var reporteduser = modcallpayload.reporteduser //the user that as reported
+            var reportinguser = modcallpayload.reportinguser //the user that reported
+            var reportreason = modcallpayload.reportreason //the reason for reporting
+            var isFlagged = modcallpayload.isFlagged
+            var game = modcallpayload.game //used to indicate the game
+            var jobid = modcallpayload.jobid
+            var suspicionpercent = modcallpayload.suspicionpercent
+            //var reportdetails = modcallpayload.reportdetails //which mod joined
+            var reportingusername
+            var reportinguserid
+            var reportedusername
+            var reporteduserid
+            var gamename
+            var gamekeyname
+            var gameid
+
+            for (var [key, value] of Object.entries(reportinguser)) {
+              reportingusername = value
+              reportinguserid = key
             }
+
+            for (var [key, value] of Object.entries(reporteduser)) {
+              reportedusername = value
+              reporteduserid = key
+            }
+
+            for (var [key, value] of Object.entries(game)) {
+              gamename = value
+              gamekeyname = key
+            }
+
+            switch (gamekeyname) {
+              case "ACSGroundsV1":
+                gameid = "5223287266"
+                break;
+
+              case "ACSTestingPlace":
+                gameid = "6262966584"
+                break;
+
+              case "ACSJungle":
+                gameid = "7120086775"
+                break;
+            }
+
+            var newEmbed = {
+              ["title"]: ":loudspeaker: Modcall",
+              ["footer"]: defaultFooter,
+              ["image"]: await shared.getRobloxAvatarPic(reporteduserid, 420, "avatar"),
+              ["thumbnail"]: await shared.getRobloxAvatarPic(reportinguserid, 150, "avatar-headshot"),
+              ["color"]: 0x990000,
+              ["description"]: "From: " + gamename,
+              ["fields"]: [
+                { name: ":name_badge: Reported User", value: "**[" + reportedusername + "](https://www.roblox.com/users/" + reporteduserid + "/profile)** (" + reporteduserid + ")", inline: true },
+                //{name: ":pencil: `group`", value: groupid, inline: true},
+                { name: ":shield: Reporting User", value: "||[" + reportingusername + "](https://www.roblox.com/users/" + reportinguserid + "/profile) (" + reportinguserid + ") ||", inline: true },
+                { name: ":warning: EASI / ~~TASE~~ Flagged", value: isFlagged },
+                { name: ":pager: Report Reason", value: reportreason },
+                { name: ":triangular_flag_on_post: Suspicion Meter", value: "**" + suspicionpercent + "%**", inline: true },
+                //{name: ":globe_with_meridians: Translation", value: translatedText},
+                { name: ":link: Join Link 1", value: "[Launch & autojoin (1)](https://www.roblox.com/games/start?placeId=" + gameid + '&launchData={"ReportJobId":"' + jobid + '"})', inline: true },
+                { name: ":link: Join Link 2", value: "[Launch & autojoin (2)](https://www.roblox.com/games/5223287266/ACS-Phoenix-Grounds?serverJobId=" + jobid + ")", inline: true },
+                { name: ":postbox: Server's JobId", value: "`" + jobid + "`" }
+              ]
+            }
+
+            var dataToSend = [
+              {
+                MessageTo: "discordbot.js",
+                Type: "Embed",
+                Payload: {
+                  ServerToSendTo: "719673864111652936",
+                  ChannelToSendTo: "908390430863929404",
+                  Embed: newEmbed,
+                  Text: "<@&941348501151961108> " + reportedusername + " (" + reporteduserid + ")",
+                },
+              }
+            ]
+
+            shared.shareData(dataToSend)
+            break;
+          case "logging":
+            var timestart = Date.now()
+            var modcallpayload = payload2.payload
+            var game = modcallpayload.game //used to indicate the game
+            var commands = modcallpayload.commands
+            var jobid = modcallpayload.jobid
+            //var reportdetails = modcallpayload.reportdetails //which mod joined
+
+            var text = ""
+            var gamename
+            var gameid
+
+            for (var [, value] of Object.entries(game)) {
+              gamename = value
+            }
+
+            var brokenLoop = -1
+            for (var [key, value] of Object.entries(commands)) {
+              var tempText = text + "**[" + value[0] + "]** " + value[1] + "\n"
+              if (tempText.length > 1024) {
+                brokenLoop = key
+                break;
+              } else {
+                text = tempText
+              }
+            }
+
+            //if (brokenLoop != -1) {
+
+            //}
+
+
+            var newEmbed = {
+              ["title"]: ":minidisc: Logs",
+              ["footer"]: defaultFooter,
+              ["color"]: 0x006080,
+              ["description"]: "From: " + gamename,
+              ["fields"]: [
+                { name: ":floppy_disk: Commands", value: text },
+                { name: ":postbox: Server's JobId", value: "`" + jobid + "`" },
+              ]
+            }
+
+            if (brokenLoop != -1) {
+              newEmbed.fields = [
+                { name: ":floppy_disk: Commands", value: text },
+                { name: ":postbox: Server's JobId", value: "`" + jobid + "`" },
+                { name: ":warning: Warning", value: "Not enough embed space for entire command list." }
+              ]
+            }
+
+            var dataToSend = [
+              {
+                MessageTo: "discordbot.js",
+                Type: "Embed",
+                Payload: {
+                  ServerToSendTo: "719673864111652936",
+                  ChannelToSendTo: "1291314421511094272",
+                  Embed: newEmbed
+                },
+              }
+            ]
+
+            shared.shareData(dataToSend)
+            break;
+          case "anticheatlogging":
+            var timestart = Date.now()
+            var modcallpayload = payload2.payload
+            var game = modcallpayload.game //used to indicate the game
+            var userId = modcallpayload.userId
+            var username = modcallpayload.username
+            var caseNum = modcallpayload.case
+            var reason = modcallpayload.reason
+            //var reportdetails = modcallpayload.reportdetails //which mod joined
+
+            var gamename
+            var gameid
+
+            for (var [, value] of Object.entries(game)) {
+              gamename = value
+            }
+
+            var newEmbed = {
+              ["title"]: ":hammer: Anticheat Ban",
+              ["thumbnail"]: await shared.getRobloxAvatarPic(userId, 150, "avatar-headshot"),
+              ["footer"]: defaultFooter,
+              ["color"]: 0x600080,
+              ["description"]: "From: " + gamename,
+              ["fields"]: [
+                { name: ":name_badge: User", value: "**[" + username + "](https://www.roblox.com/users/" + userId + "/profile)** (" + userId + ")" },
+                { name: ":pager: Case", value: "`" + caseNum + "`", inline: true },
+                { name: ":notepad_spiral: Reason", value: reason, inline: true },
+              ]
+            }
+
+            var dataToSend = [
+              {
+                MessageTo: "discordbot.js",
+                Type: "Embed",
+                Payload: {
+                  ServerToSendTo: "719673864111652936",
+                  ChannelToSendTo: "1291040473242271886",
+                  Text: username + " (" + userId + ")",
+                  Embed: newEmbed
+                },
+              }
+            ]
+
+            shared.shareData(dataToSend)
+            break;
+          case "suspicion":
+            var modcallpayload = payload2.payload
+            var reporteduser = modcallpayload.reporteduser //the user that as reported
+            var suspicionpercent = modcallpayload.suspicionpercent
+            var suspiciondetails = modcallpayload.suspiciondetails
+            var game = modcallpayload.game //used to indicate the game
+            var jobid = modcallpayload.jobid
+            //var reportdetails = modcallpayload.reportdetails //which mod joined
+
+            var reportedusername
+            var reporteduserid
+            var gamename
+            var gamekeyname
+            var gameid
+
+
+            for (var [key, value] of Object.entries(reporteduser)) {
+              reportedusername = value
+              reporteduserid = key
+            }
+
+            for (var [key, value] of Object.entries(game)) {
+              gamename = value
+              gamekeyname = key
+            }
+
+            switch (gamekeyname) {
+              case "ACSGroundsV1":
+                gameid = "5223287266"
+                break;
+
+              case "ACSTestingPlace":
+                gameid = "6262966584"
+                break;
+
+              case "ACSJungle":
+                gameid = "7120086775"
+                break;
+            }
+
+            var newEmbed = {
+              ["title"]: ":loudspeaker: Suspicion Report",
+              ["footer"]: defaultFooter,
+              ["image"]: await shared.getRobloxAvatarPic(reporteduserid, 420, "avatar"),
+              ["color"]: 0xFE9900,
+              ["description"]: "From: " + gamename,
+              ["fields"]: [
+                { name: ":name_badge: Suspicious User", value: "**[" + reportedusername + "](https://www.roblox.com/users/" + reporteduserid + "/profile)** (" + reporteduserid + ")", inline: true },
+                //{name: ":pencil: `group`", value: groupid, inline: true},
+                { name: ":pager: Suspicion Details", value: suspiciondetails, inline: false },
+                //{name: ":globe_with_meridians: Translation", value: translatedText},
+                { name: ":triangular_flag_on_post: Suspicion Meter", value: "**" + suspicionpercent + "%**", inline: true },
+                { name: ":link: Join Link 1", value: "[Launch & autojoin (1)](https://www.roblox.com/games/start?placeId=" + gameid + '&launchData={"ReportJobId":"' + jobid + '"})', inline: true },
+                { name: ":link: Join Link 2", value: "[Launch & autojoin (2)](https://www.roblox.com/games/5223287266/ACS-Phoenix-Grounds?serverJobId=" + jobid + ")", inline: true },
+                { name: ":postbox: Server's JobId", value: "`" + jobid + "`" }
+              ]
+            }
+
+            var dataToSend = [
+              {
+                MessageTo: "discordbot.js",
+                Type: "Embed",
+                Payload: {
+                  ServerToSendTo: "719673864111652936",
+                  ChannelToSendTo: "908390430863929404",
+                  Embed: newEmbed,
+                  Text: "<@&941348501151961108>" + reportedusername + " (" + reporteduserid + ")",
+                },
+              }
+            ]
+
+            shared.shareData(dataToSend)
+            break;
+        }
+    }
+  }
   response.send(responseBody).status(200)
 }
 
 module.exports = {
-    init: init,
-    webhook: webhook
+  init: init,
+  webhook: webhook
 }

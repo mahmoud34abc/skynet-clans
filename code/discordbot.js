@@ -13,17 +13,18 @@ var brokenTyping = false
 var brokenTypingInterval = null
 
 function getClient() {
-  if (isUpdatedDiscord) {
-    return new Client({intents: [
-        GatewayIntentBits.Guilds,
-        GatewayIntentBits.GuildMessages,
-        GatewayIntentBits.MessageContent,
-      ],
-    });
-  } else {
-    const { Intents } = require(`discord.js`);
-    return new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES, Intents.FLAGS.MESSAGE_CONTENT] });
-  }
+    if (isUpdatedDiscord) {
+        return new Client({
+            intents: [
+                GatewayIntentBits.Guilds,
+                GatewayIntentBits.GuildMessages,
+                GatewayIntentBits.MessageContent,
+            ],
+        });
+    } else {
+        const { Intents } = require(`discord.js`);
+        return new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES, Intents.FLAGS.MESSAGE_CONTENT] });
+    }
 }
 
 var MessageListeners = {}
@@ -38,7 +39,7 @@ function WaitForMessage(MessageType) {
     });
 }
 
-const client = getClient() 
+const client = getClient()
 
 
 // Send script messages
@@ -48,9 +49,9 @@ function shareData(data) {
 }
 
 function convertToString(value) {
-    var valueType = typeof(value)
+    var valueType = typeof (value)
 
-    switch(valueType) {
+    switch (valueType) {
         case "string":
             return value
         case "number":
@@ -75,14 +76,14 @@ function embedMessage(details, preEmbed) {
     function performEmbedChanges(anEmbed) {
         for (var [key, value] of Object.entries(details)) {
             //console.log(key, value)
-            switch(key) {
+            switch (key) {
                 case "title":
                     anEmbed.setTitle(value)
-                break;
+                    break;
 
                 case "author":
                     if (!value.name && !value.iconURL && !value.URL) {
-                        anEmbed.setAuthor({ name:convertToString(value) })
+                        anEmbed.setAuthor({ name: convertToString(value) })
                     }
 
                     if (value.name) {
@@ -94,15 +95,15 @@ function embedMessage(details, preEmbed) {
                     if (value.URL) {
                         anEmbed.setAuthor({ url: convertToString(value.URL) })
                     }
-                break;
+                    break;
 
                 case "color":
                     anEmbed.setColor(value)
-                break;
+                    break;
 
                 case "description":
                     anEmbed.setDescription(convertToString(value))
-                break;
+                    break;
 
                 case "footer":
                     if (isUpdatedDiscord) {
@@ -116,43 +117,43 @@ function embedMessage(details, preEmbed) {
                             }
                         }
                     } else {
-                      if (value.text) {
+                        if (value.text) {
                             anEmbed.setFooter(convertToString(value.text))
                         } else {
                             anEmbed.setFooter(convertToString(value))
                         }
                     }
-                break;
-                
+                    break;
+
                 case "image":
-                     if (convertToString(value) !== "") {
+                    if (convertToString(value) !== "") {
                         anEmbed.setImage(convertToString(value))
                     }
-                break;
+                    break;
 
                 case "thumbnail":
                     if (convertToString(value) !== "") {
                         anEmbed.setThumbnail(convertToString(value))
                     }
-                break;
+                    break;
 
                 case "url":
                     anEmbed.setUrl(convertToString(value))
-                break;
+                    break;
 
                 case "timestamp":
                     anEmbed.setTitle(value)
-                break;
+                    break;
 
                 case "fields":
-                    Object.keys(value).forEach(function(key) {
+                    Object.keys(value).forEach(function (key) {
                         var localValue = value[key]
                         localValue.name = convertToString(localValue.name)
                         localValue.value = convertToString(localValue.value)
                     });
 
                     anEmbed.addFields(value)
-                break;
+                    break;
             }
         }
     }
@@ -162,16 +163,16 @@ function embedMessage(details, preEmbed) {
         performEmbedChanges(preEmbed)
         return
     }
-    
-    var embed 
+
+    var embed
     if (isUpdatedDiscord) {
-      embed = new EmbedBuilder()
+        embed = new EmbedBuilder()
     } else {
-      embed = new MessageEmbed()
+        embed = new MessageEmbed()
     }
-  
+
     performEmbedChanges(embed)
-      
+
     return embed
 }
 
@@ -180,7 +181,7 @@ async function sendMessageTyping(Channel, isTest) {
         if ((!brokenTyping) || isTest) {
             var sent = false
 
-            setTimeout(() =>{
+            setTimeout(() => {
                 if (!sent) {
                     if (!brokenTyping) {
                         brokenTyping = true
@@ -229,24 +230,24 @@ async function messageHandler(message) {
     var args = messageContent.trim().split(/ +/g);
     var cmd = args[0].slice(botPrefix.length).toLowerCase();
 
-    switch(cmd) {
+    switch (cmd) {
         case "gameban":
             var allowedRoles = ["719857755036581908", "719857778675417098", "727939786815569981", "1282069297186865152", "1291525088159727737", "720057768459108425"]
             //var allowedRoles = []
             var allowed = false
-            
+
             for (var roleId of allowedRoles) {
                 if (member.roles.cache.has(roleId)) {
                     allowed = true
                     break
                 }
             }
-        
+
             if (allowed !== true) {
                 message.channel.send("You do not have permission to use this command!")
                 return
             }
-            
+
             if (args[1] == null | args[2] == null | args[3] == null) {
                 message.channel.send("Missing arguements! `[c!gameban <userId/userName> <gameName> <banType> [banReason>]`")
                 return
@@ -267,7 +268,7 @@ async function messageHandler(message) {
             } else if (raw.includes("s")) {
                 args[3] = value.toString() + "s";
             }
-                    
+
             var banReason = ""
             var skip = 0
             for (var word of args) {
@@ -277,20 +278,20 @@ async function messageHandler(message) {
                 }
                 skip = skip + 1
             }
-        
+
             if (banReason == "") {
                 banReason = "No reason provided"
             }
-        
+
             var issuedBy = member.displayName + " (" + member.user.id + ")"
 
             var dataToSend = [{
                 MessageTo: "webhook.js",
                 Type: "OpenCloudBan",
                 Payload: {
-                  ServerToSendTo: "719673864111652936",
-                  OriginalChannelId: message.channel.id,
-                  Arguements: [args[1], args[2], args[3], banReason, issuedBy]
+                    ServerToSendTo: "719673864111652936",
+                    OriginalChannelId: message.channel.id,
+                    Arguements: [args[1], args[2], args[3], banReason, issuedBy]
                 },
             }]
             shareData(dataToSend)
@@ -298,7 +299,7 @@ async function messageHandler(message) {
             //performOpenCloudBan(args[1], "phoenix", args[3], banReason, issuedBy)
             //await message.channel.send(":clock3: Sending to ROBLOX...")
             await sendMessageTyping(message.channel);
-        break;
+            break;
 
         case "viewban":
             var allowedRoles = ["726746155970461769", "727940388765040650", "719857755036581908", "719857778675417098", "727939786815569981", "1282069297186865152", "1291525088159727737", "720057768459108425"]
@@ -310,12 +311,12 @@ async function messageHandler(message) {
                     break
                 }
             }
-            
+
             if (allowed !== true) {
                 message.channel.send("You do not have permission to use this command!")
                 return
             }
-                
+
             if (args[1] == null) {
                 message.channel.send("Missing arguements! `c!viewban <userId/userName> <gameName>`")
                 return
@@ -325,9 +326,9 @@ async function messageHandler(message) {
                 MessageTo: "webhook.js",
                 Type: "OpenCloudViewBan",
                 Payload: {
-                  ServerToSendTo: "719673864111652936",
-                  OriginalChannelId: message.channel.id,
-                  Arguements: [args[1], args[2]]
+                    ServerToSendTo: "719673864111652936",
+                    OriginalChannelId: message.channel.id,
+                    Arguements: [args[1], args[2]]
                 },
             }]
             shareData(dataToSend)
@@ -335,45 +336,45 @@ async function messageHandler(message) {
             //performOpenCloudBan(args[1], "phoenix", args[3], banReason, issuedBy)
             //await message.channel.send(":clock3: Fetching from ROBLOX...")
             sendMessageTyping(message.channel);
-        break;
+            break;
 
         case "robloxcommand":
             var dataToSend = [{
                 MessageTo: "webhook.js",
                 Type: "SendToRoblox",
                 Payload: {
-                  GameName: "phoenix",
-                  Payload: {
-                    MessageType: "Command",
-                    Arguements: {},
-                  },
+                    GameName: "phoenix",
+                    Payload: {
+                        MessageType: "Command",
+                        Arguements: {},
+                    },
                 },
             }]
 
             shareData(dataToSend)
             message.channel.send(":clock3: Sending command to game.. This may take a while.")
-        break;
+            break;
 
         case "adonis":
-            var adonisCommandToSend = messageContent.split(botPrefix + cmd + " ")[1]; 
+            var adonisCommandToSend = messageContent.split(botPrefix + cmd + " ")[1];
 
             var dataToSend = [{
                 MessageTo: "webhook.js",
                 Type: "SendToRoblox",
                 Payload: {
-                  GameName: "phoenix",
-                  Payload: {
-                    MessageType: "AdonisCommand",
-                    Arguements: {
-                        Command: adonisCommandToSend,
+                    GameName: "phoenix",
+                    Payload: {
+                        MessageType: "AdonisCommand",
+                        Arguements: {
+                            Command: adonisCommandToSend,
+                        },
                     },
-                  },
                 },
             }]
 
             shareData(dataToSend)
             message.channel.send(":clock3: Sending global adonis command to game.. This may take a while.")
-        break;
+            break;
 
         case "ping":
             var messageSendingTime = Date.now()
@@ -381,18 +382,18 @@ async function messageHandler(message) {
             //var orgMsg = await message.channel.send({ content: ":ping_pong: Ping.."})
             var validPing = await sendMessageTyping(message.channel);
             messageReceivedTime = Date.now();
-            
+
             var dataToSend = [{
                 MessageTo: "webhook.js",
                 Type: "Ping",
                 Payload: {}
             }]
-            
+
             var frameworkSendingTime = Date.now()
             shareData(dataToSend)
             await WaitForMessage("Pong")
             var frameworkReceivedTime = Date.now()
-            
+
             dataToSend = [{
                 MessageTo: "webhook.js",
                 Type: "RobloxAPIPing"
@@ -421,19 +422,19 @@ async function messageHandler(message) {
 
             FrameworkPingLine = ":gear: Framework Ping: `" + (frameworkReceivedTime - frameworkSendingTime) + "ms`"
             message.channel.send({ content: ":ping_pong: Ping.. Pong!\n\n" + DiscordPingLine + "\n" + RobloxPingLine + "\n" + FrameworkPingLine + "\n-# Hosting on: " + process.env.HOSTING })
-        break;
-        }
+            break;
     }
+}
 
 client.on('messageCreate', async (message) => {
     // Ignore messages from bots
-    if (!message.content.startsWith(botPrefix)) return; 
+    if (!message.content.startsWith(botPrefix)) return;
     if (message.author.bot) return;
 
     //console.log(`New message in #${message.channel.name}:`);
     //console.log(`Author: ${message.author.tag}`);
     //console.log(`Content: ${message.content}`);
-    
+
     // You can also check for attachments
     //if (message.attachments.size > 0) {
     //  console.log('Attachments:', message.attachments.map(a => a.url));
@@ -444,23 +445,23 @@ client.on('messageCreate', async (message) => {
         console.warn("Error occured while handling message: " + e)
         try {
             await message.channel.send(":x: An error occured while processing the message. Please review the logs")
-        } catch(e) {
-            console.warn(e) 
+        } catch (e) {
+            console.warn(e)
         }
     }
 });
 
 //START
 client.on("clientReady", () => { //set the bot status
-  botOnline = true
-  console.log("Skynet Clans bot is online");
-  client.user.setPresence({
-    status: "idle",
-    activities: [{
-      name: "modcalls & handling bans",
-      type: 0
-    }]
-  });
+    botOnline = true
+    console.log("Skynet Clans bot is online");
+    client.user.setPresence({
+        status: "idle",
+        activities: [{
+            name: "modcalls & handling bans",
+            type: 0
+        }]
+    });
 });
 
 client.login(process.env.TOKEN); //log in as bot
@@ -469,7 +470,7 @@ client.login(process.env.TOKEN); //log in as bot
 
 async function handleSharedData(data) {
     if (!botOnline) {
-        setTimeout(function() {handleSharedData(data)}, 500)
+        setTimeout(function () { handleSharedData(data) }, 500)
         return
     }
 
@@ -485,7 +486,7 @@ async function handleSharedData(data) {
     }
 
     if (data.MessageTo == "discordbot.js") {
-        switch(data.Type) {
+        switch (data.Type) {
             case "Embed":
                 var guildId = data.Payload.ServerToSendTo
                 var channelId = data.Payload.ChannelToSendTo
@@ -501,8 +502,8 @@ async function handleSharedData(data) {
                 } else {
                     await channel.send({ embeds: [embed] });
                 }
-            break;
-            
+                break;
+
             case "Message":
                 var guildId = data.Payload.ServerToSendTo
                 var channelId = data.Payload.ChannelToSendTo
@@ -511,7 +512,7 @@ async function handleSharedData(data) {
                 var guild = await client.guilds.fetch(guildId);
                 var channel = await guild.channels.fetch(channelId);
                 await channel.send({ content: messageString });
-            break;
+                break;
         }
     }
 }
