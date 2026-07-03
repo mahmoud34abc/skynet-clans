@@ -53,6 +53,8 @@ async function webhook(body, response) {
           Outfits: payload2.Outfits,
           ToGame: payload2.ToGame,
         }
+        
+        console.log(payload2)
 
         pendingSyncingRequests[payload2.ToGame].push(newSyncRequest)
 
