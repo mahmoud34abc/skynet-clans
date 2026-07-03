@@ -333,7 +333,6 @@ async function performOpenCloudBan(userId, gameName, banType, banReason, issuedB
 }
 
 const sharedTable = {
-  makeResponse: makeResponse,
   shareData: shareData,
   getRobloxUserId: getRobloxUserId,
   getRobloxUsername: getRobloxUsername,
@@ -638,14 +637,7 @@ async function handleSharedData(data) {
             }
           })
         break;
-
-        case "SendToRoblox":
-          var gameName = data.Payload.GameName
-          var payload = data.Payload.DataToSend
-    
-          makeResponse(true, "CustomMessage", null, payload)
-        break;
-
+        
         case "Ping":
           var dataToSend = [
             {
