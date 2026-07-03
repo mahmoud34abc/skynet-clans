@@ -266,11 +266,11 @@ async function webhook(body, response) {
   }
 
   if (pendingSyncingRequests[body.FromGame] !== undefined || pendingSyncingRequests[body.FromGame] !== null) {
-    for (i=0; i < Object.keys(pendingSyncingRequests[body.FromGame]).length; i++) {
+    for (i=0; i < pendingSyncingRequests[body.FromGame].length; i++) {
       makeResponse(true, "syncRequest", -1, pendingSyncingRequests[body.FromGame][i])
     }
 
-    for (i=0; i < Object.keys(pendingSyncingResponses[body.FromGame]).length; i++) {
+    for (i=0; i < pendingSyncingResponses[body.FromGame].length; i++) {
       makeResponse(true, "syncResponse", -1, pendingSyncingResponses[body.FromGame][i])
     }
 
