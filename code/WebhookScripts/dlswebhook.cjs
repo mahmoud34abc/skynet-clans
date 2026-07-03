@@ -9,6 +9,16 @@ var defaultFooter = "Skynet Clans • Version " + process.env.VERSION + " • Ho
 
 var responseBody = []
 
+var pendingSyncingRequests = {
+  MZRPG: [],
+  MZRPGTEMP: [],
+}
+
+var pendingSyncingResponses = {
+  MZRPG: [],
+  MZRPGTEMP: [],
+}
+
 function makeResponse(bool,message,id,payload) {
   var theResponse = {
     id,
@@ -26,16 +36,6 @@ function makeResponse(bool,message,id,payload) {
   responseBody[arraylength + 1] = newResponse
 }
 
-var pendingSyncingRequests = {
-  MZRPG: [],
-  MZRPGTEMP: [],
-}
-
-var pendingSyncingResponses = {
-  MZRPG: [],
-  MZRPGTEMP: [],
-}
-
 async function webhook(body, response) {
     var payload = body.payload //requests will be sent every 2 seconds, so they'll be in a dictionary called payload
 
@@ -48,24 +48,24 @@ async function webhook(body, response) {
 
         case "serverSyncRequest":
           var newSyncRequest = {
-            UserId: payload.UserId,
-            Outfits: payload.Outfits,
-            FromGame: payload.FromGame,
+            UserId: payload2.UserId,
+            Outfits: payload2.Outfits,
+            FromGame: payload2.FromGame,
           }
 
-          pendingSyncingRequests[payload.FromGame].push(newSyncRequest)
+          pendingSyncingRequests[payload2.FromGame].push(newSyncRequest)
 
           makeResponse(true, "",value.id, {})
         break;
 
         case "serverSyncResponse":
           var newSyncResponse = {
-            UserId: payload.UserId,
-            Outfits: payload.Outfits,
-            ToGame: payload.ToGame, //NOT equal to the same game
+            UserId: payload2.UserId,
+            Outfits: payload2.Outfits,
+            ToGame: payload2.ToGame, //NOT equal to the same game
           }
 
-          pendingSyncingResponses[payload.FromGame].push(newSyncResponse)
+          pendingSyncingResponses[payload2.FromGame].push(newSyncResponse)
 
           makeResponse(true, "",value.id, {})
         break;
@@ -264,16 +264,16 @@ async function webhook(body, response) {
         }
     }
     
-    for (i=0; i < Object.keys(pendingSyncingRequests[payload.FromGame]).length; i++) {
-      makeResponse(true, "syncRequest", -1, pendingSyncingRequests[payload.FromGame][i])
+    for (i=0; i < Object.keys(pendingSyncingRequests[body.FromGame]).length; i++) {
+      makeResponse(true, "syncRequest", -1, pendingSyncingRequests[body.FromGame][i])
     }
 
-    for (i=0; i < Object.keys(pendingSyncingResponses[payload.FromGame]).length; i++) {
-      makeResponse(true, "syncResponse", -1, pendingSyncingResponses[payload.FromGame][i])
+    for (i=0; i < Object.keys(pendingSyncingResponses[body.FromGame]).length; i++) {
+      makeResponse(true, "syncResponse", -1, pendingSyncingResponses[body.FromGame][i])
     }
 
-    pendingSyncingRequests[payload.FromGame] = []
-    pendingSyncingResponses[payload.FromGame] = []
+    pendingSyncingRequests[body.FromGame] = []
+    pendingSyncingResponses[body.FromGame] = []
 
   response.send(responseBody).status(200)
 }

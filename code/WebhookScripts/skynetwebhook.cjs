@@ -5,6 +5,8 @@ function init(sharedTable) {
     shared = sharedTable
 }
 
+var defaultFooter = "Skynet Clans • Version " + process.env.VERSION + " • Hosting on: " + process.env.HOSTING
+
 async function webhook(body, response) {
    if (body.requesttype.toLowerCase() == "feedback") {
        var username = body.username
