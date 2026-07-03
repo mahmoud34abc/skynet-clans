@@ -51,10 +51,10 @@ async function webhook(body, response) {
         var newSyncRequest = {
           UserId: payload2.UserId,
           Outfits: payload2.Outfits,
-          FromGame: payload2.FromGame,
+          ToGame: payload2.ToGame,
         }
 
-        pendingSyncingRequests[payload2.FromGame].push(newSyncRequest)
+        pendingSyncingRequests[payload2.ToGame].push(newSyncRequest)
 
         makeResponse(true, "", value.id, {})
         break;
@@ -66,7 +66,7 @@ async function webhook(body, response) {
           ToGame: payload2.ToGame, //NOT equal to the same game
         }
 
-        pendingSyncingResponses[payload2.FromGame].push(newSyncResponse)
+        pendingSyncingResponses[payload2.ToGame].push(newSyncResponse)
 
         makeResponse(true, "", value.id, {})
         break;
