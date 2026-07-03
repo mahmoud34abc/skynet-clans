@@ -11,19 +11,20 @@ var responseBody = []
 
 function makeResponse(bool, message, id, payload) {
   var theResponse = {
-    id,
+    id: id,
     status: bool ? 200 : 400,
     responseStatus: bool ? 'OK' : 'BAD REQUEST',
-    message,
-    payload,
+    message: message,
+    payload: payload,
   }
 
-  var arraylength = responseBody.length
-  var newResponse = { ...theResponse }
-  newResponse.message = message
-  newResponse.id = id
-  newResponse.payload = { ...payload }
-  responseBody[arraylength + 1] = newResponse
+  //var arraylength = responseBody.length
+  //var newResponse = { ...theResponse }
+  //newResponse.message = message
+  //newResponse.id = id
+  //newResponse.payload = { ...payload }
+  responseBody.push(theResponse)
+  //responseBody[arraylength + 1] = newResponse
 }
 
 
@@ -312,6 +313,7 @@ async function webhook(body, response) {
     }
   }
   response.send(responseBody).status(200)
+  responseBody = []
 }
 
 module.exports = {

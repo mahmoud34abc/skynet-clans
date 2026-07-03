@@ -21,19 +21,20 @@ var pendingSyncingResponses = {
 
 function makeResponse(bool, message, id, payload) {
   var theResponse = {
-    id,
+    id: id,
     status: bool ? 200 : 400,
     responseStatus: bool ? 'OK' : 'BAD REQUEST',
-    message,
-    payload,
+    message: message,
+    payload: payload,
   }
 
-  var arraylength = responseBody.length
-  var newResponse = { ...theResponse }
-  newResponse.message = message
-  newResponse.id = id
-  newResponse.payload = { ...payload }
-  responseBody[arraylength + 1] = newResponse
+  //var arraylength = responseBody.length
+  //var newResponse = { ...theResponse }
+  //newResponse.message = message
+  //newResponse.id = id
+  //newResponse.payload = { ...payload }
+  responseBody.push(theResponse)
+  //responseBody[arraylength + 1] = newResponse
 }
 
 async function webhook(body, response) {
@@ -264,19 +265,21 @@ async function webhook(body, response) {
     }
   }
 
+  if (pendingSyncingRequests[body.FromGame] !== undefined || pendingSyncingRequests[body.FromGame] !== null) {
+    for (i=0; i < Object.keys(pendingSyncingRequests[body.FromGame]).length; i++) {
+      makeResponse(true, "syncRequest", -1, pendingSyncingRequests[body.FromGame][i])
+    }
 
-  //for (i=0; i < Object.keys(pendingSyncingRequests[body.FromGame]).length; i++) {
-  //  makeResponse(true, "syncRequest", -1, pendingSyncingRequests[body.FromGame][i])
-  //}
+    for (i=0; i < Object.keys(pendingSyncingResponses[body.FromGame]).length; i++) {
+      makeResponse(true, "syncResponse", -1, pendingSyncingResponses[body.FromGame][i])
+    }
 
-  //for (i=0; i < Object.keys(pendingSyncingResponses[body.FromGame]).length; i++) {
-  //  makeResponse(true, "syncResponse", -1, pendingSyncingResponses[body.FromGame][i])
-  //}
-
-  //pendingSyncingRequests[body.FromGame] = []
-  //pendingSyncingResponses[body.FromGame] = []
+    pendingSyncingRequests[body.FromGame] = []
+    pendingSyncingResponses[body.FromGame] = []
+  }
 
   response.send(responseBody).status(200)
+  responseBody = []
 }
 
 module.exports = {
