@@ -26,6 +26,15 @@ function makeResponse(bool,message,id,payload) {
   responseBody[arraylength + 1] = newResponse
 }
 
+var pendingSyncingRequests = {
+  MZRPG: [],
+  MZRPGTEMP: [],
+}
+
+var pendingSyncingResponses = {
+  MZRPG: [],
+  MZRPGTEMP: [],
+}
 
 async function webhook(body, response) {
     var payload = body.payload //requests will be sent every 2 seconds, so they'll be in a dictionary called payload
@@ -38,11 +47,27 @@ async function webhook(body, response) {
         break;
 
         case "serverSyncRequest":
+          var newSyncRequest = {
+            UserId: payload.UserId,
+            Outfits: payload.Outfits,
+            FromGame: payload.FromGame,
+          }
 
+          pendingSyncingRequests[payload.FromGame].push(newSyncRequest)
+
+          makeResponse(true, "",value.id, {})
         break;
 
         case "serverSyncResponse":
-          
+          var newSyncResponse = {
+            UserId: payload.UserId,
+            Outfits: payload.Outfits,
+            ToGame: payload.ToGame, //NOT equal to the same game
+          }
+
+          pendingSyncingResponses[payload.FromGame].push(newSyncResponse)
+
+          makeResponse(true, "",value.id, {})
         break;
 
         case "moderation":
@@ -238,6 +263,18 @@ async function webhook(body, response) {
             }
         }
     }
+    
+    for (i=0; i < Object.keys(pendingSyncingRequests[payload.FromGame]).length; i++) {
+      makeResponse(true, "syncRequest", -1, pendingSyncingRequests[payload.FromGame][i])
+    }
+
+    for (i=0; i < Object.keys(pendingSyncingResponses[payload.FromGame]).length; i++) {
+      makeResponse(true, "syncResponse", -1, pendingSyncingResponses[payload.FromGame][i])
+    }
+
+    pendingSyncingRequests[payload.FromGame] = []
+    pendingSyncingResponses[payload.FromGame] = []
+
   response.send(responseBody).status(200)
 }
 
