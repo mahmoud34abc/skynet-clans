@@ -79,7 +79,7 @@ async function webhook(body, response) {
         },
       ]
 
-      shareData(dataToSend)
+      shared.shareData(dataToSend)
       response.status(200).send({
         type: "success",
         message: "Successfully sent feedback!",
