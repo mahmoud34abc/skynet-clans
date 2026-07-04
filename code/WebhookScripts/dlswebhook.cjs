@@ -53,9 +53,8 @@ async function webhook(body, response) {
           Outfits: payload2.Outfits,
           ToGame: payload2.ToGame,
         }
-        
-        console.log(payload2)
 
+        console.log(payload2)
         pendingSyncingRequests[payload2.ToGame].push(newSyncRequest)
 
         makeResponse(true, "", value.id, {})
@@ -68,6 +67,7 @@ async function webhook(body, response) {
           ToGame: payload2.ToGame, //NOT equal to the same game
         }
 
+        console.log(payload2)
         pendingSyncingResponses[payload2.ToGame].push(newSyncResponse)
 
         makeResponse(true, "", value.id, {})
