@@ -65,7 +65,7 @@ async function webhook(body, response) {
               ["author"]: displayname + " (" + username + ")",
               ["description"]: gamename,
               ["footer"]: defaultFooter,
-              ["thumbnail"]: await getRobloxAvatarPic(userid, 150, "avatar-headshot"),
+              ["thumbnail"]: await shared.getRobloxAvatarPic(userid, 150, "avatar-headshot"),
               ["fields"]: [
                 { name: ":speech_balloon: Feedback", value: originalfeedbackmessage },
                 //{name: ":globe_with_meridians: Translation", value: translatedText},
