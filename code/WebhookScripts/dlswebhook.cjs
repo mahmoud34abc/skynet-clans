@@ -286,6 +286,29 @@ async function webhook(body, response) {
   responseBody = []
 }
 
+setInterval(() => {
+  var syncRequests = 0
+  var syncResponses = 0
+
+  for (i=0; i < pendingSyncingRequests.MZRPG.length; i++) {
+    syncRequests += 1
+  }
+  for (i=0; i < pendingSyncingRequests.MZRPGTEMP.length; i++) {
+    syncRequests += 1
+  }
+
+  for (i=0; i < pendingSyncingResponses.MZRPG.length; i++) {
+    syncResponses += 1
+  }
+  for (i=0; i < pendingSyncingResponses.MZRPGTEMP.length; i++) {
+    syncResponses += 1
+  }
+
+  if (syncRequests > 0 || syncResponses > 0) {
+    console.log("Pending Sync Requests: " + syncRequests + " | Pending Sync Responses: " + syncResponses)
+  }
+}, 1000 * 60 * 60);
+
 module.exports = {
   init: init,
   webhook: webhook
