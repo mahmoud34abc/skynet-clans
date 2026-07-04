@@ -12,13 +12,13 @@ var responseBody = []
 var pendingSyncingRequests = {
   MZRPG: [],
   MZRPGTEMP: [],
-  TEST: [],
+  //TEST: [],
 }
 
 var pendingSyncingResponses = {
   MZRPG: [],
   MZRPGTEMP: [],
-  TEST: [],
+  //TEST: [],
 }
 
 function makeResponse(bool, message, id, payload) {
