@@ -12,11 +12,13 @@ var responseBody = []
 var pendingSyncingRequests = {
   MZRPG: [],
   MZRPGTEMP: [],
+  TEST: [],
 }
 
 var pendingSyncingResponses = {
   MZRPG: [],
   MZRPGTEMP: [],
+  TEST: [],
 }
 
 function makeResponse(bool, message, id, payload) {
@@ -267,7 +269,7 @@ async function webhook(body, response) {
     }
   }
 
-  if (pendingSyncingRequests[body.FromGame] !== undefined && pendingSyncingRequests[body.FromGame] !== null) {
+  if (pendingSyncingRequests[body.FromGame] !== undefined) {
     for (i=0; i < pendingSyncingRequests[body.FromGame].length; i++) {
       makeResponse(true, "syncRequest", -1, pendingSyncingRequests[body.FromGame][i])
     }
