@@ -12,13 +12,13 @@ var responseBody = []
 var pendingSyncingRequests = {
   MZRPG: [],
   MZRPGTEMP: [],
-  //TEST: [],
+  TEST: [],
 }
 
 var pendingSyncingResponses = {
   MZRPG: [],
   MZRPGTEMP: [],
-  //TEST: [],
+  TEST: [],
 }
 
 function makeResponse(bool, message, id, payload) {
@@ -56,7 +56,7 @@ async function webhook(body, response) {
           ToGame: payload2.ToGame,
         }
 
-        console.log(payload2)
+        //console.log(payload2)
         pendingSyncingRequests[payload2.ToGame].push(newSyncRequest)
 
         makeResponse(true, "", value.id, {})
@@ -69,7 +69,7 @@ async function webhook(body, response) {
           ToGame: payload2.ToGame, //NOT equal to the same game
         }
 
-        console.log(payload2)
+        //console.log(payload2)
         pendingSyncingResponses[payload2.ToGame].push(newSyncResponse)
 
         makeResponse(true, "", value.id, {})
