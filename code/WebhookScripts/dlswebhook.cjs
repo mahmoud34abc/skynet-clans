@@ -313,9 +313,9 @@ setInterval(() => {
     const minutes = String(now.getMinutes()).padStart(2, "0");
     const seconds = String(now.getSeconds()).padStart(2, "0");
 
-    console.log(hours + ":" + minutes + ":" + seconds + " - Pending Sync Requests: " + syncRequests + " | Pending Sync Responses: " + syncResponses)
+    console.log(hours + ":" + minutes + ":" + seconds + " - Pending - Sync Requests: " + syncRequests + " | Sync Responses: " + syncResponses)
   }
-}, 1000 * 60 * .1);
+}, 1000 * 60 * 10);
 
 module.exports = {
   init: init,
