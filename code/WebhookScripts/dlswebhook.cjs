@@ -282,7 +282,7 @@ async function webhook(body, response) {
     pendingSyncingResponses[body.FromGame] = []
   }
 
-  console.log(body.FromGame)
+  //console.log(body.FromGame)
   response.send(responseBody).status(200)
   responseBody = []
 }
