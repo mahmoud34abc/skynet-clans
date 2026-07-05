@@ -305,9 +305,16 @@ setInterval(() => {
   }
 
   if (syncRequests > 0 || syncResponses > 0) {
-    console.log("Pending Sync Requests: " + syncRequests + " | Pending Sync Responses: " + syncResponses)
+    const now = new Date();
+
+    // Extract values with zero‑padding
+    const hours = String(now.getHours()).padStart(2, "0");
+    const minutes = String(now.getMinutes()).padStart(2, "0");
+    const seconds = String(now.getSeconds()).padStart(2, "0");
+
+    console.log("${hours}:${minutes}:${seconds} - Pending Sync Requests: " + syncRequests + " | Pending Sync Responses: " + syncResponses)
   }
-}, 1000 * 60 * 60);
+}, 1000 * 60 * 1);
 
 module.exports = {
   init: init,
