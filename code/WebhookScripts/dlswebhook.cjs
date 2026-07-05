@@ -282,6 +282,7 @@ async function webhook(body, response) {
     pendingSyncingResponses[body.FromGame] = []
   }
 
+  console.log(body.FromGame)
   response.send(responseBody).status(200)
   responseBody = []
 }
@@ -314,7 +315,7 @@ setInterval(() => {
 
     console.log(hours + ":" + minutes + ":" + seconds + " - Pending Sync Requests: " + syncRequests + " | Pending Sync Responses: " + syncResponses)
   }
-}, 1000 * 60 * 0.1);
+}, 1000 * 60 * .1);
 
 module.exports = {
   init: init,
