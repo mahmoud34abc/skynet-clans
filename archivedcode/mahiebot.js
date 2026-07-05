@@ -10,7 +10,6 @@ const client = new Client({
   ],
 });
 const express = require("express");
-const bodyParser = require("body-parser");
 const useragent = require('express-useragent');
 const prefix = "m!"
 //const Conf = require("conf");
@@ -238,8 +237,8 @@ function checkHttps(req, res, next) {
   res.redirect("https://" + req.hostname + req.originalUrl);
 }
 
-app.use(bodyParser.urlencoded({ extended: true }))
-app.use(bodyParser.json());
+app.use(express.urlencoded({ extended: true }))
+app.use(express.json());
 app.use(useragent.express());
 
 app.use(express.static("public"));

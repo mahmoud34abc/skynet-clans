@@ -4,12 +4,11 @@ import { createRequire } from 'module';
 const require = createRequire(import.meta.url);
 const https = require("https")
 const express = require("express");
-const bodyParser = require("body-parser");
 const querystring = require('querystring');
 const app = express();
 
 app.disable('x-powered-by'); //safety
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(express.urlencoded({ extended: true }));
 app.use(express.json({ limit: '10mb' }));
 
 // Send messages
