@@ -95,7 +95,9 @@ var userNameCache = {}
 
 async function getRobloxAvatarPic(userid, size, type) {
   if (userid == undefined || size == undefined || type == undefined) {
-    resolve("https://media.discordapp.net/attachments/846381103349628938/1424126341112008754/image.png")
+    return new Promise(async (resolve) => {
+      resolve("https://media.discordapp.net/attachments/846381103349628938/1424126341112008754/image.png")
+    })
   }
 
   var cacheName = userid.toString() + type + size.toString()
