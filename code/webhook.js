@@ -9,8 +9,8 @@ const querystring = require('querystring');
 const app = express();
 
 app.disable('x-powered-by'); //safety
-app.use(bodyParser.urlencoded({ extended: true })); //to be able to parse the requests' bodies
-app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(express.json({ limit: '10mb' }));
 
 // Send messages
 function shareData(data) {
