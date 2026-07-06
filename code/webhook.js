@@ -5,11 +5,13 @@ const require = createRequire(import.meta.url);
 const https = require("https")
 const express = require("express");
 const querystring = require('querystring');
+const compression = require('compression');
 const app = express();
 
 app.disable('x-powered-by'); //safety
+app.use(compression());
 app.use(express.urlencoded({ extended: true }));
-app.use(express.json({ limit: '10mb' }));
+app.use(express.json({ limit: '256kb' }));
 
 // Send messages
 function shareData(data) {

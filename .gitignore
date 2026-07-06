@@ -1,7 +1,5 @@
-.glitchdotcom.json
-.node-gyp
 node_modules
-.env
 package-lock.json
+.env
 tickets.db
 appeals.db
