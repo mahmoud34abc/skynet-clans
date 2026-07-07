@@ -148,7 +148,7 @@ async function webhook(body, response) {
                   ServerToSendTo: "1278787772122927226",
                   ChannelToSendTo: "1515770408584872026",
                   Embed: newEmbed,
-                  Text: "" + reportedusername + " (" + reporteduserid + ")",
+                  Text: "<@&1293245227376574686> " + reportedusername + " (" + reporteduserid + ")",
                 },
               }
             ]
