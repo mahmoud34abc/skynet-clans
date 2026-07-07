@@ -270,16 +270,31 @@ async function webhook(body, response) {
   }
 
   if (pendingSyncingRequests[body.FromGame] !== undefined) {
-    for (i=0; i < pendingSyncingRequests[body.FromGame].length; i++) {
-      makeResponse(true, "syncRequest", -1, pendingSyncingRequests[body.FromGame][i])
-    }
+    const maximumAmount = 10
+    var currentAmount = 0
 
     for (i=0; i < pendingSyncingResponses[body.FromGame].length; i++) {
-      makeResponse(true, "syncResponse", -1, pendingSyncingResponses[body.FromGame][i])
+      if (currentAmount >= maximumAmount) {
+        break;
+      }
+
+      var resp = pendingSyncingResponses[body.FromGame].shift()
+      makeResponse(true, "syncResponse", -1, resp)
+      currentAmount++
     }
 
-    pendingSyncingRequests[body.FromGame] = []
-    pendingSyncingResponses[body.FromGame] = []
+    for (i=0; i < pendingSyncingRequests[body.FromGame].length; i++) {
+      if (currentAmount >= maximumAmount) {
+        break;
+      }
+
+      var req = pendingSyncingRequests[body.FromGame].shift()
+      makeResponse(true, "syncRequest", -1, req)
+      currentAmount++
+    }
+
+    //pendingSyncingRequests[body.FromGame] = []
+    //pendingSyncingResponses[body.FromGame] = []
   }
 
   //console.log(body.FromGame)
@@ -288,22 +303,8 @@ async function webhook(body, response) {
 }
 
 setInterval(() => {
-  var syncRequests = 0
-  var syncResponses = 0
-
-  for (i=0; i < pendingSyncingRequests.MZRPG.length; i++) {
-    syncRequests += 1
-  }
-  for (i=0; i < pendingSyncingRequests.MZRPGTEMP.length; i++) {
-    syncRequests += 1
-  }
-
-  for (i=0; i < pendingSyncingResponses.MZRPG.length; i++) {
-    syncResponses += 1
-  }
-  for (i=0; i < pendingSyncingResponses.MZRPGTEMP.length; i++) {
-    syncResponses += 1
-  }
+  var syncRequests = pendingSyncingRequests.MZRPG.length + pendingSyncingRequests.MZRPGTEMP.length
+  var syncResponses = pendingSyncingResponses.MZRPG.length + pendingSyncingResponses.MZRPGTEMP.length
 
   if (syncRequests > 0 || syncResponses > 0) {
     const now = new Date();
