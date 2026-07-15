@@ -52,23 +52,31 @@ function convertToString(value) {
     var valueType = typeof (value)
 
     switch (valueType) {
-        case "string":
+        case "string": {
             return value
-        case "number":
+        }
+        case "number": {
             return value.toString()
-        case "boolean":
+        }
+        case "boolean": {
             if (value) return "Yes"
             return "No"
-        case "bigint":
+        }
+        case "bigint": {
             return value.toString()
-        case "symbol":
+        }
+        case "symbol": {
             return value.toString()
-        case "null":
+        }
+        case "null": {
             return "[null]"
-        case "undefined":
+        }
+        case "undefined": {
             return "[undefined]"
-        default:
-            return "[An " + valueType + " was passed as a value]"
+        }
+        default: {
+            return "[A " + valueType + " was passed as a value]"
+        }
     }
 }
 
@@ -77,11 +85,12 @@ function embedMessage(details, preEmbed) {
         for (var [key, value] of Object.entries(details)) {
             //console.log(key, value)
             switch (key) {
-                case "title":
+                case "title": {
                     anEmbed.setTitle(value)
                     break;
+                }
 
-                case "author":
+                case "author": {
                     if (!value.name && !value.iconURL && !value.URL) {
                         anEmbed.setAuthor({ name: convertToString(value) })
                     }
@@ -96,16 +105,19 @@ function embedMessage(details, preEmbed) {
                         anEmbed.setAuthor({ url: convertToString(value.URL) })
                     }
                     break;
+                }
 
-                case "color":
+                case "color": {
                     anEmbed.setColor(value)
                     break;
+                }
 
-                case "description":
+                case "description": {
                     anEmbed.setDescription(convertToString(value))
                     break;
+                }
 
-                case "footer":
+                case "footer": {
                     if (isUpdatedDiscord) {
                         if (value.iconURL) {
                             anEmbed.setFooter({ text: convertToString(value.text), iconURL: convertToString(value.iconURL) })
@@ -124,28 +136,33 @@ function embedMessage(details, preEmbed) {
                         }
                     }
                     break;
+                }
 
-                case "image":
+                case "image": {
                     if (convertToString(value) !== "") {
                         anEmbed.setImage(convertToString(value))
                     }
                     break;
+                }
 
-                case "thumbnail":
+                case "thumbnail": {
                     if (convertToString(value) !== "") {
                         anEmbed.setThumbnail(convertToString(value))
                     }
                     break;
+                }
 
-                case "url":
+                case "url": {
                     anEmbed.setUrl(convertToString(value))
                     break;
+                }
 
-                case "timestamp":
+                case "timestamp": {
                     anEmbed.setTitle(value)
                     break;
+                }
 
-                case "fields":
+                case "fields": {
                     Object.keys(value).forEach(function (key) {
                         var localValue = value[key]
                         localValue.name = convertToString(localValue.name)
@@ -154,6 +171,7 @@ function embedMessage(details, preEmbed) {
 
                     anEmbed.addFields(value)
                     break;
+                }
             }
         }
     }
@@ -231,7 +249,7 @@ async function messageHandler(message) {
     var cmd = args[0].slice(botPrefix.length).toLowerCase();
 
     switch (cmd) {
-        case "gameban":
+        case "gameban": {
             var allowedRoles = ["719857755036581908", "719857778675417098", "727939786815569981", "1282069297186865152", "1291525088159727737", "720057768459108425"]
             //var allowedRoles = []
             var allowed = false
@@ -300,8 +318,9 @@ async function messageHandler(message) {
             //await message.channel.send(":clock3: Sending to ROBLOX...")
             await sendMessageTyping(message.channel);
             break;
+        }
 
-        case "viewban":
+        case "viewban": {
             var allowedRoles = ["726746155970461769", "727940388765040650", "719857755036581908", "719857778675417098", "727939786815569981", "1282069297186865152", "1291525088159727737", "720057768459108425"]
             //var allowedRoles = []
             var allowed = false
@@ -337,8 +356,9 @@ async function messageHandler(message) {
             //await message.channel.send(":clock3: Fetching from ROBLOX...")
             sendMessageTyping(message.channel);
             break;
+        }
 
-        case "robloxcommand":
+        case "robloxcommand": {
             var dataToSend = [{
                 MessageTo: "webhook.js",
                 Type: "SendToRoblox",
@@ -354,8 +374,9 @@ async function messageHandler(message) {
             shareData(dataToSend)
             message.channel.send(":clock3: Sending command to game.. This may take a while.")
             break;
+        }
 
-        case "adonis":
+        case "adonis": {
             var adonisCommandToSend = messageContent.split(botPrefix + cmd + " ")[1];
 
             var dataToSend = [{
@@ -375,8 +396,9 @@ async function messageHandler(message) {
             shareData(dataToSend)
             message.channel.send(":clock3: Sending global adonis command to game.. This may take a while.")
             break;
+        }
 
-        case "ping":
+        case "ping": {
             var messageSendingTime = Date.now()
             var messageReceivedTime = null
             //var orgMsg = await message.channel.send({ content: ":ping_pong: Ping.."})
@@ -423,6 +445,7 @@ async function messageHandler(message) {
             FrameworkPingLine = ":gear: Framework Ping: `" + (frameworkReceivedTime - frameworkSendingTime) + "ms`"
             message.channel.send({ content: ":ping_pong: Ping.. Pong!\n\n" + DiscordPingLine + "\n" + RobloxPingLine + "\n" + FrameworkPingLine + "\n-# Hosting on: " + process.env.HOSTING })
             break;
+        }
     }
 }
 
@@ -487,7 +510,7 @@ async function handleSharedData(data) {
 
     if (data.MessageTo == "discordbot.js") {
         switch (data.Type) {
-            case "Embed":
+            case "Embed": {
                 var guildId = data.Payload.ServerToSendTo
                 var channelId = data.Payload.ChannelToSendTo
                 var extraText = data.Payload.Text
@@ -503,8 +526,9 @@ async function handleSharedData(data) {
                     await channel.send({ embeds: [embed] });
                 }
                 break;
+            }
 
-            case "Message":
+            case "Message": {
                 var guildId = data.Payload.ServerToSendTo
                 var channelId = data.Payload.ChannelToSendTo
                 var messageString = data.Payload.Message
@@ -513,6 +537,7 @@ async function handleSharedData(data) {
                 var channel = await guild.channels.fetch(channelId);
                 await channel.send({ content: messageString });
                 break;
+            }
         }
     }
 }

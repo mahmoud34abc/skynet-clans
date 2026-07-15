@@ -1,3 +1,5 @@
+const { BurstHandlerMajorIdKey } = require("discord.js")
+
 //things to be imported via the init function
 var shared
 
@@ -45,15 +47,22 @@ async function webhook(body, response) {
   for (var [, value] of Object.entries(payload)) {
     var payload2 = value.payload
     switch (value.requestType) {
-      case "heartbeat":
+      case "heartbeat": {
         makeResponse(true, "", value.id, {})
         break;
-
-      case "serverSyncRequest":
+      }
+      
+      case "serverSyncRequest": {
         var newSyncRequest = {
           UserId: payload2.UserId,
           Outfits: payload2.Outfits,
           ToGame: payload2.ToGame,
+        }
+        
+        const existingIndex = pendingSyncingRequests[payload2.ToGame].findIndex(response => response.UserId === newSyncRequest.UserId);
+
+        if (existingIndex !== -1) {
+          pendingSyncingRequests[payload2.ToGame].splice(existingIndex, 1);
         }
 
         //console.log(payload2)
@@ -61,8 +70,9 @@ async function webhook(body, response) {
 
         makeResponse(true, "", value.id, {})
         break;
+      }
 
-      case "serverSyncResponse":
+      case "serverSyncResponse": {
         var newSyncResponse = {
           UserId: payload2.UserId,
           Outfits: payload2.Outfits,
@@ -70,15 +80,22 @@ async function webhook(body, response) {
         }
 
         //console.log(payload2)
+        const existingIndex = pendingSyncingResponses[payload2.ToGame].findIndex(response => response.UserId === newSyncResponse.UserId);
+
+        if (existingIndex !== -1) {
+          pendingSyncingResponses[payload2.ToGame].splice(existingIndex, 1);
+        }
+
         pendingSyncingResponses[payload2.ToGame].push(newSyncResponse)
 
         makeResponse(true, "", value.id, {})
         break;
+      }
 
-      case "moderation":
+      case "moderation": {
         var requesttype = payload2.requestType
         switch (requesttype) {
-          case "modcall":
+          case "modcall": {
             //console.log(payload)       
             var modcallpayload = payload2.payload
             var reporteduser = modcallpayload.reporteduser //the user that as reported
@@ -155,7 +172,9 @@ async function webhook(body, response) {
             shared.shareData(dataToSend)
 
             break;
-          case "logging":
+          }
+
+          case "logging": {
             var timestart = Date.now()
             var modcallpayload = payload2.payload
             var game = modcallpayload.game //used to indicate the game
@@ -220,7 +239,9 @@ async function webhook(body, response) {
 
             shared.shareData(dataToSend)
             break;
-          case "anticheatlogging":
+          }
+
+          case "anticheatlogging": {
             var timestart = Date.now()
             var modcallpayload = payload2.payload
             var game = modcallpayload.game //used to indicate the game
@@ -265,7 +286,10 @@ async function webhook(body, response) {
 
             shared.shareData(dataToSend)
             break;
+          }
         }
+        break;
+      }
     }
   }
 
@@ -273,7 +297,7 @@ async function webhook(body, response) {
     const maximumAmount = 10
     var currentAmount = 0
 
-    for (i=0; i < pendingSyncingResponses[body.FromGame].length; i++) {
+    for (let i=0; i < pendingSyncingResponses[body.FromGame].length; i++) {
       if (currentAmount >= maximumAmount) {
         break;
       }
@@ -283,7 +307,7 @@ async function webhook(body, response) {
       currentAmount++
     }
 
-    for (i=0; i < pendingSyncingRequests[body.FromGame].length; i++) {
+    for (let i=0; i < pendingSyncingRequests[body.FromGame].length; i++) {
       if (currentAmount >= maximumAmount) {
         break;
       }

@@ -258,17 +258,20 @@ async function performOpenCloudViewBan(userId, gameName, callbackFunction) {
   }
 
   switch (gameName) {
-    case "phoenix":
+    case "phoenix": {
       requestPath = "/cloud/v2/universes/1826628366/user-restrictions/" + userId
       break;
+    }
 
-    case "firing":
+    case "firing": {
       requestPath = "/cloud/v2/universes/1810450591/user-restrictions/" + userId
       break;
+    }
 
-    case "jungle":
+    case "jungle": {
       requestPath = "/cloud/v2/universes/2756038974/user-restrictions/" + userId
       break;
+    }
   }
 
   if (requestPath == null) {
@@ -299,17 +302,20 @@ async function performOpenCloudBan(userId, gameName, banType, banReason, issuedB
   }
 
   switch (gameName) {
-    case "phoenix":
+    case "phoenix": {
       requestPath = "/cloud/v2/universes/1826628366/user-restrictions/" + userId
       break;
+    }
 
-    case "firing":
+    case "firing": {
       requestPath = "/cloud/v2/universes/1810450591/user-restrictions/" + userId
       break;
+    }
 
-    case "jungle":
+    case "jungle": {
       requestPath = "/cloud/v2/universes/2756038974/user-restrictions/" + userId
       break;
+    }
   }
 
   if (requestPath == null) {
@@ -396,7 +402,7 @@ async function handleSharedData(data) {
     //console.log("Recieved something on webhook")
     var timestart = Date.now()
     switch (data.Type) {
-      case "OpenCloudBan":
+      case "OpenCloudBan": {
         var userId = data.Payload.Arguements[0]
         var gameName = data.Payload.Arguements[1]
         var banType = data.Payload.Arguements[2]
@@ -500,8 +506,9 @@ async function handleSharedData(data) {
           }
         })
         break;
+      }
 
-      case "OpenCloudViewBan":
+      case "OpenCloudViewBan": {
         var userId = data.Payload.Arguements[0]
         var gameName = data.Payload.Arguements[1]
         var originalChannelId = data.Payload.OriginalChannelId
@@ -640,8 +647,9 @@ async function handleSharedData(data) {
           }
         })
         break;
+      }
 
-      case "Ping":
+      case "Ping": {
         var dataToSend = [
           {
             MessageTo: "discordbot.js",
@@ -651,8 +659,9 @@ async function handleSharedData(data) {
 
         shareData(dataToSend)
         break;
+      }
 
-      case "RobloxAPIPing":
+      case "RobloxAPIPing": {
         var { message, success } = await pingWebsite("apis.roblox.com")
         //console.log(robloxPing, isSuccess)
 
@@ -666,6 +675,7 @@ async function handleSharedData(data) {
 
         shareData(dataToSend)
         break;
+      }
     }
   }
 }

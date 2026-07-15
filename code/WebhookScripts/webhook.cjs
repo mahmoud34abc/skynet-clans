@@ -36,13 +36,15 @@ async function webhook(body, response) {
     //}
     var payload2 = value.payload
     switch (value.requestType) {
-      case "heartbeat":
+      case "heartbeat": {
         makeResponse(true, "", value.id, {})
         break;
-      case "moderation":
+      }
+
+      case "moderation": {
         var requesttype = payload2.requestType
         switch (requesttype) {
-          case "modcall":
+          case "modcall": {
             //console.log(payload)       
             var modcallpayload = payload2.payload
             var reporteduser = modcallpayload.reporteduser //the user that as reported
@@ -126,7 +128,9 @@ async function webhook(body, response) {
 
             shared.shareData(dataToSend)
             break;
-          case "logging":
+          }
+
+          case "logging": {
             var timestart = Date.now()
             var modcallpayload = payload2.payload
             var game = modcallpayload.game //used to indicate the game
@@ -191,7 +195,9 @@ async function webhook(body, response) {
 
             shared.shareData(dataToSend)
             break;
-          case "anticheatlogging":
+          }
+
+          case "anticheatlogging": {
             var timestart = Date.now()
             var modcallpayload = payload2.payload
             var game = modcallpayload.game //used to indicate the game
@@ -236,7 +242,9 @@ async function webhook(body, response) {
 
             shared.shareData(dataToSend)
             break;
-          case "suspicion":
+          }
+
+          case "suspicion": {
             var modcallpayload = payload2.payload
             var reporteduser = modcallpayload.reporteduser //the user that as reported
             var suspicionpercent = modcallpayload.suspicionpercent
@@ -309,7 +317,10 @@ async function webhook(body, response) {
 
             shared.shareData(dataToSend)
             break;
+          }
         }
+        break;
+      }
     }
   }
   response.send(responseBody).status(200)
