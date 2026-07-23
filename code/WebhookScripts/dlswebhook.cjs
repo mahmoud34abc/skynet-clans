@@ -79,13 +79,6 @@ async function webhook(body, response) {
           ToGame: payload2.ToGame, //NOT equal to the same game
         }
 
-        //console.log(payload2)
-        const existingIndex = pendingSyncingResponses[payload2.ToGame].findIndex(response => response.UserId === newSyncResponse.UserId);
-
-        if (existingIndex !== -1) {
-          pendingSyncingResponses[payload2.ToGame].splice(existingIndex, 1);
-        }
-
         pendingSyncingResponses[payload2.ToGame].push(newSyncResponse)
 
         makeResponse(true, "", value.id, {})
