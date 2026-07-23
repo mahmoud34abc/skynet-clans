@@ -8,6 +8,10 @@ const querystring = require('querystring');
 const compression = require('compression');
 const app = express();
 
+const server = require('http').createServer(app);
+
+server.timeout = 0; //to disable timeouts
+
 app.disable('x-powered-by'); //safety
 app.use(compression());
 app.use(express.urlencoded({ extended: true }));
