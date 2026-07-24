@@ -8,9 +8,6 @@ const querystring = require('querystring');
 const compression = require('compression');
 const app = express();
 
-const server = require('http').createServer(app);
-
-server.timeout = 0; //to disable timeouts
 
 app.disable('x-powered-by'); //safety
 app.use(compression());
@@ -389,6 +386,10 @@ app.post("/dlswebhook", async (request, response) => {
 var listener = app.listen(process.env.PORT, () => {
   console.log(`Your app is listening on port ${process.env.PORT}`);
 });
+
+listener.timeout = 0;
+listener.headersTimeout = 0;
+listener.requestTimeout = 0;
 
 // Receive messages
 async function handleSharedData(data) {
