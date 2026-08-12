@@ -443,7 +443,7 @@ async function messageHandler(message) {
             }
 
             FrameworkPingLine = ":gear: Framework Ping: `" + (frameworkReceivedTime - frameworkSendingTime) + "ms`"
-            message.channel.send({ content: ":ping_pong: Ping.. Pong!\n\n" + DiscordPingLine + "\n" + RobloxPingLine + "\n" + FrameworkPingLine + "\n-# Hosting on: " + process.env.HOSTING })
+            message.channel.send({ content: ":ping_pong: ..Pong!\n\n" + DiscordPingLine + "\n" + RobloxPingLine + "\n" + FrameworkPingLine + "\n-# Hosting on: " + process.env.HOSTING })
             break;
         }
     }
