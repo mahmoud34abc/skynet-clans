@@ -11,13 +11,13 @@ var responseBody = []
 
 var pendingSyncingRequests = {
   MZRPG: [],
-  //MZRPGTEMP: [],
+  MZRPGTEMP: [],
   TEST: [],
 }
 
 var pendingSyncingResponses = {
   MZRPG: [],
-  //MZRPGTEMP: [],
+  MZRPGTEMP: [],
   TEST: [],
 }
 
@@ -247,7 +247,7 @@ async function webhook(body, response) {
                 MessageTo: "discordbot.js",
                 Type: "Embed",
                 Payload: {
-                  ServerToSendTo: "1278787772122927226",
+                  ServerToSendTo: "1540111553456504912",
                   ChannelToSendTo: "1515770408584872026",
                   Embed: newEmbed,
                   Text: "<@&1293245227376574686> " + reportedusername + " (" + reporteduserid + ")",
@@ -361,7 +361,7 @@ async function webhook(body, response) {
                 MessageTo: "discordbot.js",
                 Type: "Embed",
                 Payload: {
-                  ServerToSendTo: "719673864111652936",
+                  ServerToSendTo: "1540111553456504912",
                   ChannelToSendTo: "1291040473242271886",
                   Text: username + " (" + userId + ")",
                   Embed: newEmbed
