@@ -3,7 +3,7 @@ import { channel } from 'diagnostics_channel';
 import { createRequire } from 'module';
 const require = createRequire(import.meta.url);
 //const fs = require('node:fs');
-const { Client, GatewayIntentBits, EmbedBuilder, MessageEmbed } = require('discord.js');
+const { Client, GatewayIntentBits, EmbedBuilder, MessageEmbed, AttachmentBuilder } = require('discord.js');
 
 const isUpdatedDiscord = process.env.UPDATEDDISCORD == "true";
 const botPrefix = "c!"
@@ -517,14 +517,31 @@ async function handleSharedData(data) {
                 var embedable = data.Payload.Embed
                 var embed = embedMessage(embedable)
 
+                var imagePaths = data.Payload.Images || []
+                var deleteAfter = data.Payload.DeleteImagesAfterSending
+
+                var attachments = imagePaths.map(p => new AttachmentBuilder(p, { name: path.basename(p) }))
+
                 var guild = await client.guilds.fetch(guildId);
                 var channel = await guild.channels.fetch(channelId);
 
+                var sendOptions = { embeds: [embed], files: attachments }
                 if (extraText !== null) {
-                    await channel.send({ content: extraText, embeds: [embed] });
-                } else {
-                    await channel.send({ embeds: [embed] });
+                    sendOptions.content = extraText
                 }
+
+                try {
+                    await channel.send(sendOptions);
+                } finally {
+                    if (deleteAfter) {
+                        for (const p of imagePaths) {
+                            fs.unlink(p, (err) => {
+                                if (err) console.warn(`Failed to delete ${p}:`, err);
+                            });
+                        }
+                    }
+                }
+                
                 break;
             }
 

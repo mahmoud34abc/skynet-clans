@@ -8,6 +8,9 @@ const querystring = require('querystring');
 const compression = require('compression');
 const app = express();
 
+const fs = require('fs');
+const path = require('path');
+
 
 app.disable('x-powered-by'); //safety
 app.use(compression());
@@ -88,6 +91,32 @@ async function webRequest(options, requestBodyString) {
     req.end();
   })
 }
+
+async function downloadFileTo(url, destPath) {
+  return new Promise((resolve, reject) => {
+    fs.mkdirSync(path.dirname(destPath), { recursive: true });
+
+    https.get(url, (res) => {
+      if (res.statusCode !== 200) {
+        res.resume(); // drain
+        reject(new Error(`Failed to download, status ${res.statusCode}`));
+        return;
+      }
+
+      const fileStream = fs.createWriteStream(destPath);
+      res.pipe(fileStream);
+
+      fileStream.on('finish', () => {
+        fileStream.close(() => resolve(destPath));
+      });
+
+      fileStream.on('error', (err) => {
+        fs.unlink(destPath, () => reject(err));
+      });
+    }).on('error', reject);
+  });
+}
+
 
 var robloxAvatarPicCache = {}
 var robloxAvatarPicCacheTimeTable = {}
@@ -224,8 +253,6 @@ async function getRobloxUserId(userName) {
 }
 
 
-
-
 async function openCloudFunction(requestType, requestPath, requestBody, callbackFunction) {
   //console.log(requestBody)
   var requestBodyString = null
@@ -342,6 +369,28 @@ async function performOpenCloudBan(userId, gameName, banType, banReason, issuedB
   openCloudFunction("PATCH", requestPath, requestBody, callbackFunction)
 }
 
+async function loadRobloxImageOfAsset(assetId, pathToDownloadAt) { //return success, pathToFile
+  var options = { ...commonWebRequestOptions }
+  options.hostname = "thumbnails.roblox.com"
+  options.path = "/v1/assets?assetIds=" + assetId + "&size=420x420&format=png&isCircular=false"
+
+  var { success, statusCode, data } = await webRequest(options, null)
+
+  if (!success || statusCode != 200 || !data || !data.data || data.data.length === 0) {
+    return { success: false, pathToFile: null }
+  }
+
+  const imageUrl = data.data[0].imageUrl;
+
+  try {
+    const filePath = await downloadFileTo(imageUrl, path.join(pathToDownloadAt, `${assetId}.png`));
+    return { success: true, pathToFile: filePath };
+  } catch (err) {
+    console.warn('Failed to download image:', err);
+    return { success: false, pathToFile: null };
+  }
+}
+
 const sharedTable = {
   shareData: shareData,
   getRobloxUserId: getRobloxUserId,
@@ -353,6 +402,7 @@ const sharedTable = {
   openCloudFunction: openCloudFunction,
   performOpenCloudBan: performOpenCloudBan,
   performOpenCloudViewBan: performOpenCloudViewBan,
+  loadRobloxImageOfAsset: loadRobloxImageOfAsset,
 }
 
 const mzrpgwebhook = require('./WebhookScripts/mzrpgwebhook.cjs')

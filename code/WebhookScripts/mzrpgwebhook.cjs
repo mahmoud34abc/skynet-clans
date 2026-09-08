@@ -49,14 +49,14 @@ async function webhook(body, response) {
         makeResponse(true, "", value.id, {})
         break;
       }
-      
+
       case "serverSyncRequest": {
         var newSyncRequest = {
           UserId: payload2.UserId,
           Outfits: payload2.Outfits,
           ToGame: payload2.ToGame,
         }
-        
+
         const existingIndex = pendingSyncingRequests[payload2.ToGame].findIndex(response => response.UserId === newSyncRequest.UserId);
 
         if (existingIndex !== -1) {
@@ -80,6 +80,99 @@ async function webhook(body, response) {
         pendingSyncingResponses[payload2.ToGame].push(newSyncResponse)
 
         makeResponse(true, "", value.id, {})
+        break;
+      }
+
+      case "newOutfitCreated": {
+        //payload2.OutfitName
+        //payload2.OutfitId
+        //payload2.OutfitAssets = {
+        // [0]: {"AssetName", AssetId or ImageLink}
+        //}
+        //payload2.IsOutfitPrivate
+        //payload2.UserId
+        //payload2.Username
+
+        
+        var outfitName = payload2.OutfitName
+        var outfitId = payload2.OutfitId
+        var assets = payload2.OutfitAssets
+        
+        var isOutfitPrivate = payload2.IsOutfitPrivate ? "Yes" : "No"
+        var userId = payload2.UserId
+        var username = payload2.Username
+        
+        var text = ""
+        var brokenLoop = -1
+        
+        var imageFiles = []
+        var appendedImages = 0
+
+        var imageLoadingFailed = false
+        
+        for (var [key, value] of Object.entries(assets)) {
+          var {success, pathToFile} = await shared.loadRobloxImageOfAsset(value[1], ".temp/")
+          console.log(success, pathToFile)
+          if (success) {
+            imageFiles.push(pathToFile)
+            appendedImages += 1
+            if (appendedImages >= 9) {
+              break
+            }
+          } else {
+            imageLoadingFailed = true
+          }
+        }
+        
+        for (var [key, value] of Object.entries(assets)) {
+          var tempText = text + "[" + value[0] + "](" + value[1] + ")\n"
+          //var tempText = text + "**[" + value[0] + "]** " + value[1] + "\n"
+          if (tempText.length > 1024) {
+            brokenLoop = key
+            break;
+          } else {
+            text = tempText
+          }
+        }
+
+        var newEmbed = {
+          ["title"]: ":shirt: New Outfit",
+          ["footer"]: defaultFooter + " • OutfitId: " + outfitId,
+          ["thumbnail"]: await shared.getRobloxAvatarPic(userId, 150, "avatar-headshot"),
+          ["color"]: 0xBF5C00,
+          ["description"]: ":pager: Name: `" + outfitName + "`, OutfitId: `" + outfitId + "`",
+          ["fields"]: [
+            //{ name: ":pager: OutfitId", value: payload2.OutfitId, inline: true },
+            { name: ":closed_lock_with_key: Is outfit private?", value: isOutfitPrivate },
+            { name: ":billed_cap: Attachments list", value: text }
+          ]
+        }
+
+
+        if (brokenLoop != -1) {
+          newEmbed.fields.push({ name: ":warning: Warning", value: "Not enough embed space for entire attachment list." })
+        }
+
+        if (imageLoadingFailed) {
+          newEmbed.fields.push({ name: ":warning: Warning", value: "Failed to load one or more images." })
+        }
+
+        var dataToSend = [
+          {
+            MessageTo: "discordbot.js",
+            Type: "Embed",
+            Payload: {
+              ServerToSendTo: "1540111553456504912",
+              ChannelToSendTo: "1545359563744616510",
+              Embed: newEmbed,
+              Images: imageFiles, //paths to files from `temp` folder, deleted after sending
+              DeleteImagesAfterSending: true,
+              Text: "New outfit `" + outfitName + "` by " + username + " (" + userId + ")",
+            },
+          }
+        ]
+        shared.shareData(dataToSend)
+
         break;
       }
 
@@ -221,8 +314,8 @@ async function webhook(body, response) {
                 MessageTo: "discordbot.js",
                 Type: "Embed",
                 Payload: {
-                  ServerToSendTo: "1278787772122927226",
-                  ChannelToSendTo: "1516374354299195492",
+                  ServerToSendTo: "1540111553456504912",
+                  ChannelToSendTo: "1546139284401168466",
                   Embed: newEmbed
                 },
               }
@@ -288,7 +381,7 @@ async function webhook(body, response) {
     const maximumAmount = 10
     var currentAmount = 0
 
-    for (let i=0; i < pendingSyncingResponses[body.FromGame].length; i++) {
+    for (let i = 0; i < pendingSyncingResponses[body.FromGame].length; i++) {
       if (currentAmount >= maximumAmount) {
         break;
       }
@@ -298,7 +391,7 @@ async function webhook(body, response) {
       currentAmount++
     }
 
-    for (let i=0; i < pendingSyncingRequests[body.FromGame].length; i++) {
+    for (let i = 0; i < pendingSyncingRequests[body.FromGame].length; i++) {
       if (currentAmount >= maximumAmount) {
         break;
       }
