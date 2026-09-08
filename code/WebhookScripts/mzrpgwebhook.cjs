@@ -41,6 +41,7 @@ function makeResponse(bool, message, id, payload) {
 
 async function webhook(body, response) {
   var payload = body.payload //requests will be sent every 2 seconds, so they'll be in a dictionary called payload
+  console.log("i got somethin")
 
   for (var [, value] of Object.entries(payload)) {
     var payload2 = value.payload
