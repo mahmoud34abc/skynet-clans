@@ -1,5 +1,3 @@
-const { BurstHandlerMajorIdKey } = require("discord.js")
-
 //things to be imported via the init function
 var shared
 
@@ -13,13 +11,13 @@ var responseBody = []
 
 var pendingSyncingRequests = {
   MZRPG: [],
-  MZRPGTEMP: [],
+  //MZRPGTEMP: [],
   TEST: [],
 }
 
 var pendingSyncingResponses = {
   MZRPG: [],
-  MZRPGTEMP: [],
+  //MZRPGTEMP: [],
   TEST: [],
 }
 

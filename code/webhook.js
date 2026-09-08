@@ -355,11 +355,11 @@ const sharedTable = {
   performOpenCloudViewBan: performOpenCloudViewBan,
 }
 
-const dlswebhook = require('./WebhookScripts/dlswebhook.cjs')
+const mzrpgwebhook = require('./WebhookScripts/mzrpgwebhook.cjs')
 const skynetwebhook = require('./WebhookScripts/skynetwebhook.cjs')
 const webhook = require('./WebhookScripts/webhook.cjs')
 
-dlswebhook.init(sharedTable);
+mzrpgwebhook.init(sharedTable);
 skynetwebhook.init(sharedTable);
 webhook.init(sharedTable);
 
@@ -376,10 +376,10 @@ app.post("/skynetwebhook", async (request, response) => {
   skynetwebhook.webhook(body, response)
 });
 
-app.post("/dlswebhook", async (request, response) => {
+app.post("/mzrpgwebhook", async (request, response) => {
   var body = request.body
   //do the payload here
-  dlswebhook.webhook(body, response)
+  mzrpgwebhook.webhook(body, response)
 })
 
 // listen for requests
