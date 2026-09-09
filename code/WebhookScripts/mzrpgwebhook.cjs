@@ -90,7 +90,7 @@ async function webhook(body, response) {
       }
 
       case "newOutfitCreated": {
-
+        var outfitId = payload2.OutfitId
 
         const existingIndex = pendingNewOutfits.findIndex(response => response.OutfitId === outfitId);
 
