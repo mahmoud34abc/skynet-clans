@@ -442,7 +442,6 @@ setInterval(async () => {
           MessageTo: "discordbot.js",
           Type: "Embed",
           Payload: {
-            RequestId: randomUUID(), // used to match the async ack
             ServerToSendTo: "1540111553456504912",
             ChannelToSendTo: "1545359563744616510",
             Embed: newEmbed,
