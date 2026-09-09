@@ -131,7 +131,7 @@ async function webhook(body, response) {
         }
         
         for (var [key, value] of Object.entries(assets)) {
-          var tempText = text + "[" + value[0] + "](https://www.roblox.com/catalog/" + value[1] + "/)\n"
+          var tempText = text + "- [" + value[0] + "](https://www.roblox.com/catalog/" + value[1] + "/)\n"
           //var tempText = text + "**[" + value[0] + "]** " + value[1] + "\n"
           if (tempText.length > 1024) {
             brokenLoop = key
@@ -143,17 +143,16 @@ async function webhook(body, response) {
 
         var newEmbed = {
           ["title"]: ":shirt: New Outfit",
-          ["footer"]: defaultFooter + " • OutfitId: " + outfitId,
+          ["footer"]: defaultFooter,
           ["thumbnail"]: await shared.getRobloxAvatarPic(userId, 150, "avatar-headshot"),
           ["color"]: 0xBF5C00,
-          ["description"]: ":pager: Name: `" + outfitName + "`\nOutfitId: `" + outfitId + "`",
+          ["description"]: ":pencil: Name: `" + outfitName + "`\n:pager: OutfitId: `" + outfitId + "`",
           ["fields"]: [
             //{ name: ":pager: OutfitId", value: payload2.OutfitId, inline: true },
             { name: ":closed_lock_with_key: Is outfit private?", value: isOutfitPrivate },
             { name: ":billed_cap: Attachments list", value: text }
           ]
         }
-
 
         if (brokenLoop != -1) {
           newEmbed.fields.push({ name: ":warning: Warning", value: "Not enough embed space for entire attachment list." })
@@ -173,7 +172,7 @@ async function webhook(body, response) {
               Embed: newEmbed,
               Images: imageFiles, //paths to files from `temp` folder, deleted after sending
               DeleteImagesAfterSending: true,
-              Text: "New outfit `" + outfitName + "` by " + username + " (" + userId + ")",
+              Text: "New outfit `" + outfitName + "` by [" + username + "](https://www.roblox.com/users/" + userId + "/profile) (" + userId + ")",
             },
           }
         ]
