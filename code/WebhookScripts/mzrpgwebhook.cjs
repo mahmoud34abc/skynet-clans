@@ -21,6 +21,10 @@ var pendingSyncingResponses = {
   TEST: [],
 }
 
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 function makeResponse(bool, message, id, payload) {
   var theResponse = {
     id: id,
@@ -112,7 +116,7 @@ async function webhook(body, response) {
         
         for (var [key, value] of Object.entries(assets)) {
           var {success, pathToFile} = await shared.loadRobloxImageOfAsset(value[1], ".temp/")
-          console.log(success, pathToFile)
+          //console.log(success, pathToFile)
           if (success) {
             imageFiles.push(pathToFile)
             appendedImages += 1
@@ -122,6 +126,8 @@ async function webhook(body, response) {
           } else {
             imageLoadingFailed = true
           }
+
+          await sleep(1000);
         }
         
         for (var [key, value] of Object.entries(assets)) {
