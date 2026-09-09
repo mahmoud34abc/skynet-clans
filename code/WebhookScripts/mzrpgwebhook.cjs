@@ -21,6 +21,8 @@ var pendingSyncingResponses = {
   TEST: [],
 }
 
+var pendingNewOutfits = []
+
 function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
@@ -88,96 +90,18 @@ async function webhook(body, response) {
       }
 
       case "newOutfitCreated": {
-        //payload2.OutfitName
-        //payload2.OutfitId
-        //payload2.OutfitAssets = {
-        // [0]: {"AssetName", AssetId or ImageLink}
-        //}
-        //payload2.IsOutfitPrivate
-        //payload2.UserId
-        //payload2.Username
 
-        
-        var outfitName = payload2.OutfitName
-        var outfitId = payload2.OutfitId
-        var assets = payload2.OutfitAssets
-        
-        var isOutfitPrivate = payload2.IsOutfitPrivate ? "Yes" : "No"
-        var userId = payload2.UserId
-        var username = payload2.Username
-        
-        var text = ""
-        var brokenLoop = -1
-        
-        var imageFiles = []
-        var appendedImages = 0
 
-        var imageLoadingFailed = false
-        
-        for (var [key, value] of Object.entries(assets)) {
-          var {success, pathToFile} = await shared.loadRobloxImageOfAsset(value[1], ".temp/")
-          //console.log(success, pathToFile)
-          if (success) {
-            imageFiles.push(pathToFile)
-            appendedImages += 1
-            if (appendedImages >= 10) {
-              break
-            }
-          } else {
-            imageLoadingFailed = true
-          }
+        const existingIndex = pendingNewOutfits.findIndex(response => response.OutfitId === outfitId);
 
-          await sleep(1000);
-        }
-        
-        for (var [key, value] of Object.entries(assets)) {
-          var tempText = text + "- [" + value[0] + "](https://www.roblox.com/catalog/" + value[1] + "/)\n"
-          //var tempText = text + "**[" + value[0] + "]** " + value[1] + "\n"
-          if (tempText.length > 1024) {
-            brokenLoop = key
-            break;
-          } else {
-            text = tempText
-          }
+        if (existingIndex !== -1) {
+          pendingNewOutfits.splice(existingIndex, 1);
         }
 
-        var newEmbed = {
-          ["title"]: ":shirt: New Outfit",
-          ["footer"]: defaultFooter,
-          ["thumbnail"]: await shared.getRobloxAvatarPic(userId, 150, "avatar-headshot"),
-          ["color"]: 0xBF5C00,
-          ["description"]: ":pencil: Name: `" + outfitName + "`\n:pager: OutfitId: `" + outfitId + "`",
-          ["fields"]: [
-            //{ name: ":pager: OutfitId", value: payload2.OutfitId, inline: true },
-            { name: ":closed_lock_with_key: Is outfit private?", value: isOutfitPrivate },
-            { name: ":billed_cap: Attachments list", value: text }
-          ]
-        }
+        //console.log(payload2)
+        pendingNewOutfits.push(payload2)
 
-        if (brokenLoop != -1) {
-          newEmbed.fields.push({ name: ":warning: Warning", value: "Not enough embed space for entire attachment list." })
-        }
-
-        if (imageLoadingFailed) {
-          newEmbed.fields.push({ name: ":warning: Warning", value: "Failed to load one or more images." })
-        }
-
-        var dataToSend = [
-          {
-            MessageTo: "discordbot.js",
-            Type: "Embed",
-            Payload: {
-              ServerToSendTo: "1540111553456504912",
-              ChannelToSendTo: "1545359563744616510",
-              Embed: newEmbed,
-              Images: imageFiles, //paths to files from `temp` folder, deleted after sending
-              DeleteImagesAfterSending: true,
-              Text: "`" + outfitName + "` by [" + username + "](https://www.roblox.com/users/" + userId + "/profile) (" + userId + ")",
-            },
-          }
-        ]
-        shared.shareData(dataToSend)
-
+        makeResponse(true, "", value.id, {})
         break;
       }
 
@@ -430,6 +354,115 @@ setInterval(() => {
     console.log(hours + ":" + minutes + ":" + seconds + " - Pending - Sync Requests: " + syncRequests + " | Sync Responses: " + syncResponses)
   }
 }, 1000 * 60 * 10);
+
+var isActivelySendingOutfits = false
+
+setInterval(async() => {
+  if (pendingNewOutfits.length <= 0) {
+    if (isActivelySendingOutfits) {
+      isActivelySendingOutfits = false
+      console.log("Finished notifying about new outfits")
+    }
+  }
+
+  for (let i = 0; i < pendingNewOutfits.length; i++) {
+    if (!isActivelySendingOutfits) {
+      isActivelySendingOutfits = true;
+    }
+
+    var payload2 = pendingNewOutfits.shift()
+
+    //payload2.OutfitName
+    //payload2.OutfitId
+    //payload2.OutfitAssets = {
+    // [0]: {"AssetName", AssetId or ImageLink}
+    //}
+    //payload2.IsOutfitPrivate
+    //payload2.UserId
+    //payload2.Username
+
+
+    var outfitName = payload2.OutfitName
+    var outfitId = payload2.OutfitId
+    var assets = payload2.OutfitAssets
+
+    var isOutfitPrivate = payload2.IsOutfitPrivate ? "Yes" : "No"
+    var userId = payload2.UserId
+    var username = payload2.Username
+
+    var text = ""
+    var brokenLoop = -1
+
+    var imageFiles = []
+    var appendedImages = 0
+
+    var imageLoadingFailed = false
+
+    for (var [key, value] of Object.entries(assets)) {
+      var { success, pathToFile } = await shared.loadRobloxImageOfAsset(value[1], ".temp/")
+      //console.log(success, pathToFile)
+      if (success) {
+        imageFiles.push(pathToFile)
+        appendedImages += 1
+        if (appendedImages >= 10) {
+          break
+        }
+      } else {
+        imageLoadingFailed = true
+      }
+
+      await sleep(1000);
+    }
+
+    for (var [key, value] of Object.entries(assets)) {
+      var tempText = text + "- [" + value[0] + "](https://www.roblox.com/catalog/" + value[1] + "/)\n"
+      //var tempText = text + "**[" + value[0] + "]** " + value[1] + "\n"
+      if (tempText.length > 1024) {
+        brokenLoop = key
+        break;
+      } else {
+        text = tempText
+      }
+    }
+
+    var newEmbed = {
+      ["title"]: ":shirt: New Outfit",
+      ["footer"]: defaultFooter,
+      ["thumbnail"]: await shared.getRobloxAvatarPic(userId, 150, "avatar-headshot"),
+      ["color"]: 0xBF5C00,
+      ["description"]: ":pencil: Name: `" + outfitName + "`\n:pager: OutfitId: `" + outfitId + "`",
+      ["fields"]: [
+        //{ name: ":pager: OutfitId", value: payload2.OutfitId, inline: true },
+        { name: ":closed_lock_with_key: Is outfit private?", value: isOutfitPrivate },
+        { name: ":billed_cap: Attachments list", value: text }
+      ]
+    }
+
+    if (brokenLoop != -1) {
+      newEmbed.fields.push({ name: ":warning: Warning", value: "Not enough embed space for entire attachment list." })
+    }
+
+    if (imageLoadingFailed) {
+      newEmbed.fields.push({ name: ":warning: Warning", value: "Failed to load one or more images." })
+    }
+
+    var dataToSend = [
+      {
+        MessageTo: "discordbot.js",
+        Type: "Embed",
+        Payload: {
+          ServerToSendTo: "1540111553456504912",
+          ChannelToSendTo: "1545359563744616510",
+          Embed: newEmbed,
+          Images: imageFiles, //paths to files from `temp` folder, deleted after sending
+          DeleteImagesAfterSending: true,
+          Text: "`" + outfitName + "` by [" + username + "](https://www.roblox.com/users/" + userId + "/profile) (" + userId + ")",
+        },
+      }
+    ]
+    shared.shareData(dataToSend)
+  }
+}, 1000 * 1);
 
 module.exports = {
   init: init,
