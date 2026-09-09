@@ -125,7 +125,7 @@ async function webhook(body, response) {
         }
         
         for (var [key, value] of Object.entries(assets)) {
-          var tempText = text + "[" + value[0] + "](" + value[1] + ")\n"
+          var tempText = text + "[" + value[0] + "](https://www.roblox.com/catalog/" + value[1] + "/)\n"
           //var tempText = text + "**[" + value[0] + "]** " + value[1] + "\n"
           if (tempText.length > 1024) {
             brokenLoop = key
