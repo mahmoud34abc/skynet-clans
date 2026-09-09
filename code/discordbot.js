@@ -513,48 +513,51 @@ async function handleSharedData(data) {
     if (data.MessageTo == "discordbot.js") {
         switch (data.Type) {
             case "Embed": {
-                var guildId = data.Payload.ServerToSendTo
-                var channelId = data.Payload.ChannelToSendTo
-                var extraText = data.Payload.Text
-                var embedable = data.Payload.Embed
-                var embed = embedMessage(embedable)
+                return new Promise((resolve, reject) => {
+                    var guildId = data.Payload.ServerToSendTo
+                    var channelId = data.Payload.ChannelToSendTo
+                    var extraText = data.Payload.Text
+                    var embedable = data.Payload.Embed
+                    var embed = embedMessage(embedable)
 
-                var imagePaths = data.Payload.Images || []
-                var deleteAfter = data.Payload.DeleteImagesAfterSending
+                    var imagePaths = data.Payload.Images || []
+                    var deleteAfter = data.Payload.DeleteImagesAfterSending
 
-                var existingPaths = []
-                for (const p of imagePaths) {
-                    try {
-                        await fs.promises.access(p, fs.constants.F_OK)
-                        existingPaths.push(p)
-                    } catch {
-                        console.warn(`[Embed] Skipping missing image file: ${p}`)
-                    }
-                }
-
-                var attachments = existingPaths.map(p => new AttachmentBuilder(p, { name: path.basename(p) }))
-
-                var guild = await client.guilds.fetch(guildId);
-                var channel = await guild.channels.fetch(channelId);
-
-                var sendOptions = { embeds: [embed], files: attachments }
-                if (extraText !== null) {
-                    sendOptions.content = extraText
-                }
-
-                try {
-                    await channel.send(sendOptions);
-                } catch (err) {
-                    console.error("Failed to send embed:", err);
-                } finally {
-                    if (deleteAfter) {
-                        for (const p of existingPaths) {
-                            fs.promises.unlink(p).catch(err => {
-                                if (err.code !== 'ENOENT') console.warn(`Failed to delete ${p}:`, err);
-                            });
+                    var existingPaths = []
+                    for (const p of imagePaths) {
+                        try {
+                            await fs.promises.access(p, fs.constants.F_OK)
+                            existingPaths.push(p)
+                        } catch {
+                            console.warn(`[Embed] Skipping missing image file: ${p}`)
                         }
                     }
-                }
+
+                    var attachments = existingPaths.map(p => new AttachmentBuilder(p, { name: path.basename(p) }))
+
+                    var guild = await client.guilds.fetch(guildId);
+                    var channel = await guild.channels.fetch(channelId);
+
+                    var sendOptions = { embeds: [embed], files: attachments }
+                    if (extraText !== null) {
+                        sendOptions.content = extraText
+                    }
+
+                    try {
+                        await channel.send(sendOptions);
+                    } catch (err) {
+                        console.error("Failed to send embed:", err);
+                    } finally {
+                        if (deleteAfter) {
+                            for (const p of existingPaths) {
+                                fs.promises.unlink(p).catch(err => {
+                                    if (err.code !== 'ENOENT') console.warn(`Failed to delete ${p}:`, err);
+                                });
+                            }
+                        }
+                    }
+                    resolve()
+                })
                 break;
             }
 
