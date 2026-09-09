@@ -522,7 +522,17 @@ async function handleSharedData(data) {
                 var imagePaths = data.Payload.Images || []
                 var deleteAfter = data.Payload.DeleteImagesAfterSending
 
-                var attachments = imagePaths.map(p => new AttachmentBuilder(p, { name: path.basename(p) }))
+                var existingPaths = []
+                for (const p of imagePaths) {
+                    try {
+                        await fs.promises.access(p, fs.constants.F_OK)
+                        existingPaths.push(p)
+                    } catch {
+                        console.warn(`[Embed] Skipping missing image file: ${p}`)
+                    }
+                }
+
+                var attachments = existingPaths.map(p => new AttachmentBuilder(p, { name: path.basename(p) }))
 
                 var guild = await client.guilds.fetch(guildId);
                 var channel = await guild.channels.fetch(channelId);
@@ -534,16 +544,17 @@ async function handleSharedData(data) {
 
                 try {
                     await channel.send(sendOptions);
+                } catch (err) {
+                    console.error("Failed to send embed:", err);
                 } finally {
                     if (deleteAfter) {
-                        for (const p of imagePaths) {
-                            fs.unlink(p, (err) => {
-                                if (err) console.warn(`Failed to delete ${p}:`, err);
+                        for (const p of existingPaths) {
+                            fs.promises.unlink(p).catch(err => {
+                                if (err.code !== 'ENOENT') console.warn(`Failed to delete ${p}:`, err);
                             });
                         }
                     }
                 }
-                
                 break;
             }
 

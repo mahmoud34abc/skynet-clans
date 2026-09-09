@@ -10,6 +10,7 @@ const app = express();
 
 const fs = require('fs');
 const path = require('path');
+const { randomUUID } = require('crypto');
 
 
 app.disable('x-powered-by'); //safety
@@ -383,7 +384,7 @@ async function loadRobloxImageOfAsset(assetId, pathToDownloadAt) { //return succ
   const imageUrl = data.data[0].imageUrl;
 
   try {
-    const filePath = await downloadFileTo(imageUrl, path.join(pathToDownloadAt, `${assetId}.png`));
+    const filePath = await downloadFileTo(imageUrl, path.join(pathToDownloadAt, `${assetId}_${randomUUID()}.png`));
     return { success: true, pathToFile: filePath };
   } catch (err) {
     console.warn('Failed to download image:', err);
