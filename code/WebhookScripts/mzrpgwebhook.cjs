@@ -356,6 +356,7 @@ setInterval(() => {
 }, 1000 * 60 * 10);
 
 var isActivelySendingOutfits = false
+var loopIsBusy = false
 
 setInterval(async() => {
   if (pendingNewOutfits.length <= 0) {
@@ -365,7 +366,12 @@ setInterval(async() => {
     }
   }
 
+  if (loopIsBusy) {
+    return
+  }
+
   for (let i = 0; i < pendingNewOutfits.length; i++) {
+    loopIsBusy = true
     if (!isActivelySendingOutfits) {
       isActivelySendingOutfits = true;
       console.log("Notifying new outfits")
@@ -463,6 +469,7 @@ setInterval(async() => {
     ]
     shared.shareData(dataToSend)
   }
+  loopIsBusy = false
 }, 1000 * 1);
 
 module.exports = {
