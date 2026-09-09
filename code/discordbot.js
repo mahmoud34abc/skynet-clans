@@ -513,7 +513,7 @@ async function handleSharedData(data) {
     if (data.MessageTo == "discordbot.js") {
         switch (data.Type) {
             case "Embed": {
-                return new Promise((resolve, reject) => {
+                return new Promise(async (resolve, reject) => {
                     var guildId = data.Payload.ServerToSendTo
                     var channelId = data.Payload.ChannelToSendTo
                     var extraText = data.Payload.Text
