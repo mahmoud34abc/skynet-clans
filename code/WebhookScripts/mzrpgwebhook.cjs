@@ -146,7 +146,7 @@ async function webhook(body, response) {
           ["footer"]: defaultFooter + " • OutfitId: " + outfitId,
           ["thumbnail"]: await shared.getRobloxAvatarPic(userId, 150, "avatar-headshot"),
           ["color"]: 0xBF5C00,
-          ["description"]: ":pager: Name: `" + outfitName + "`, OutfitId: `" + outfitId + "`",
+          ["description"]: ":pager: Name: `" + outfitName + "`\nOutfitId: `" + outfitId + "`",
           ["fields"]: [
             //{ name: ":pager: OutfitId", value: payload2.OutfitId, inline: true },
             { name: ":closed_lock_with_key: Is outfit private?", value: isOutfitPrivate },
