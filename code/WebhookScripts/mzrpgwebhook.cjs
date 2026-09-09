@@ -368,6 +368,7 @@ setInterval(async() => {
   for (let i = 0; i < pendingNewOutfits.length; i++) {
     if (!isActivelySendingOutfits) {
       isActivelySendingOutfits = true;
+      console.log("Notifying new outfits")
     }
 
     var payload2 = pendingNewOutfits.shift()
