@@ -120,7 +120,7 @@ async function webhook(body, response) {
           if (success) {
             imageFiles.push(pathToFile)
             appendedImages += 1
-            if (appendedImages >= 9) {
+            if (appendedImages >= 10) {
               break
             }
           } else {
@@ -172,7 +172,7 @@ async function webhook(body, response) {
               Embed: newEmbed,
               Images: imageFiles, //paths to files from `temp` folder, deleted after sending
               DeleteImagesAfterSending: true,
-              Text: "New outfit `" + outfitName + "` by [" + username + "](https://www.roblox.com/users/" + userId + "/profile) (" + userId + ")",
+              Text: "`" + outfitName + "` by [" + username + "](https://www.roblox.com/users/" + userId + "/profile) (" + userId + ")",
             },
           }
         ]
