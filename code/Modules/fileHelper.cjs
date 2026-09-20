@@ -58,11 +58,25 @@ function openWriteStream(filePath) {
     }
 }
 
+async function promiseAccess(filePath, mode) {
+    try {
+        await fs.promises.access(filePath, fs.constants[mode])
+        return filePath;
+    } catch(err) {
+        console.warn(`Error while accessing path ${filePath}: ${err}`)
+        return null;
+    }
+}
+
 module.exports = {
     doesFolderOrFileExist,
     getFileSize,
+    
+    openWriteStream,
     removeFile,
+
     makeFolder,
     removeFolder,
-    openWriteStream
+    
+    promiseAccess
 }

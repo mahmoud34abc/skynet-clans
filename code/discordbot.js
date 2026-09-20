@@ -2,9 +2,9 @@
 import { createRequire } from 'module';
 const require = createRequire(import.meta.url);
 const path = require('path');
-const fs = require('fs');
-//const fs = require('node:fs');
 const { Client, GatewayIntentBits, EmbedBuilder, MessageEmbed, AttachmentBuilder, Intents } = require('discord.js');
+
+const { promiseAccess, removeFile } = require('./Modules/fileHelper.cjs');
 
 const isUpdatedDiscord = process.env.UPDATEDDISCORD == "true";
 const botPrefix = "c!"
@@ -522,12 +522,12 @@ async function handleSharedData(data) {
                     var deleteAfter = data.Payload.DeleteImagesAfterSending
 
                     var existingPaths = []
-                    for (const p of imagePaths) {
+                    for (const filePath of imagePaths) {
                         try {
-                            await fs.promises.access(p, fs.constants.F_OK)
-                            existingPaths.push(p)
+                            await promiseAccess(filePath, "F_OK")
+                            existingPaths.push(filePath)
                         } catch {
-                            console.warn(`[Embed] Skipping missing image file: ${p}`)
+                            console.warn(`[Embed] Skipping missing image file: ${filePath}`)
                         }
                     }
 
@@ -547,10 +547,8 @@ async function handleSharedData(data) {
                         console.error("Failed to send embed:", err);
                     } finally {
                         if (deleteAfter) {
-                            for (const p of existingPaths) {
-                                fs.promises.unlink(p).catch(err => {
-                                    if (err.code !== 'ENOENT') console.warn(`Failed to delete ${p}:`, err);
-                                });
+                            for (const filePath of existingPaths) {
+                                removeFile(filePath);
                             }
                         }
                     }
