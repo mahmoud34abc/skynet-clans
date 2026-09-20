@@ -438,7 +438,7 @@ async function loadRobloxImageOfAsset(assetId) { //return success, pathToFile
 
   if (!success || statusCode != 200 || !data || !data.data || data.data.length === 0) {
     if (statusCode == 429) {
-      console.warn('Rate limited; ' + response);
+      console.warn('Rate limited; ' + response.headers['retry-after']);
       return await setTimeout(loadRobloxImageOfAsset, 1000, assetId);
     }
     return { success: false, pathToFile: null }
