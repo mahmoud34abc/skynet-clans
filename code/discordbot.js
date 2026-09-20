@@ -21,6 +21,10 @@ function getClient() {
                 GatewayIntentBits.GuildMessages,
                 GatewayIntentBits.MessageContent,
             ],
+            rest: {
+                timeout: 30000, //increased from 10s
+                retries: 3
+            },
         });
     } else {
         return new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES, Intents.FLAGS.MESSAGE_CONTENT] });

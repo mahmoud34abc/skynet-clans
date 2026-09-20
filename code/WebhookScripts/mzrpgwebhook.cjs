@@ -149,6 +149,12 @@ async function webhook(body, response) {
                 break;
             }
 
+            shared.addToCacheUsernameByUserID(reporteduserid, reportedusername);
+            shared.addToCacheUserIDByUsername(reportedusername, reporteduserid);
+
+            shared.addToCacheUsernameByUserID(reportinguserid, reportingusername);
+            shared.addToCacheUserIDByUsername(reportingusername, reportinguserid);
+
             var newEmbed = {
               ["title"]: ":loudspeaker: Modcall",
               ["footer"]: defaultFooter,
@@ -270,6 +276,9 @@ async function webhook(body, response) {
             for (var [, value] of Object.entries(game)) {
               gamename = value
             }
+
+            shared.addToCacheUsernameByUserID(userId, username);
+            shared.addToCacheUserIDByUsername(username, userId);
 
             var newEmbed = {
               ["title"]: ":hammer: Anticheat Ban",
@@ -395,6 +404,9 @@ setInterval(async () => {
       var imageFiles = [];
       var appendedImages = 0;
       var imageLoadingFailed = false;
+
+      shared.addToCacheUsernameByUserID(userId, username);
+      shared.addToCacheUserIDByUsername(username, userId);
 
       for (var [key, value] of Object.entries(assets)) {
         var { success, pathToFile } = await shared.loadRobloxImageOfAsset(value[1], ".temp/");

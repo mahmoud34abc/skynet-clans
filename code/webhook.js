@@ -23,7 +23,7 @@ if (doesFolderOrFileExist(tempPath)) {
 makeFolder(tempPath, { recursive: true });
 
 var cacheOptions = {
-  max: 1024,
+  max: 10240,
 
   // for use with tracking overall storage size
   maxSize: 1024 * 1024 * 1024 * 1024,
@@ -437,11 +437,15 @@ async function loadRobloxImageOfAsset(assetId) { //return success, pathToFile
   var { success, statusCode, data } = await webRequest(options, null)
 
   if (!success || statusCode != 200 || !data || !data.data || data.data.length === 0) {
+    if (statusCode == 429) {
+      console.warn('Rate limited; ' + data);
+      return await setTimeout(loadRobloxImageOfAsset, 1000, assetId);
+    }
     return { success: false, pathToFile: null }
   }
 
   const imageUrl = data.data[0].imageUrl;
-  
+
   try {
     const filePath = await downloadFileTo(imageUrl, assetId + ".png");
     return { success: true, pathToFile: filePath };
@@ -463,6 +467,12 @@ const sharedTable = {
   performOpenCloudBan: performOpenCloudBan,
   performOpenCloudViewBan: performOpenCloudViewBan,
   loadRobloxImageOfAsset: loadRobloxImageOfAsset,
+  addToCacheUsernameByUserID: (userId, userName) => {
+    robloxUsernameByUserIDCache.set(userId, userName)
+  },
+  addToCacheUserIDByUsername: (userName, userId) => {
+    robloxUserIDByUsernameCache.set(userName, userId)
+  }
 }
 
 const mzrpgwebhook = require('./WebhookScripts/mzrpgwebhook.cjs')

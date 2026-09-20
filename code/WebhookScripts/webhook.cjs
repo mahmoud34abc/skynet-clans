@@ -92,6 +92,12 @@ async function webhook(body, response) {
                 break;
             }
 
+            shared.addToCacheUsernameByUserID(reporteduserid, reportedusername);
+            shared.addToCacheUserIDByUsername(reportedusername, reporteduserid);
+
+            shared.addToCacheUsernameByUserID(reportinguserid, reportingusername);
+            shared.addToCacheUserIDByUsername(reportingusername, reportinguserid);
+
             var newEmbed = {
               ["title"]: ":loudspeaker: Modcall",
               ["footer"]: defaultFooter,
@@ -214,6 +220,10 @@ async function webhook(body, response) {
               gamename = value
             }
 
+            shared.addToCacheUsernameByUserID(userId, username);
+            shared.addToCacheUserIDByUsername(username, userId);
+
+
             var newEmbed = {
               ["title"]: ":hammer: Anticheat Ban",
               ["thumbnail"]: await shared.getRobloxAvatarPic(userId, 150, "avatar-headshot"),
@@ -283,6 +293,9 @@ async function webhook(body, response) {
                 gameid = "7120086775"
                 break;
             }
+
+            shared.addToCacheUsernameByUserID(reporteduserid, reportedusername);
+            shared.addToCacheUserIDByUsername(reportedusername, reporteduserid);
 
             var newEmbed = {
               ["title"]: ":loudspeaker: Suspicion Report",

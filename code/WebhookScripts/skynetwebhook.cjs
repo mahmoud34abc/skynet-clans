@@ -28,6 +28,9 @@ async function webhook(body, response) {
       }
     }
 
+    shared.addToCacheUsernameByUserID(userid, username);
+    shared.addToCacheUserIDByUsername(username, userid);
+
     if (requestCorrect == true) {
       var channeltosend
       var gamename
