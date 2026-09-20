@@ -61,11 +61,13 @@ async function spawnScript(filePath) {
 
   console.log(`Starting script: ${scriptName}`);
   
+  const envPath = path.resolve(__dirname, '.env');
+
   const child = fork(filePath, [], {
+    execArgv: fs.existsSync(envPath) ? [`--env-file=${envPath}`] : [],
     stdio: ['pipe', 'pipe', 'pipe', 'ipc'],
     env: { ...process.env, CHILD_SCRIPT: 'true' }
   });
-
   // Store process info
   processes[scriptName] = {
     child: child,
