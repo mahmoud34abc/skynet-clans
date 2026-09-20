@@ -7,15 +7,14 @@
   "//description": "Skynet Clans Roblox and Discord Handler",
   "main": "start.js",
   "scripts": {
-    "start": "node start.js --experimental-modules"
+    "start": "node --env-file=.env --experimental-modules start.js"
   },
   "type": "module",
   "dependencies": {
+    "compression": "^1.8.2",
     "discord.js": "^14.27.0",
     "express": "^5.2.1",
-    "express-useragent": "^2.2.1",
-    "compression": "^1.8.1",
-    "varlock": "^1.16.1"
+    "lru-cache": "^11.5.2"
   },
   "engines": {
     "node": "24.X"
@@ -24,5 +23,10 @@
     "url": "https://glitch.com/edit/#!/hello-sqlite"
   },
   "license": "MIT",
-  "keywords": []
+  "keywords": [],
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "eslint": "^10.11.0",
+    "globals": "^17.12.0"
+  }
 }

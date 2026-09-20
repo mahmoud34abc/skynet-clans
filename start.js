@@ -1,9 +1,8 @@
 import { createRequire } from 'module';
 const require = createRequire(import.meta.url);
+const path = require('path');
 const fs = require('fs');
-const { spawn } = require('child_process');
-import 'varlock/auto-load'; //new env loader
-//require('dotenv').config(); //loading env
+const { execSync, fork, spawn } = require('child_process');
 
 import { fileURLToPath } from 'url';
 import { dirname, join, basename } from 'path';
@@ -59,11 +58,10 @@ async function spawnScript(filePath) {
     scriptColor = SCRIPT_COLORS[scriptColorIndex++ % SCRIPT_COLORS.length];
   }
   const prefix = `${scriptColor}[${scriptName}]${COLORS.reset}`;
-  const errorPrefix = `${COLORS.red}[${scriptName}]${COLORS.reset}`;
 
   console.log(`Starting script: ${scriptName}`);
   
-  const child = spawn('node', [filePath], {
+  const child = fork(filePath, [], {
     stdio: ['pipe', 'pipe', 'pipe', 'ipc'],
     env: { ...process.env, CHILD_SCRIPT: 'true' }
   });
@@ -182,13 +180,12 @@ async function startNgrok() {
 
     switch(platform) {
       case "Windows":
-        ngrok = spawn('ngrokwin', ['http','--url=' + process.env.NGROK_URL, port, '--pooling-enabled'])
+        ngrok = spawn(path.resolve('./ngrokwin.exe'), ['http','--url=' + process.env.NGROK_URL, String(port), '--pooling-enabled'])
       break;
       
       case "Linux":
-        const { execSync } = require('child_process');
         execSync('chmod u+x ./ngroklinux');
-        ngrok = spawn('./ngroklinux', ['http','--url=' + process.env.NGROK_URL, port, '--pooling-enabled'])
+        ngrok = spawn(path.resolve('./ngroklinux'), ['http','--url=' + process.env.NGROK_URL, port, '--pooling-enabled'])
       break;
     }
 
@@ -241,6 +238,7 @@ process.on('exit', () => {
 });
 
 // Handle Ctrl+C
+
 process.on('SIGINT', () => {
   console.log('\nReceived SIGINT - shutting down');
   process.exit();

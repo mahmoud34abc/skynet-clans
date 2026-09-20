@@ -10,7 +10,6 @@ const client = new Client({
   ],
 });
 const express = require("express");
-const useragent = require('express-useragent');
 const prefix = "m!"
 //const Conf = require("conf");
 //const config = new Conf();

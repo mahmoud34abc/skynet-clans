@@ -114,11 +114,11 @@ async function webhook(body, response) {
             var reporteduser = modcallpayload.reporteduser //the user that as reported
             var reportinguser = modcallpayload.reportinguser //the user that reported
             var reportreason = modcallpayload.reportreason //the reason for reporting
-            var isFlagged = modcallpayload.isFlagged
+            //var isFlagged = modcallpayload.isFlagged
             var game = modcallpayload.game //used to indicate the game
             var placeid = modcallpayload.placeid
             var jobid = modcallpayload.jobid
-            var suspicionpercent = modcallpayload.suspicionpercent
+            //var suspicionpercent = modcallpayload.suspicionpercent
             //var reportdetails = modcallpayload.reportdetails //which mod joined
             var reportingusername
             var reportinguserid

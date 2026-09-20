@@ -1,17 +1,81 @@
 //webhook handling for roblox
 import { createRequire } from 'module';
+import { LRUCache } from 'lru-cache'
 
 const require = createRequire(import.meta.url);
-const https = require("https")
 const express = require("express");
 const querystring = require('querystring');
 const compression = require('compression');
 const app = express();
 
-const fs = require('fs');
 const path = require('path');
-const { randomUUID } = require('crypto');
 
+const { doesFolderOrFileExist, getFileSize, removeFile, makeFolder, openWriteStream, removeFolder } = require('./Modules/fileHelper.cjs');
+const { httpGet, httpRequest, setDefaultRequestOptions } = require('./Modules/webHelper.cjs');
+
+var tempPath = path.resolve(".temp")
+
+//console.log(tempPath)
+
+if (doesFolderOrFileExist(tempPath)) {
+  removeFolder(tempPath);
+}
+makeFolder(tempPath, { recursive: true });
+
+var cacheOptions = {
+  max: 1024,
+
+  // for use with tracking overall storage size
+  maxSize: 1024 * 1024 * 1024 * 1024,
+  sizeCalculation: (value) => {
+    if (doesFolderOrFileExist(path.join(value))) {
+      return getFileSize(path.join(value));
+    }
+    return 1
+  },
+
+  // for use when you need to clean up something when objects
+  // are evicted from the cache
+  dispose: (value) => {
+    if (doesFolderOrFileExist(path.join(value))) {
+      removeFile(path.join(value));
+    }
+  },
+
+  // for use when you need to know that an item is being inserted
+  // note that this does NOT allow you to prevent the insertion,
+  // it just allows you to know about it.
+  //onInsert: (value, key, reason) => {
+  //  logInsertionOrWhatever(key, value)
+  //},
+
+  // how long to live in ms
+  ttl: 1000 * 60 * 60 * 24,
+
+  // return stale items before removing from cache?
+  allowStale: false,
+
+  updateAgeOnGet: true,
+  updateAgeOnHas: false,
+
+  // async method to use for cache.fetch(), for
+  // stale-while-revalidate type of behavior
+  //fetchMethod: async (key, staleValue, { options, signal, context }) => {},
+}
+
+const catalogItemImageCache = new LRUCache(cacheOptions)
+
+cacheOptions.maxSize = 1024
+cacheOptions.sizeCalculation = () => {
+  return 1;
+}
+cacheOptions.dispose = undefined
+cacheOptions.ttl = 1000 * 60 * 60
+cacheOptions.updateAgeOnGet = false
+
+const robloxUserIDByUsernameCache = new LRUCache(cacheOptions)
+const robloxUsernameByUserIDCache = new LRUCache(cacheOptions)
+const robloxProfileImageCache = new LRUCache(cacheOptions)
 
 app.disable('x-powered-by'); //safety
 app.use(compression());
@@ -43,13 +107,15 @@ var commonWebRequestOptions = {
   headers: commonOpenCloudHeaders
 }
 
+setDefaultRequestOptions(commonWebRequestOptions)
+
 async function webRequest(options, requestBodyString) {
   return new Promise((resolve) => {
     if (requestBodyString) {
       options.headers = { ...options.headers, 'Content-Length': Buffer.byteLength(requestBodyString) }
     }
 
-    var req = https.request(options, res => {
+    var req = httpRequest(options, res => {
       let data = '';
 
       res.setEncoding('utf8');
@@ -93,41 +159,36 @@ async function webRequest(options, requestBodyString) {
   })
 }
 
-async function downloadFileTo(url, destPath) {
+async function downloadFileTo(url, assetId) {
   return new Promise((resolve, reject) => {
-    fs.mkdirSync(path.dirname(destPath), { recursive: true });
+    var filePath = path.join(tempPath, `${assetId}.png`);
+    makeFolder(path.dirname(filePath), { recursive: true });
 
-    https.get(url, (res) => {
+    httpGet(url, (res) => {
       if (res.statusCode !== 200) {
         res.resume(); // drain
         reject(new Error(`Failed to download, status ${res.statusCode}`));
         return;
       }
 
-      const fileStream = fs.createWriteStream(destPath);
+      const fileStream = openWriteStream(filePath);
       res.pipe(fileStream);
 
       fileStream.on('finish', () => {
-        fileStream.close(() => resolve(destPath));
+        catalogItemImageCache.set(assetId, filePath);
+        fileStream.close(() => resolve(filePath));
       });
 
       fileStream.on('error', (err) => {
-        fs.unlink(destPath, () => reject(err));
+        removeFile(filePath, () => reject(err));
       });
     }).on('error', reject);
   });
 }
 
-
-var robloxAvatarPicCache = {}
-var robloxAvatarPicCacheTimeTable = {}
-var robloxAvatarPicCacheTimeout = 1000 * 60 * 60 * 0.5
-var userIdCache = {}
-var userNameCache = {}
-
 async function getRobloxAvatarPic(userid, size, type) {
   if (userid == undefined || size == undefined || type == undefined) {
-    return new Promise(async (resolve) => {
+    return new Promise((resolve) => {
       resolve("https://media.discordapp.net/attachments/846381103349628938/1424126341112008754/image.png")
     })
   }
@@ -135,13 +196,8 @@ async function getRobloxAvatarPic(userid, size, type) {
   var cacheName = userid.toString() + type + size.toString()
   //console.log(cacheName)
 
-  if (robloxAvatarPicCacheTimeTable[cacheName] && Date.now() - robloxAvatarPicCacheTimeTable[cacheName] > robloxAvatarPicCacheTimeout) {
-    delete robloxAvatarPicCache[cacheName];
-    delete robloxAvatarPicCacheTimeTable[cacheName];
-  }
-
-  if (robloxAvatarPicCache[cacheName]) {
-    return robloxAvatarPicCache[cacheName]
+  if (robloxProfileImageCache.has(cacheName)) {
+    return robloxProfileImageCache.get(cacheName)
   }
 
   return new Promise(async (resolve) => {
@@ -160,8 +216,7 @@ async function getRobloxAvatarPic(userid, size, type) {
 
     if (success && statusCode == 200 && ((data !== undefined && data !== null) && data.data !== undefined)) {
       var imageUrl1 = data.data[0].imageUrl
-      robloxAvatarPicCache[cacheName] = imageUrl1
-      robloxAvatarPicCacheTimeTable[cacheName] = Date.now()
+      robloxProfileImageCache.set(cacheName, imageUrl1)
       resolve(imageUrl1)
     } else {
       resolve("https://media.discordapp.net/attachments/846381103349628938/1424126341112008754/image.png")
@@ -205,8 +260,8 @@ function getUserType(userIdOrName) {
 }
 
 async function getRobloxUsername(userId) {
-  if (userNameCache[userId]) {
-    return userNameCache[userId]
+  if (robloxUsernameByUserIDCache.has(userId)) {
+    return robloxUsernameByUserIDCache.get(userId)
   }
 
   var options = { ...commonWebRequestOptions }
@@ -220,15 +275,15 @@ async function getRobloxUsername(userId) {
     return "N/A"
   };
 
-  userNameCache[userId] = data.name
-  userIdCache[data.name] = userId
+  robloxUsernameByUserIDCache.set(userId, data.name)
+  robloxUserIDByUsernameCache.set(data.name, userId)
 
   return data.name
 }
 
 async function getRobloxUserId(userName) {
-  if (userIdCache[userName]) {
-    return userIdCache[userName]
+  if (robloxUserIDByUsernameCache.has(userName)) {
+    return robloxUserIDByUsernameCache.get(userName)
   }
 
   var responseBodyString = JSON.stringify({ usernames: [userName], excludeBannedUsers: false })
@@ -247,8 +302,8 @@ async function getRobloxUserId(userName) {
 
   if (!data || data.data.length === 0) return "#USERNOTFOUND";
 
-  userIdCache[userName] = data.data[0].id
-  userNameCache[data.data[0].id] = userName
+  robloxUserIDByUsernameCache.set(userName, data.data[0].id)
+  robloxUsernameByUserIDCache.set(data.data[0].id, userName)
 
   return data.data[0].id; // { id, name, displayName }
 }
@@ -370,7 +425,7 @@ async function performOpenCloudBan(userId, gameName, banType, banReason, issuedB
   openCloudFunction("PATCH", requestPath, requestBody, callbackFunction)
 }
 
-async function loadRobloxImageOfAsset(assetId, pathToDownloadAt) { //return success, pathToFile
+async function loadRobloxImageOfAsset(assetId) { //return success, pathToFile
   var options = { ...commonWebRequestOptions }
   options.hostname = "thumbnails.roblox.com"
   options.path = "/v1/assets?assetIds=" + assetId + "&size=420x420&format=png&isCircular=false"
@@ -383,8 +438,12 @@ async function loadRobloxImageOfAsset(assetId, pathToDownloadAt) { //return succ
 
   const imageUrl = data.data[0].imageUrl;
 
+  if (catalogItemImageCache.has(assetId)) {
+    return { success: true, pathToFile: catalogItemImageCache.get(assetId) };
+  }
+
   try {
-    const filePath = await downloadFileTo(imageUrl, path.join(pathToDownloadAt, `${assetId}_${randomUUID()}.png`));
+    const filePath = await downloadFileTo(imageUrl, assetId + ".png");
     return { success: true, pathToFile: filePath };
   } catch (err) {
     console.warn('Failed to download image:', err);
