@@ -388,6 +388,7 @@ setInterval(async () => {
     }
 
     while (pendingNewOutfits.length > 0) {
+      var timeStart = Date.now();
       var payload2 = pendingNewOutfits.shift();
 
       var outfitName = payload2.OutfitName;
@@ -429,10 +430,12 @@ setInterval(async () => {
           text = tempText;
         }
       }
+      
+      var timeEnd = Date.now();
 
       var newEmbed = {
         title: ":shirt: New Outfit",
-        footer: defaultFooter,
+        footer: defaultFooter + " • Took " + (timeEnd - timeStart) + "ms",
         thumbnail: await shared.getRobloxAvatarPic(userId, 150, "avatar-headshot"),
         color: 0xBF5C00,
         description: ":pencil: Name: `" + outfitName + "`\n:pager: OutfitId: `" + outfitId + "`",
@@ -448,6 +451,7 @@ setInterval(async () => {
       if (imageLoadingFailed) {
         newEmbed.fields.push({ name: ":warning: Warning", value: "Failed to load one or more images." });
       }
+
 
       var dataToSend = [
         {
