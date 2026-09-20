@@ -141,7 +141,7 @@ async function webRequest(options, requestBodyString) {
         } else {
           //console.log(parsedData)
           console.warn(options.path, res.statusCode, data)
-          resolve({ success: false, statusCode: res.statusCode, data: data.code + "; " + data.message })
+          resolve({ success: false, statusCode: res.statusCode, data: data.code + "; " + data.message, response: res })
           return
         }
       });
@@ -434,11 +434,11 @@ async function loadRobloxImageOfAsset(assetId) { //return success, pathToFile
   options.hostname = "thumbnails.roblox.com"
   options.path = "/v1/assets?assetIds=" + assetId + "&size=420x420&format=png&isCircular=false"
 
-  var { success, statusCode, data } = await webRequest(options, null)
+  var { success, statusCode, data, res } = await webRequest(options, null)
 
   if (!success || statusCode != 200 || !data || !data.data || data.data.length === 0) {
     if (statusCode == 429) {
-      console.warn('Rate limited; ' + data);
+      console.warn('Rate limited; ' + res);
       return await setTimeout(loadRobloxImageOfAsset, 1000, assetId);
     }
     return { success: false, pathToFile: null }
