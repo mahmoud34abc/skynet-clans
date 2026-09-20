@@ -434,11 +434,11 @@ async function loadRobloxImageOfAsset(assetId) { //return success, pathToFile
   options.hostname = "thumbnails.roblox.com"
   options.path = "/v1/assets?assetIds=" + assetId + "&size=420x420&format=png&isCircular=false"
 
-  var { success, statusCode, data, res } = await webRequest(options, null)
+  var { success, statusCode, data, response } = await webRequest(options, null)
 
   if (!success || statusCode != 200 || !data || !data.data || data.data.length === 0) {
     if (statusCode == 429) {
-      console.warn('Rate limited; ' + res);
+      console.warn('Rate limited; ' + response);
       return await setTimeout(loadRobloxImageOfAsset, 1000, assetId);
     }
     return { success: false, pathToFile: null }
