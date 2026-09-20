@@ -2,8 +2,7 @@
 import { createRequire } from 'module';
 const require = createRequire(import.meta.url);
 const path = require('path');
-const discord = require('discord.js');
-const { Client, GatewayIntentBits, EmbedBuilder, MessageEmbed, AttachmentBuilder, Intents } = discord;
+const { Client, GatewayIntentBits, EmbedBuilder, MessageEmbed, AttachmentBuilder, Intents } = require('discord.js');
 
 const { promiseAccess, removeFile } = require('./Modules/fileHelper.cjs');
 
