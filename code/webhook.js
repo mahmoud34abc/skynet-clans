@@ -426,6 +426,10 @@ async function performOpenCloudBan(userId, gameName, banType, banReason, issuedB
 }
 
 async function loadRobloxImageOfAsset(assetId) { //return success, pathToFile
+  if (catalogItemImageCache.has(assetId)) {
+    return { success: true, pathToFile: catalogItemImageCache.get(assetId) };
+  }
+
   var options = { ...commonWebRequestOptions }
   options.hostname = "thumbnails.roblox.com"
   options.path = "/v1/assets?assetIds=" + assetId + "&size=420x420&format=png&isCircular=false"
@@ -437,11 +441,7 @@ async function loadRobloxImageOfAsset(assetId) { //return success, pathToFile
   }
 
   const imageUrl = data.data[0].imageUrl;
-
-  if (catalogItemImageCache.has(assetId)) {
-    return { success: true, pathToFile: catalogItemImageCache.get(assetId) };
-  }
-
+  
   try {
     const filePath = await downloadFileTo(imageUrl, assetId + ".png");
     return { success: true, pathToFile: filePath };
