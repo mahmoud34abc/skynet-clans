@@ -369,7 +369,7 @@ var loopIsBusy = false
 
 setInterval(async () => {
   if (pendingNewOutfits.length <= 0) {
-    if (isActivelySendingOutfits) {
+    if (isActivelySendingOutfits && !loopIsBusy) {
       isActivelySendingOutfits = false;
       console.log("Finished notifying about new outfits");
     }
