@@ -161,7 +161,7 @@ async function webRequest(options, requestBodyString) {
 
 async function downloadFileTo(url, assetId) {
   return new Promise((resolve, reject) => {
-    var filePath = path.join(tempPath, `${assetId}.png`);
+    var filePath = path.join(tempPath, `${assetId}`);
     makeFolder(path.dirname(filePath), { recursive: true });
 
     httpGet(url, (res) => {
