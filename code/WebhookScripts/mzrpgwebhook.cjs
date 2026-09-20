@@ -446,7 +446,7 @@ setInterval(async () => {
             ChannelToSendTo: "1545359563744616510",
             Embed: newEmbed,
             Images: imageFiles,
-            DeleteImagesAfterSending: true,
+            DeleteImagesAfterSending: false,
             Text: "`" + outfitName + "` by [" + username + "](https://www.roblox.com/users/" + userId + "/profile) (" + userId + ")",
           },
         }
