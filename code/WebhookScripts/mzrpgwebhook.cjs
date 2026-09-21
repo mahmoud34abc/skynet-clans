@@ -368,7 +368,7 @@ var isActivelySendingOutfits = false
 var loopIsBusy = false
 
 var poolOfOutfitChannels = ["1545359563744616510", "1550483057868406784", "1550483094287556698"];
-var currentOutfitChannel = 0;
+var currentOutfitChannel = -1;
 
 setInterval(async () => {
   if (pendingNewOutfits.length <= 0) {
