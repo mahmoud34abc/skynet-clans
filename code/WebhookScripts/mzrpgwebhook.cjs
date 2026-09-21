@@ -367,6 +367,9 @@ setInterval(() => {
 var isActivelySendingOutfits = false
 var loopIsBusy = false
 
+var poolOfOutfitChannels = ["1545359563744616510", "1550483057868406784", "1550483094287556698"];
+var currentOutfitChannel = 0;
+
 setInterval(async () => {
   if (pendingNewOutfits.length <= 0) {
     if (isActivelySendingOutfits && !loopIsBusy) {
@@ -432,6 +435,12 @@ setInterval(async () => {
       }
       
       var timeEnd = Date.now();
+      
+      currentOutfitChannel += 1;
+
+      if (poolOfOutfitChannels[currentOutfitChannel] === undefined) {
+        currentOutfitChannel = 0;
+      }
 
       var newEmbed = {
         title: ":shirt: New Outfit",
@@ -459,7 +468,7 @@ setInterval(async () => {
           Type: "Embed",
           Payload: {
             ServerToSendTo: "1540111553456504912",
-            ChannelToSendTo: "1545359563744616510",
+            ChannelToSendTo: poolOfOutfitChannels[currentOutfitChannel],
             Embed: newEmbed,
             Images: imageFiles,
             DeleteImagesAfterSending: false,
