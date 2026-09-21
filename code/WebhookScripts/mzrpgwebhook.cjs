@@ -413,7 +413,7 @@ setInterval(async () => {
       shared.addToCacheUserIDByUsername(username, userId);
 
       for (var [key, value] of Object.entries(assets)) {
-        var { success, pathToFile } = await shared.loadRobloxImageOfAsset(value[1], ".temp/");
+        var { success, pathToFile, cached } = await shared.loadRobloxImageOfAsset(value[1], ".temp/");
         if (success) {
           imageFiles.push(pathToFile);
           appendedImages += 1;
@@ -421,7 +421,10 @@ setInterval(async () => {
         } else {
           imageLoadingFailed = true;
         }
-        await sleep(1000);
+
+        if (!cached) {
+          await sleep(1000);
+        }
       }
 
       for (var [key, value] of Object.entries(assets)) {

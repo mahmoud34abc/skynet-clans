@@ -175,7 +175,6 @@ async function downloadFileTo(url, assetId) {
       res.pipe(fileStream);
 
       fileStream.on('finish', () => {
-        catalogItemImageCache.set(assetId, filePath);
         fileStream.close(() => resolve(filePath));
       });
 
@@ -427,7 +426,7 @@ async function performOpenCloudBan(userId, gameName, banType, banReason, issuedB
 
 async function loadRobloxImageOfAsset(assetId) { //return success, pathToFile
   if (catalogItemImageCache.has(assetId)) {
-    return { success: true, pathToFile: catalogItemImageCache.get(assetId) };
+    return { success: true, pathToFile: catalogItemImageCache.get(assetId), cached: true };
   }
 
   var options = { ...commonWebRequestOptions }
@@ -440,17 +439,18 @@ async function loadRobloxImageOfAsset(assetId) { //return success, pathToFile
     if (statusCode == 429) {
       return await setTimeout(loadRobloxImageOfAsset, 1000 + (response.headers['retry-after']*1000), assetId);
     }
-    return { success: false, pathToFile: null }
+    return { success: false, pathToFile: null, cached: false }
   }
 
   const imageUrl = data.data[0].imageUrl;
 
   try {
     const filePath = await downloadFileTo(imageUrl, assetId + ".png");
-    return { success: true, pathToFile: filePath };
+    catalogItemImageCache.set(assetId, filePath)
+    return { success: true, pathToFile: filePath, cached: false };
   } catch (err) {
     console.warn('Failed to download image:', err);
-    return { success: false, pathToFile: null };
+    return { success: false, pathToFile: null, cached: false };
   }
 }
 
