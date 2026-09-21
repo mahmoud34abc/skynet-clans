@@ -1,7 +1,4 @@
 node_modules
 package-lock.json
 .env
-.env.d.ts
 .temp
-tickets.db
-appeals.db
