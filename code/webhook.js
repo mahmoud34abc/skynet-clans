@@ -1,3 +1,4 @@
+/* eslint-disable no-redeclare */
 //webhook handling for roblox
 import { createRequire } from 'module';
 import { LRUCache } from 'lru-cache'
@@ -478,6 +479,12 @@ const mzrpgwebhook = require('./WebhookScripts/mzrpgwebhook.cjs')
 const skynetwebhook = require('./WebhookScripts/skynetwebhook.cjs')
 const webhook = require('./WebhookScripts/webhook.cjs')
 
+const gotExports = {
+  mzrpgwebhook: mzrpgwebhook.exports,
+  skynetwebhook: skynetwebhook.exports,
+  webhook: webhook.exports
+}
+
 mzrpgwebhook.init(sharedTable);
 skynetwebhook.init(sharedTable);
 webhook.init(sharedTable);
@@ -798,6 +805,36 @@ async function handleSharedData(data) {
         ]
 
         shareData(dataToSend)
+        break;
+      }
+
+      case "MZRPGOutfitDelete": {
+        var outfitId = data.Payload.Arguements[0]
+        var serverId = data.Payload.ServerToSendTo
+        var channelId = data.Payload.OriginalChannelId
+        var userId = data.Payload.Arguements[1]
+
+        gotExports.mzrpgwebhook.OutfitDeleteRequest(outfitId, [serverId, channelId, userId])
+        break;
+      }
+
+      case "MZRPGOutfitsLookup": {
+        var userId = data.Payload.Arguements[0]
+        var serverId = data.Payload.ServerToSendTo
+        var channelId = data.Payload.OriginalChannelId
+        var discordUserId = data.Payload.Arguements[1]
+
+        gotExports.mzrpgwebhook.OutfitsLookupRequest(userId, [serverId, channelId, discordUserId])
+        break;
+      }
+
+      case "MZRPGAsseBlockAdd": {
+        var assetId = data.Payload.Arguements[0]
+        var serverId = data.Payload.ServerToSendTo
+        var channelId = data.Payload.OriginalChannelId
+        var userId = data.Payload.Arguements[1]
+
+        gotExports.mzrpgwebhook.AssetBlockAdd(assetId, [serverId, channelId, userId])
         break;
       }
     }

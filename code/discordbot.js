@@ -1,3 +1,4 @@
+/* eslint-disable no-redeclare */
 //new discord bot stuff handler
 import { createRequire } from 'module';
 const require = createRequire(import.meta.url);
@@ -398,12 +399,140 @@ async function messageHandler(message) {
             break;
         }
 
+         case "outfitdelete": {
+            var allowedRoles = ["1543230108125372557"]
+            //var allowedRoles = []
+            var allowed = false
+
+            if (message.guildId != "1540111553456504912") {
+                return
+            } 
+
+            for (var roleId of allowedRoles) {
+                if (member.roles.cache.has(roleId)) {
+                    allowed = true
+                    break
+                }
+            }
+
+            if (allowed !== true) {
+                message.channel.send("You do not have permission to use this command!")
+                return
+            }
+
+            if (args[1] == null) {
+                message.channel.send("Missing arguements! `c!outfitdelete <outfitId>`")
+                return
+            }
+
+            var dataToSend = [{
+                MessageTo: "webhook.js",
+                Type: "MZRPGOutfitDelete",
+                Payload: {
+                    ServerToSendTo: "1540111553456504912",
+                    OriginalChannelId: message.channel.id,
+                    Arguements: [args[1], message.author.id]
+                },
+            }]
+            shareData(dataToSend)
+
+            //performOpenCloudBan(args[1], "phoenix", args[3], banReason, issuedBy)
+            //await message.channel.send(":clock3: Fetching from ROBLOX...")
+            message.channel.send({ content: "Queued delete for `" + args[1] + "`, it may take up to 5 minutes to receive a response!"})
+            break;
+        }
+
+        case "outfitslookup": {
+            var allowedRoles = ["1543230108125372557"]
+            //var allowedRoles = []
+            var allowed = false
+
+            if (message.guildId != "1540111553456504912") {
+                return
+            } 
+
+            for (var roleId of allowedRoles) {
+                if (member.roles.cache.has(roleId)) {
+                    allowed = true
+                    break
+                }
+            }
+
+            if (allowed !== true) {
+                message.channel.send("You do not have permission to use this command!")
+                return
+            }
+
+            if (args[1] == null) {
+                message.channel.send("Missing arguements! `c!outfitslookup <userId/userName>`")
+                return
+            }
+
+            var dataToSend = [{
+                MessageTo: "webhook.js",
+                Type: "MZRPGOutfitsLookup",
+                Payload: {
+                    ServerToSendTo: "1540111553456504912",
+                    OriginalChannelId: message.channel.id,
+                    Arguements: [args[1], message.author.id]
+                },
+            }]
+            shareData(dataToSend)
+
+            //performOpenCloudBan(args[1], "phoenix", args[3], banReason, issuedBy)
+            //await message.channel.send(":clock3: Fetching from ROBLOX...")
+            message.channel.send({ content: "Queued outfits lookup for user `" + args[1] + "`, it may take up to 5 minutes to receive a response!"})
+            break;
+        }
+
+        case "blockasset": {
+            var allowedRoles = ["1543230108125372557"]
+            //var allowedRoles = []
+            var allowed = false
+
+            if (message.guildId != "1540111553456504912") {
+                return
+            } 
+
+            for (var roleId of allowedRoles) {
+                if (member.roles.cache.has(roleId)) {
+                    allowed = true
+                    break
+                }
+            }
+
+            if (allowed !== true) {
+                message.channel.send("You do not have permission to use this command!")
+                return
+            }
+
+            if (args[1] == null) {
+                message.channel.send("Missing arguements! `c!blockasset <assetId>`")
+                return
+            }
+
+            var dataToSend = [{
+                MessageTo: "webhook.js",
+                Type: "MZRPGAssetBlockAdd",
+                Payload: {
+                    ServerToSendTo: "1540111553456504912",
+                    OriginalChannelId: message.channel.id,
+                    Arguements: [args[1], message.author.id]
+                },
+            }]
+            shareData(dataToSend)
+
+            //performOpenCloudBan(args[1], "phoenix", args[3], banReason, issuedBy)
+            //await message.channel.send(":clock3: Fetching from ROBLOX...")
+            message.channel.send({ content: "Queued asset block for `" + args[1] + "`, it may take up to 5 minutes to receive a response!"})
+            break;
+        }
+
         case "ping": {
             var messageSendingTime = Date.now()
-            var messageReceivedTime = null
             //var orgMsg = await message.channel.send({ content: ":ping_pong: Ping.."})
             var validPing = await sendMessageTyping(message.channel);
-            messageReceivedTime = Date.now();
+            var messageReceivedTime = Date.now();
 
             var dataToSend = [{
                 MessageTo: "webhook.js",
@@ -545,6 +674,7 @@ async function handleSharedData(data) {
                         await channel.send(sendOptions);
                     } catch (err) {
                         console.error("Failed to send embed:", err);
+                        reject("Failed to send embed:", err);
                     } finally {
                         if (deleteAfter) {
                             for (const filePath of existingPaths) {
@@ -564,6 +694,7 @@ async function handleSharedData(data) {
 
                 var guild = await client.guilds.fetch(guildId);
                 var channel = await guild.channels.fetch(channelId);
+
                 await channel.send({ content: messageString });
                 break;
             }

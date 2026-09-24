@@ -23,6 +23,92 @@ var pendingSyncingResponses = {
 
 var pendingNewOutfits = []
 
+var QueuedMessages = []
+var AwaitingResponses = [] //keyed by UUIDs created here
+
+function makeAwaitingResponse(discordStuff, message) {
+  var id = crypto.randomUUID();
+
+  AwaitingResponses[id] = [
+    {
+      MessageTo: "discordbot.js",
+      Type: "Message",
+      Payload: {
+        ServerToSendTo: discordStuff[0],
+        ChannelToSendTo: discordStuff[1],
+        Text: message,
+      },
+    }
+  ]
+
+  return id
+}
+
+function OutfitDeleteRequest(outfitId, discordStuff) {
+  var id = makeAwaitingResponse(discordStuff, "<@" + discordStuff[2] + ">; successfully deleted outfit `" + outfitId + "`!")
+
+  QueuedMessages.push({
+    gameId: "MZRPG",
+    messageType: "outfitDeleteRequest",
+    payload: { OutfitId: outfitId, ReturnID: id },
+  })
+}
+
+async function OutfitsLookupRequest(user, discordStuff) {
+  var userName
+  var userId
+  
+  //console.log(user, discordStuff)
+
+  if (shared.getUserType(user) == "userId") {
+    userId = user
+    userName = await shared.getRobloxUsername(user)
+  } else {
+    userId = await shared.getRobloxUserId(user)
+    userName = user
+  }
+
+  //console.log(userName, userId)
+
+  if (userId == null || userId == undefined || userId == "#HTTPERROR" || userId == "#USERNOTFOUND") {
+    //console.log(discordStuff[0], discordStuff[1])
+    shared.shareData([{
+      MessageTo: "discordbot.js",
+      Type: "Message",
+      Payload: {
+        ServerToSendTo: discordStuff[0],
+        ChannelToSendTo: discordStuff[1],
+        Message: "<@" + discordStuff[2] + "> User `" + userName + "` does not exist! Please provide a UserId or double check the spelling",
+      },
+    }])
+    return
+  }
+
+  var id = makeAwaitingResponse(discordStuff, "<@" + discordStuff[2] + ">; outfits lookup for user `" + userName + "` finished! Please wait for the outfits to send..")
+
+  QueuedMessages.push({
+    gameId: "MZRPG",
+    messageType: "outfitsLookupRequest",
+    payload: { UserId: userId, ReturnID: id },
+  })
+}
+
+function AssetBlockAdd(assetId, discordStuff) {
+  var id = makeAwaitingResponse(discordStuff, "<@" + discordStuff[2] + ">; successfully added asset `" + assetId + "` to blocklist!")
+
+  QueuedMessages.push({
+    gameId: "MZRPG",
+    messageType: "assetBlockAddRequest",
+    payload: { AssetId: assetId, ReturnID: id },
+  })
+}
+
+const gotExports = {
+  OutfitDeleteRequest: OutfitDeleteRequest,
+  OutfitsLookupRequest: OutfitsLookupRequest,
+  AssetBlockAdd: AssetBlockAdd
+}
+
 function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
@@ -315,33 +401,33 @@ async function webhook(body, response) {
     }
   }
 
-  if (pendingSyncingRequests[body.FromGame] !== undefined) {
-    const maximumAmount = 10
-    var currentAmount = 0
+  const maximumAmount = 10
+  let currentAmount = 0
 
-    for (let i = 0; i < pendingSyncingResponses[body.FromGame].length; i++) {
-      if (currentAmount >= maximumAmount) {
-        break;
-      }
 
-      var resp = pendingSyncingResponses[body.FromGame].shift()
-      makeResponse(true, "syncResponse", -1, resp)
-      currentAmount++
-    }
-
-    for (let i = 0; i < pendingSyncingRequests[body.FromGame].length; i++) {
-      if (currentAmount >= maximumAmount) {
-        break;
-      }
-
-      var req = pendingSyncingRequests[body.FromGame].shift()
-      makeResponse(true, "syncRequest", -1, req)
-      currentAmount++
-    }
-
-    //pendingSyncingRequests[body.FromGame] = []
-    //pendingSyncingResponses[body.FromGame] = []
+  const responses = pendingSyncingResponses[body.FromGame] ?? []
+  while (responses.length > 0 && currentAmount < maximumAmount) {
+    makeResponse(true, "syncResponse", -1, responses.shift())
+    currentAmount++
   }
+
+  const requests = pendingSyncingRequests[body.FromGame] ?? []
+  while (requests.length > 0 && currentAmount < maximumAmount) {
+    makeResponse(true, "syncRequest", -1, requests.shift())
+    currentAmount++
+  }
+
+
+  var remaining = []
+  for (const message of QueuedMessages) {
+    if (message.gameId == body.FromGame) {
+      makeResponse(true, message.messageType, -1, message.payload)
+    } else {
+      remaining.push(message)
+    }
+  }
+  QueuedMessages.length = 0
+  QueuedMessages.push(...remaining)
 
   //console.log(body.FromGame)
   response.send(responseBody).status(200)
@@ -436,9 +522,9 @@ setInterval(async () => {
           text = tempText;
         }
       }
-      
+
       var timeEnd = Date.now();
-      
+
       currentOutfitChannel += 1;
 
       if (poolOfOutfitChannels[currentOutfitChannel] === undefined) {
@@ -494,5 +580,6 @@ setInterval(async () => {
 
 module.exports = {
   init: init,
-  webhook: webhook
+  webhook: webhook,
+  exports: gotExports
 }
