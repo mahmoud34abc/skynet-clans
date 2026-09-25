@@ -472,7 +472,7 @@ async function webhook(body, response) {
   }
 
   if (!(body.Capabilities == undefined || body.Capabilities == null)) {
-    const maximumAmount = 10
+    const maximumAmount = 5
     let currentAmount = 0
 
     const responses = pendingSyncingResponses[body.FromGame] ?? []
@@ -487,10 +487,14 @@ async function webhook(body, response) {
       currentAmount++
     }
 
+    const maximumOutfitOrders = 1
+    let currentOutfitOrders = 0
+
     if (body.Capabilities["OutfitModerationTools"]) {
       var remaining = []
       for (const message of QueuedMessages) {
-        if (message.gameId == body.FromGame) {
+        if (message.gameId == body.FromGame && currentOutfitOrders < maximumOutfitOrders) {
+          currentOutfitOrders += 1
           makeResponse(true, message.messageType, -1, message.payload)
         } else {
           remaining.push(message)
