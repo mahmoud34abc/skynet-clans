@@ -108,6 +108,8 @@ async function OutfitsLookupRequest(user, discordStuff) {
         wentThroughOutfits = true
         outfit.LookedUp = true
         outfit.LookedUpOriginChannel = discordStuff[1]
+        outfit.UserId = userId
+        outfit.Username = userName
 
         pendingNewOutfits.push(outfit)
       });
