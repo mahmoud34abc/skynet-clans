@@ -499,33 +499,6 @@ async function messageHandler(message) {
             break;
         }
 
-        case "testcache": {
-            if (args[1] == "id") {
-                var dataToSend = [{
-                    MessageTo: "webhook.js",
-                    Type: "MZRPGIdCacheCheck",
-                    Payload: {
-                        ServerToSendTo: "1540111553456504912",
-                        OriginalChannelId: message.channel.id,
-                        Arguements: [args[2]]
-                    },
-                }]
-                shareData(dataToSend)
-            } else {
-                var dataToSend = [{
-                    MessageTo: "webhook.js",
-                    Type: "MZRPGNameCacheCheck",
-                    Payload: {
-                        ServerToSendTo: "1540111553456504912",
-                        OriginalChannelId: message.channel.id,
-                        Arguements: [args[2]]
-                    },
-                }]
-                shareData(dataToSend)
-            }
-            break;
-        }
-
         case "blockasset": {
             var bypass = true
             if (bypass) {
