@@ -842,6 +842,40 @@ async function handleSharedData(data) {
         gotExports.mzrpgwebhook.AssetBlockAdd(assetId, [serverId, channelId, userId])
         break;
       }
+
+      case "MZRPGIdCacheCheck": {
+         var dataToSend = [
+          {
+            MessageTo: "discordbot.js",
+            Type: "Message",
+            Payload: {
+              ServerToSendTo: data.Payload.ServerToSendTo,
+              ChannelToSendTo: data.Payload.OriginalChannelId,
+              Message: robloxUserIDByUsernameCache.get(data.Payload.Arguements[1]),
+            },
+          }
+        ]
+
+        shareData(dataToSend)
+        break;
+      }
+
+      case "MZRPGNameCacheCheck": {
+         var dataToSend = [
+          {
+            MessageTo: "discordbot.js",
+            Type: "Message",
+            Payload: {
+              ServerToSendTo: data.Payload.ServerToSendTo,
+              ChannelToSendTo: data.Payload.OriginalChannelId,
+              Message: robloxUsernameByUserIDCache.get(data.Payload.Arguements[1]),
+            },
+          }
+        ]
+
+        shareData(dataToSend)
+        break;
+      }
     }
   }
 }

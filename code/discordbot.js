@@ -14,6 +14,20 @@ var botOnline = false
 var brokenTyping = false
 var brokenTypingInterval = null
 
+function getStackTrace() {
+  var stack;
+
+  try {
+    throw new Error('');
+  }
+  catch (error) {
+    stack = error.stack || '';
+  }
+
+  stack = stack.split('\n').map(function (line) { return line.trim(); });
+  return stack.splice(stack[0] == 'Error' ? 2 : 1);
+}
+
 function getClient() {
     if (isUpdatedDiscord) {
         return new Client({
@@ -485,6 +499,33 @@ async function messageHandler(message) {
             break;
         }
 
+        case "testcache": {
+            if (args[1] == "id") {
+                var dataToSend = [{
+                    MessageTo: "webhook.js",
+                    Type: "MZRPGIdCacheCheck",
+                    Payload: {
+                        ServerToSendTo: "1540111553456504912",
+                        OriginalChannelId: message.channel.id,
+                        Arguements: [args[2]]
+                    },
+                }]
+                shareData(dataToSend)
+            } else {
+                var dataToSend = [{
+                    MessageTo: "webhook.js",
+                    Type: "MZRPGNameCacheCheck",
+                    Payload: {
+                        ServerToSendTo: "1540111553456504912",
+                        OriginalChannelId: message.channel.id,
+                        Arguements: [args[2]]
+                    },
+                }]
+                shareData(dataToSend)
+            }
+            break;
+        }
+
         case "blockasset": {
             var bypass = true
             if (bypass) {
@@ -696,6 +737,10 @@ async function handleSharedData(data) {
                 var guildId = data.Payload.ServerToSendTo
                 var channelId = data.Payload.ChannelToSendTo
                 var messageString = data.Payload.Message
+
+                if (messageString == null || messageString == undefined) {
+                    messageString = "`null` message.\n__Traceback:__ " + getStackTrace().join('\n')
+                }
 
                 var guild = await client.guilds.fetch(guildId);
                 var channel = await guild.channels.fetch(channelId);
