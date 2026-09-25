@@ -26,26 +26,37 @@ var pendingNewOutfits = []
 var QueuedMessages = []
 var AwaitingResponses = [] //keyed by UUIDs created here
 
-function makeAwaitingResponse(discordStuff, message) {
+function makeAwaitingResponse(discordStuff, functionToRun) {
   var id = crypto.randomUUID();
-
-  AwaitingResponses[id] = [
-    {
-      MessageTo: "discordbot.js",
-      Type: "Message",
-      Payload: {
-        ServerToSendTo: discordStuff[0],
-        ChannelToSendTo: discordStuff[1],
-        Text: message,
-      },
-    }
-  ]
+  AwaitingResponses[id] = functionToRun
 
   return id
 }
 
 function OutfitDeleteRequest(outfitId, discordStuff) {
-  var id = makeAwaitingResponse(discordStuff, "<@" + discordStuff[2] + ">; successfully deleted outfit `" + outfitId + "`!")
+  var id = makeAwaitingResponse(discordStuff, (returnedData) => {
+    var textToSend
+
+    if (returnedData.Success) {
+      textToSend = "<@" + discordStuff[2] + ">; successfully deleted outfit `" + outfitId + "`!"
+    } else {
+      textToSend = "<@" + discordStuff[2] + ">; an error occured while deleting `" + outfitId + "`; `" + returnedData.Error.Message + "`"
+    }
+
+    var dataToSend = [
+      {
+        MessageTo: "discordbot.js",
+        Type: "Message",
+        Payload: {
+          ServerToSendTo: discordStuff[0],
+          ChannelToSendTo: discordStuff[1],
+          Message: textToSend,
+        },
+      }
+    ]
+
+    shared.shareData(dataToSend)
+  })
 
   QueuedMessages.push({
     gameId: "MZRPG",
@@ -84,7 +95,36 @@ async function OutfitsLookupRequest(user, discordStuff) {
     return
   }
 
-  var id = makeAwaitingResponse(discordStuff, "<@" + discordStuff[2] + ">; outfits lookup for user `" + userName + "` finished! Please wait for the outfits to send..")
+  var id = makeAwaitingResponse(discordStuff, (returnedData) => {
+    var textToSend
+
+    if (returnedData.Success) {
+      textToSend = "<@" + discordStuff[2] + ">; outfits lookup for user `" + userName + "` finished! Please wait for the outfits to send here.."
+      
+      returnedData.Outfits.forEach(outfit => {
+        outfit.LookedUp = true
+        outfit.LookedUpOriginChannel = discordStuff[1]
+
+        pendingNewOutfits.push(outfit)
+      });
+    } else {
+      textToSend = "<@" + discordStuff[2] + ">; an error occured while looking up `" + userId + "`; `" + returnedData.Error.Message + "`"
+    }
+
+    var dataToSend = [
+      {
+        MessageTo: "discordbot.js",
+        Type: "Message",
+        Payload: {
+          ServerToSendTo: discordStuff[0],
+          ChannelToSendTo: discordStuff[1],
+          Message: textToSend,
+        },
+      }
+    ]
+
+    shared.shareData(dataToSend)
+  })
 
   QueuedMessages.push({
     gameId: "MZRPG",
@@ -190,6 +230,24 @@ async function webhook(body, response) {
         makeResponse(true, "", value.id, {})
         break;
       }
+
+      case "outfitLookupResponse": {
+        //console.log("oi", payload2, QueuedMessages)
+        if (AwaitingResponses[payload2.ReturnID]) {
+          AwaitingResponses[payload2.ReturnID](payload2)
+          AwaitingResponses[payload2.ReturnID] = undefined
+        }
+        break;
+      };
+
+      case "outfitDeleteResponse": {
+        //console.log("oi", payload2, QueuedMessages)
+        if (AwaitingResponses[payload2.ReturnID]) {
+          AwaitingResponses[payload2.ReturnID](payload2)
+          AwaitingResponses[payload2.ReturnID] = undefined
+        }
+        break;
+      };
 
       case "moderation": {
         var requesttype = payload2.requestType
@@ -401,33 +459,35 @@ async function webhook(body, response) {
     }
   }
 
-  const maximumAmount = 10
-  let currentAmount = 0
+  if (!(body.Capabilities == undefined || body.Capabilities == null)) {
+    const maximumAmount = 10
+    let currentAmount = 0
 
-
-  const responses = pendingSyncingResponses[body.FromGame] ?? []
-  while (responses.length > 0 && currentAmount < maximumAmount) {
-    makeResponse(true, "syncResponse", -1, responses.shift())
-    currentAmount++
-  }
-
-  const requests = pendingSyncingRequests[body.FromGame] ?? []
-  while (requests.length > 0 && currentAmount < maximumAmount) {
-    makeResponse(true, "syncRequest", -1, requests.shift())
-    currentAmount++
-  }
-
-
-  var remaining = []
-  for (const message of QueuedMessages) {
-    if (message.gameId == body.FromGame) {
-      makeResponse(true, message.messageType, -1, message.payload)
-    } else {
-      remaining.push(message)
+    const responses = pendingSyncingResponses[body.FromGame] ?? []
+    while (responses.length > 0 && currentAmount < maximumAmount) {
+      makeResponse(true, "syncResponse", -1, responses.shift())
+      currentAmount++
     }
-  }
-  QueuedMessages.length = 0
-  QueuedMessages.push(...remaining)
+
+    const requests = pendingSyncingRequests[body.FromGame] ?? []
+    while (requests.length > 0 && currentAmount < maximumAmount) {
+      makeResponse(true, "syncRequest", -1, requests.shift())
+      currentAmount++
+    }
+
+    if (body.Capabilities["OutfitModerationTools"]) {
+      var remaining = []
+      for (const message of QueuedMessages) {
+        if (message.gameId == body.FromGame) {
+          makeResponse(true, message.messageType, -1, message.payload)
+        } else {
+          remaining.push(message)
+        }
+      }
+      QueuedMessages.length = 0
+      QueuedMessages.push(...remaining)
+    }
+  }  
 
   //console.log(body.FromGame)
   response.send(responseBody).status(200)
@@ -488,6 +548,9 @@ setInterval(async () => {
       var userId = payload2.UserId;
       var username = payload2.Username;
 
+      var isLookedUpOutfit = payload2.LookedUp
+      var lookedUpOriginChannel = payload2.LookedUpOriginChannel
+
       var text = "";
       var brokenLoop = false;
 
@@ -525,10 +588,18 @@ setInterval(async () => {
 
       var timeEnd = Date.now();
 
-      currentOutfitChannel += 1;
+      var chosenChannel
 
-      if (poolOfOutfitChannels[currentOutfitChannel] === undefined) {
-        currentOutfitChannel = 0;
+      if (!isLookedUpOutfit) {
+        currentOutfitChannel += 1;
+        
+        if (poolOfOutfitChannels[currentOutfitChannel] === undefined) {
+          currentOutfitChannel = 0;
+        }
+        
+        chosenChannel = poolOfOutfitChannels[currentOutfitChannel]
+      } else {
+        chosenChannel = lookedUpOriginChannel
       }
 
       var newEmbed = {
@@ -557,7 +628,7 @@ setInterval(async () => {
           Type: "Embed",
           Payload: {
             ServerToSendTo: "1540111553456504912",
-            ChannelToSendTo: poolOfOutfitChannels[currentOutfitChannel],
+            ChannelToSendTo: chosenChannel,
             Embed: newEmbed,
             Images: imageFiles,
             DeleteImagesAfterSending: false,

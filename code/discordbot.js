@@ -399,7 +399,7 @@ async function messageHandler(message) {
             break;
         }
 
-         case "outfitdelete": {
+         case "deleteoutfit": {
             var allowedRoles = ["1543230108125372557"]
             //var allowedRoles = []
             var allowed = false
@@ -421,7 +421,7 @@ async function messageHandler(message) {
             }
 
             if (args[1] == null) {
-                message.channel.send("Missing arguements! `c!outfitdelete <outfitId>`")
+                message.channel.send("Missing arguements! `c!deleteoutfit <outfitId>`")
                 return
             }
 
@@ -442,7 +442,7 @@ async function messageHandler(message) {
             break;
         }
 
-        case "outfitslookup": {
+        case "lookupuseroutfits": {
             var allowedRoles = ["1543230108125372557"]
             //var allowedRoles = []
             var allowed = false
@@ -464,7 +464,7 @@ async function messageHandler(message) {
             }
 
             if (args[1] == null) {
-                message.channel.send("Missing arguements! `c!outfitslookup <userId/userName>`")
+                message.channel.send("Missing arguements! `c!lookupuseroutfits <userId/userName>`")
                 return
             }
 
@@ -486,6 +486,11 @@ async function messageHandler(message) {
         }
 
         case "blockasset": {
+            var bypass = true
+            if (bypass) {
+                break;
+            }
+
             var allowedRoles = ["1543230108125372557"]
             //var allowedRoles = []
             var allowed = false
