@@ -81,7 +81,7 @@ async function OutfitsLookupRequest(user, discordStuff) {
 
   //console.log(userName, userId)
 
-  if (userId == null || userId == undefined || userId == "#HTTPERROR" || userId == "#USERNOTFOUND") {
+  if (userId == null || userId == undefined || userId == "#HTTPERROR" || userId == "#USERNOTFOUND" || userName == "N/A") {
     //console.log(discordStuff[0], discordStuff[1])
     shared.shareData([{
       MessageTo: "discordbot.js",
