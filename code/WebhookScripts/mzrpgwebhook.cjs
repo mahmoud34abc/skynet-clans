@@ -89,7 +89,7 @@ async function OutfitsLookupRequest(user, discordStuff) {
       Payload: {
         ServerToSendTo: discordStuff[0],
         ChannelToSendTo: discordStuff[1],
-        Message: "<@" + discordStuff[2] + "> User `" + userName + "` does not exist! Please provide a UserId or double check the spelling",
+        Message: "<@" + discordStuff[2] + "> User `" + userName + "`/ `" + userId + "` does not exist! Please provide a UserId or double check the spelling",
       },
     }])
     return
