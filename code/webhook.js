@@ -260,8 +260,8 @@ function getUserType(userIdOrName) {
 }
 
 async function getRobloxUsername(userId) {
-  if (robloxUsernameByUserIDCache.has(userId)) {
-    return robloxUsernameByUserIDCache.get(userId)
+  if (robloxUsernameByUserIDCache.has(toString(userId))) {
+    return robloxUsernameByUserIDCache.get(toString(userId))
   }
 
   var options = { ...commonWebRequestOptions }
@@ -275,15 +275,15 @@ async function getRobloxUsername(userId) {
     return "N/A"
   };
 
-  robloxUsernameByUserIDCache.set(userId, data.name)
-  robloxUserIDByUsernameCache.set(data.name, userId)
+  robloxUsernameByUserIDCache.set(toString(userId), toString(data.name))
+  robloxUserIDByUsernameCache.set(toString(data.name), userId)
 
   return data.name
 }
 
 async function getRobloxUserId(userName) {
-  if (robloxUserIDByUsernameCache.has(userName)) {
-    return robloxUserIDByUsernameCache.get(userName)
+  if (robloxUserIDByUsernameCache.has(toString(userName))) {
+    return robloxUserIDByUsernameCache.get(toString(userName))
   }
 
   var responseBodyString = JSON.stringify({ usernames: [userName], excludeBannedUsers: false })
@@ -302,8 +302,8 @@ async function getRobloxUserId(userName) {
 
   if (!data || data.data.length === 0) return "#USERNOTFOUND";
 
-  robloxUserIDByUsernameCache.set(userName, data.data[0].id)
-  robloxUsernameByUserIDCache.set(data.data[0].id, userName)
+  robloxUserIDByUsernameCache.set(toString(userName), data.data[0].id)
+  robloxUsernameByUserIDCache.set(toString(data.data[0].id), toString(userName))
 
   return data.data[0].id; // { id, name, displayName }
 }
@@ -468,10 +468,12 @@ const sharedTable = {
   performOpenCloudViewBan: performOpenCloudViewBan,
   loadRobloxImageOfAsset: loadRobloxImageOfAsset,
   addToCacheUsernameByUserID: (userId, userName) => {
-    robloxUsernameByUserIDCache.set(userId, userName)
+    robloxUsernameByUserIDCache.set(toString(userId), toString(userName))
+    robloxUserIDByUsernameCache.set(toString(userName), userId)
   },
   addToCacheUserIDByUsername: (userName, userId) => {
-    robloxUserIDByUsernameCache.set(userName, userId)
+    robloxUserIDByUsernameCache.set(toString(userName), userId)
+    robloxUsernameByUserIDCache.set(toString(userId), toString(userName))
   }
 }
 
