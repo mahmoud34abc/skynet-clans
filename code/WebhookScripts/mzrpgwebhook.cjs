@@ -75,16 +75,16 @@ async function OutfitsLookupRequest(user, discordStuff) {
   //console.log(user, discordStuff)
 
   if (shared.getUserType(user) == "userId") {
-    userName = await shared.getRobloxUsername(user)
-    userId = await shared.getRobloxUserId(user)
+      userId = user
+      userName = await shared.getRobloxUsername(user)
   } else {
-    userId = await shared.getRobloxUserId(user)
-    userName = await shared.getRobloxUsername(user)
+      userName = user
+      userId = await shared.getRobloxUserId(user)
   }
 
   //console.log(userName, userId)
 
-  if (userId == null || userId == undefined || userId == "#HTTPERROR" || userId == "#USERNOTFOUND" || userName == "N/A") {
+  if (userId == null || userId === "#HTTPERROR" || userId === "#USERNOTFOUND" || userName == null || userName === "N/A") {
     //console.log(discordStuff[0], discordStuff[1])
     shared.shareData([{
       MessageTo: "discordbot.js",

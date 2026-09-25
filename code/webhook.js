@@ -274,11 +274,15 @@ async function getRobloxUsername(userId) {
     console.error(`HTTP ${statusCode}`)
     return "N/A"
   };
+  if (!data || typeof data.name === "undefined") {
+    console.error("Unexpected payload for userId", userId, JSON.stringify(data))
+    return "N/A"
+  }
 
   robloxUsernameByUserIDCache.set(toString(userId), toString(data.name))
   robloxUserIDByUsernameCache.set(toString(data.name), userId)
 
-  return data.name
+  return toString(data.name)
 }
 
 async function getRobloxUserId(userName) {
@@ -295,11 +299,10 @@ async function getRobloxUserId(userName) {
 
   var { success, statusCode, data } = await webRequest(options, responseBodyString)
 
-  if (!success) {
+  if (!success || statusCode != 200) {
     console.error(`HTTP ${statusCode}`);
     return "#HTTPERROR";
   }
-
   if (!data || data.data.length === 0) return "#USERNOTFOUND";
 
   robloxUserIDByUsernameCache.set(toString(userName), data.data[0].id)
