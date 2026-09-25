@@ -72,11 +72,11 @@ async function OutfitsLookupRequest(user, discordStuff) {
   //console.log(user, discordStuff)
 
   if (shared.getUserType(user) == "userId") {
-    userId = user
     userName = await shared.getRobloxUsername(user)
+    userId = await shared.getRobloxUserId(user)
   } else {
     userId = await shared.getRobloxUserId(user)
-    userName = user
+    userName = await shared.getRobloxUsername(user)
   }
 
   //console.log(userName, userId)
