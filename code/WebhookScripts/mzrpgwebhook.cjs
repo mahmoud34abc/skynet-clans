@@ -69,6 +69,9 @@ async function OutfitsLookupRequest(user, discordStuff) {
   var userName
   var userId
   
+  var origUsername = userName
+  var origUserId = userId
+
   //console.log(user, discordStuff)
 
   if (shared.getUserType(user) == "userId") {
@@ -89,7 +92,7 @@ async function OutfitsLookupRequest(user, discordStuff) {
       Payload: {
         ServerToSendTo: discordStuff[0],
         ChannelToSendTo: discordStuff[1],
-        Message: "<@" + discordStuff[2] + "> User `" + userName + "`/ `" + userId + "` does not exist! Please provide a UserId or double check the spelling",
+        Message: "<@" + discordStuff[2] + "> User `" + origUsername + "`/ `" + userId + "` does not exist! Please provide a UserId or double check the spelling. Values: `" + userId + " " + userName + "`",
       },
     }])
     return
