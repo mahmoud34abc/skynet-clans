@@ -99,14 +99,21 @@ async function OutfitsLookupRequest(user, discordStuff) {
     var textToSend
 
     if (returnedData.Success) {
-      textToSend = "<@" + discordStuff[2] + ">; outfits lookup for user `" + userName + "` finished! Please wait for the outfits to send here.."
-      
+      var wentThroughOutfits = false
+
       returnedData.Outfits.forEach(outfit => {
+        wentThroughOutfits = true
         outfit.LookedUp = true
         outfit.LookedUpOriginChannel = discordStuff[1]
 
         pendingNewOutfits.push(outfit)
       });
+
+      if (wentThroughOutfits) {
+        textToSend = "<@" + discordStuff[2] + ">; outfits lookup for user `" + userName + "` finished! Please wait for the outfits to send here.."
+      } else {
+        textToSend = "<@" + discordStuff[2] + ">; " + userName + " has no favourited or created outfits saved."
+      }
     } else {
       textToSend = "<@" + discordStuff[2] + ">; an error occured while looking up `" + userId + "`; `" + returnedData.Error.Message + "`"
     }
@@ -231,7 +238,7 @@ async function webhook(body, response) {
         break;
       }
 
-      case "outfitLookupResponse": {
+      case "outfitsLookupResponse": {
         //console.log("oi", payload2, QueuedMessages)
         if (AwaitingResponses[payload2.ReturnID]) {
           AwaitingResponses[payload2.ReturnID](payload2)
