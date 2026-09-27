@@ -487,7 +487,7 @@ async function webhook(body, response) {
       currentAmount++
     }
 
-    const maximumOutfitOrders = 3
+    const maximumOutfitOrders = 2
     let currentOutfitOrders = 0
 
     if (body.Capabilities["OutfitModerationTools"]) {
