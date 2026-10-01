@@ -24,10 +24,10 @@ if (doesFolderOrFileExist(tempPath)) {
 makeFolder(tempPath, { recursive: true });
 
 var cacheOptions = {
-  max: 10240,
+  max: 5120,
 
   // for use with tracking overall storage size
-  maxSize: 1024 * 1024 * 1024 * 1024,
+  maxSize: 1024 * 1024 * 1024 * 500,
   sizeCalculation: (value) => {
     if (doesFolderOrFileExist(path.join(value))) {
       return getFileSize(path.join(value));
@@ -66,7 +66,7 @@ var cacheOptions = {
 
 const catalogItemImageCache = new LRUCache(cacheOptions)
 
-cacheOptions.maxSize = 1024
+cacheOptions.maxSize = 5120
 cacheOptions.sizeCalculation = () => {
   return 1;
 }
