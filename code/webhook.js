@@ -24,10 +24,10 @@ if (doesFolderOrFileExist(tempPath)) {
 makeFolder(tempPath, { recursive: true });
 
 var cacheOptions = {
-  max: 5120,
+  max: 7000,
 
   // for use with tracking overall storage size
-  maxSize: 1024 * 1024 * 1024 * 500,
+  maxSize: 1024 * 1024 * 1024 * 700,
   sizeCalculation: (value) => {
     if (doesFolderOrFileExist(path.join(value))) {
       return getFileSize(path.join(value));
