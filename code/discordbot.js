@@ -482,20 +482,32 @@ async function messageHandler(message) {
                 return
             }
 
+            var ownedOutfitsOnly = false
+            var firstLetter = "f"
+
+            if (args[2] !== null) {
+                args[2] = args[2].toLowerCase()
+                firstLetter = args[2].charAt(0)
+            }
+
+            if (firstLetter == "t" || firstLetter == "o" || (args[2] !== null && (args[2].toLowerCase() == "owned" || args[2].toLowerCase() == "true"))) {
+                ownedOutfitsOnly = true
+            }
+
             var dataToSend = [{
                 MessageTo: "webhook.js",
                 Type: "MZRPGOutfitsLookup",
                 Payload: {
                     ServerToSendTo: "1540111553456504912",
                     OriginalChannelId: message.channel.id,
-                    Arguements: [args[1], message.author.id]
+                    Arguements: [args[1], message.author.id, ownedOutfitsOnly]
                 },
             }]
             shareData(dataToSend)
 
             //performOpenCloudBan(args[1], "phoenix", args[3], banReason, issuedBy)
             //await message.channel.send(":clock3: Fetching from ROBLOX...")
-            message.channel.send({ content: "Queued outfits lookup for user `" + args[1] + "`, it may take up to 5 minutes to receive a response!"})
+            message.channel.send({ content: "Queued outfits lookup for user `" + args[1] + "` with `ownedOutfitsOnly` set to `" + ownedOutfitsOnly + "`.\nIt may take up to 5 minutes to receive a response!"})
             break;
         }
 

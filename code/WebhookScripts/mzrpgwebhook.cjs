@@ -65,7 +65,7 @@ function OutfitDeleteRequest(outfitId, discordStuff) {
   })
 }
 
-async function OutfitsLookupRequest(user, discordStuff) {
+async function OutfitsLookupRequest(user, discordStuff, ownedOutfitsOnly) {
   var userName
   var userId
   
@@ -108,8 +108,8 @@ async function OutfitsLookupRequest(user, discordStuff) {
         wentThroughOutfits = true
         outfit.LookedUp = true
         outfit.LookedUpOriginChannel = discordStuff[1]
-        outfit.UserId = userId
-        outfit.Username = userName
+        //outfit.UserId = userId
+        //outfit.Username = userName
 
         pendingNewOutfits.push(outfit)
       });
@@ -141,7 +141,7 @@ async function OutfitsLookupRequest(user, discordStuff) {
   QueuedMessages.push({
     gameId: "MZRPG",
     messageType: "outfitsLookupRequest",
-    payload: { UserId: userId, ReturnID: id },
+    payload: { UserId: userId, ReturnID: id, OwnedOutfitsOnly: ownedOutfitsOnly },
   })
 }
 

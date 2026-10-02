@@ -829,7 +829,7 @@ async function handleSharedData(data) {
         var channelId = data.Payload.OriginalChannelId
         var discordUserId = data.Payload.Arguements[1]
 
-        gotExports.mzrpgwebhook.OutfitsLookupRequest(userId, [serverId, channelId, discordUserId])
+        gotExports.mzrpgwebhook.OutfitsLookupRequest(userId, [serverId, channelId, discordUserId], data.Payload.Arguements[2])
         break;
       }
 
