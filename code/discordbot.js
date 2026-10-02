@@ -485,12 +485,12 @@ async function messageHandler(message) {
             var ownedOutfitsOnly = false
             var firstLetter = "f"
 
-            if (args[2] !== null) {
+            if (args[2] !== null && args[2] !== undefined) {
                 args[2] = args[2].toLowerCase()
                 firstLetter = args[2].charAt(0)
             }
 
-            if (firstLetter == "t" || firstLetter == "o" || (args[2] !== null && (args[2].toLowerCase() == "owned" || args[2].toLowerCase() == "true"))) {
+            if (firstLetter == "t" || firstLetter == "o" || (args[2] !== null && args[2] !== undefined && (args[2].toLowerCase() == "owned" || args[2].toLowerCase() == "true"))) {
                 ownedOutfitsOnly = true
             }
 
