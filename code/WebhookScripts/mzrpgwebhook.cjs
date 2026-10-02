@@ -115,7 +115,7 @@ async function OutfitsLookupRequest(user, discordStuff) {
       });
 
       if (wentThroughOutfits) {
-        textToSend = "<@" + discordStuff[2] + ">; outfits lookup for user `" + userName + "` finished!\nFound " + returnedData.Outfits.length + " outfits, please wait for them to be sent here.."
+        textToSend = "<@" + discordStuff[2] + ">; favourite outfits lookup for user `" + userName + "` finished!\nFound **" + returnedData.Outfits.length + "** outfits, please wait for them to be sent here.."
       } else {
         textToSend = "<@" + discordStuff[2] + ">; " + userName + " has no favourited or created outfits saved."
       }
