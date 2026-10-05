@@ -429,12 +429,13 @@ async function webhook(body, response) {
             var gamename
             var gameid
 
-            for (var [gameid, value] of Object.entries(game)) {
+            for (var [, value] of Object.entries(game)) {
               gamename = value
             }
 
             shared.addToCacheUsernameByUserID(userId, username);
             shared.addToCacheUserIDByUsername(username, userId);
+
 
             var newEmbed = {
               ["title"]: ":hammer: Anticheat Ban",
