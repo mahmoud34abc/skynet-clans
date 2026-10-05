@@ -455,7 +455,7 @@ async function webhook(body, response) {
                 Type: "Embed",
                 Payload: {
                   ServerToSendTo: "1540111553456504912",
-                  ChannelToSendTo: "1291040473242271886",
+                  ChannelToSendTo: "1550483616730185820",
                   Text: username + " (" + userId + ")",
                   Embed: newEmbed
                 },
