@@ -429,7 +429,7 @@ async function webhook(body, response) {
             var gamename
             var gameid
 
-            for (var [, value] of Object.entries(game)) {
+            for (var [gameid, value] of Object.entries(game)) {
               gamename = value
             }
 
