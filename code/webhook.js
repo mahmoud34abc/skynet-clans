@@ -182,14 +182,12 @@ async function downloadFileTo(url, assetId) {
       }
 
       const fileStream = openWriteStream(filePath);
-      pipeline(res, fileStream);
-
-      fileStream.on('finish', () => {
-        fileStream.close(() => resolve(filePath));
-      });
-
-      fileStream.on('error', (err) => {
-        removeFile(filePath, () => reject(err));
+      pipeline(res, fileStream, (err) => {
+        if (err) {
+          removeFile(filePath, () => reject(err));
+        } else {
+          resolve(filePath);
+        }
       });
     }).on('error', reject);
   });
