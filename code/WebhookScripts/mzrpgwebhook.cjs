@@ -7,8 +7,6 @@ function init(sharedTable) {
 
 var defaultFooter = "Skynet Clans • Version " + process.env.VERSION + " • Hosting on: " + process.env.HOSTING
 
-var responseBody = []
-
 var pendingSyncingRequests = {
   MZRPG: [],
   MZRPGTEMP: [],
@@ -24,11 +22,11 @@ var pendingSyncingResponses = {
 var pendingNewOutfits = []
 
 var QueuedMessages = []
-var AwaitingResponses = [] //keyed by UUIDs created here
+var AwaitingResponses = new Map() //keyed by UUIDs created here
 
 function makeAwaitingResponse(discordStuff, functionToRun) {
   var id = crypto.randomUUID();
-  AwaitingResponses[id] = functionToRun
+  AwaitingResponses.set(id, functionToRun)
 
   return id
 }
@@ -184,6 +182,8 @@ function makeResponse(bool, message, id, payload) {
 }
 
 async function webhook(body, response) {
+  var responseBody = []
+
   var payload = body.payload //requests will be sent every 2 seconds, so they'll be in a dictionary called payload
 
   for (var [, value] of Object.entries(payload)) {
@@ -245,18 +245,18 @@ async function webhook(body, response) {
 
       case "outfitsLookupResponse": {
         //console.log("oi", payload2, QueuedMessages)
-        if (AwaitingResponses[payload2.ReturnID]) {
-          AwaitingResponses[payload2.ReturnID](payload2)
-          AwaitingResponses[payload2.ReturnID] = undefined
+        if (AwaitingResponses.has(payload2.ReturnID)) {
+          AwaitingResponses.get(payload2.ReturnID)(payload2)
+          AwaitingResponses.delete(payload2.ReturnID)
         }
         break;
       };
 
       case "outfitDeleteResponse": {
         //console.log("oi", payload2, QueuedMessages)
-        if (AwaitingResponses[payload2.ReturnID]) {
-          AwaitingResponses[payload2.ReturnID](payload2)
-          AwaitingResponses[payload2.ReturnID] = undefined
+        if (AwaitingResponses.has(payload2.ReturnID)) {
+          AwaitingResponses.get(payload2.ReturnID)(payload2)
+          AwaitingResponses.delete(payload2.ReturnID)
         }
         break;
       };

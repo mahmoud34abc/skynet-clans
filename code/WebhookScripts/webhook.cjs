@@ -7,8 +7,6 @@ function init(sharedTable) {
 
 var defaultFooter = "Skynet Clans • Version " + process.env.VERSION + " • Hosting on: " + process.env.HOSTING
 
-var responseBody = []
-
 function makeResponse(bool, message, id, payload) {
   var theResponse = {
     id: id,
@@ -29,6 +27,8 @@ function makeResponse(bool, message, id, payload) {
 
 
 async function webhook(body, response) {
+  var responseBody = []
+
   var payload = body.payload //requests will be sent every 2 seconds, so they'll be in a dictionary called payload
   for (var [, value] of Object.entries(payload)) {
     //if (key == "requestType") {

@@ -7,6 +7,7 @@ const require = createRequire(import.meta.url);
 const express = require("express");
 const querystring = require('querystring');
 const compression = require('compression');
+const { pipeline } = require('stream');
 const app = express();
 
 const path = require('path');
@@ -152,6 +153,10 @@ async function webRequest(options, requestBodyString) {
       return
     });
 
+    req.setTimeout(30000, () => {
+      resolve({ success: true, statusCode: 0, data: "Request timed out" })
+    });
+
     //console.log(requestBodyString)
     if (requestBodyString) {
       req.write(requestBodyString);
@@ -173,7 +178,7 @@ async function downloadFileTo(url, assetId) {
       }
 
       const fileStream = openWriteStream(filePath);
-      res.pipe(fileStream);
+      pipeline(res, fileStream);
 
       fileStream.on('finish', () => {
         fileStream.close(() => resolve(filePath));
@@ -441,7 +446,7 @@ async function loadRobloxImageOfAsset(assetId) { //return success, pathToFile
 
   if (!success || statusCode != 200 || !data || !data.data || data.data.length === 0) {
     if (statusCode == 429) {
-      return await setTimeout(loadRobloxImageOfAsset, 1000 + (response.headers['retry-after']*1000), assetId);
+      return await setTimeout(loadRobloxImageOfAsset, 1000 + (response.headers['retry-after'] * 1000), assetId);
     }
     return { success: false, pathToFile: null, cached: false }
   }
@@ -501,7 +506,7 @@ const handle = (fn) => async (req, res) => {
     console.error(e);
     if (!res.headersSent) res.status(500).send();
   }
-  
+
   if (!res.headersSent) res.status(202).send();
 };
 
