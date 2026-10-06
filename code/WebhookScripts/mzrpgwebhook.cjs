@@ -66,18 +66,18 @@ function OutfitDeleteRequest(outfitId, discordStuff) {
 async function OutfitsLookupRequest(user, discordStuff, ownedOutfitsOnly) {
   var userName
   var userId
-  
+
   var origUsername = userName
   var origUserId = userId
 
   //console.log(user, discordStuff)
 
   if (shared.getUserType(user) == "userId") {
-      userId = user
-      userName = await shared.getRobloxUsername(user)
+    userId = user
+    userName = await shared.getRobloxUsername(user)
   } else {
-      userName = user
-      userId = await shared.getRobloxUserId(user)
+    userName = user
+    userId = await shared.getRobloxUserId(user)
   }
 
   //console.log(userName, userId)
@@ -163,26 +163,26 @@ function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-function makeResponse(bool, message, id, payload) {
-  var theResponse = {
-    id: id,
-    status: bool ? 200 : 400,
-    responseStatus: bool ? 'OK' : 'BAD REQUEST',
-    message: message,
-    payload: payload,
-  }
-
-  //var arraylength = responseBody.length
-  //var newResponse = { ...theResponse }
-  //newResponse.message = message
-  //newResponse.id = id
-  //newResponse.payload = { ...payload }
-  responseBody.push(theResponse)
-  //responseBody[arraylength + 1] = newResponse
-}
-
 async function webhook(body, response) {
   var responseBody = []
+
+  function makeResponse(bool, message, id, payload) {
+    var theResponse = {
+      id: id,
+      status: bool ? 200 : 400,
+      responseStatus: bool ? 'OK' : 'BAD REQUEST',
+      message: message,
+      payload: payload,
+    }
+
+    //var arraylength = responseBody.length
+    //var newResponse = { ...theResponse }
+    //newResponse.message = message
+    //newResponse.id = id
+    //newResponse.payload = { ...payload }
+    responseBody.push(theResponse)
+    //responseBody[arraylength + 1] = newResponse
+  }
 
   var payload = body.payload //requests will be sent every 2 seconds, so they'll be in a dictionary called payload
 
@@ -504,7 +504,7 @@ async function webhook(body, response) {
       QueuedMessages.length = 0
       QueuedMessages.push(...remaining)
     }
-  }  
+  }
 
   //console.log(body.FromGame)
   response.status(200).send(responseBody)
@@ -609,11 +609,11 @@ setInterval(async () => {
 
       if (!isLookedUpOutfit) {
         currentOutfitChannel += 1;
-        
+
         if (poolOfOutfitChannels[currentOutfitChannel] === undefined) {
           currentOutfitChannel = 0;
         }
-        
+
         chosenChannel = poolOfOutfitChannels[currentOutfitChannel]
       } else {
         chosenChannel = lookedUpOriginChannel

@@ -10,20 +10,6 @@ const { promiseAccess, removeFile } = require('./Modules/fileHelper.cjs');
 const isUpdatedDiscord = process.env.UPDATEDDISCORD == "true";
 const botPrefix = "c!"
 
-const botOnline = new Promise(resolve => {
-    client.on("clientReady", () => { //set the bot status
-        console.log("Skynet Clans bot is online");
-        client.user.setPresence({
-            status: "idle",
-            activities: [{
-                name: "modcalls & handling bans",
-                type: 0
-            }]
-        });
-        resolve(true);
-    });
-});
-
 var brokenTyping = false
 var brokenTypingInterval = null
 
@@ -68,7 +54,19 @@ function WaitForMessage(MessageType) {
 }
 
 const client = getClient()
-
+const botOnline = new Promise(resolve => {
+    client.on("clientReady", () => { //set the bot status
+        console.log("Skynet Clans bot is online");
+        client.user.setPresence({
+            status: "idle",
+            activities: [{
+                name: "modcalls & handling bans",
+                type: 0
+            }]
+        });
+        resolve(true);
+    });
+});
 
 // Send script messages
 function shareData(data) {
