@@ -507,7 +507,7 @@ async function webhook(body, response) {
   }  
 
   //console.log(body.FromGame)
-  response.send(responseBody).status(200)
+  response.status(200).send(responseBody)
   responseBody = []
 }
 

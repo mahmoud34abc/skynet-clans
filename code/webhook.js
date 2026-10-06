@@ -494,24 +494,20 @@ mzrpgwebhook.init(sharedTable);
 skynetwebhook.init(sharedTable);
 webhook.init(sharedTable);
 
-app.post("/webhook", async (request, response) => {  //since I'm planning this to be semi-public, it'll require authkeys
-  //to make clans and make changes to them and give them credit
-  //authkeys will only be given to trusted ones, and exploiting them
-  //will cause deactivation to their authkey
-  var body = request.body
-  webhook.webhook(body, response)
-}); //listener for post requests (webhook)
+const handle = (fn) => async (req, res) => {
+  try {
+    await fn(req.body, res);
+  } catch (e) {
+    console.error(e);
+    if (!res.headersSent) res.status(500).send();
+  }
+  
+  if (!res.headersSent) res.status(202).send();
+};
 
-app.post("/skynetwebhook", async (request, response) => {
-  var body = request.body
-  skynetwebhook.webhook(body, response)
-});
-
-app.post("/mzrpgwebhook", async (request, response) => {
-  var body = request.body
-  //do the payload here
-  mzrpgwebhook.webhook(body, response)
-})
+app.post("/webhook", handle(webhook.webhook));
+app.post("/skynetwebhook", handle(skynetwebhook.webhook));
+app.post("/mzrpgwebhook", handle(mzrpgwebhook.webhook));
 
 // listen for requests
 var listener = app.listen(process.env.PORT, () => {

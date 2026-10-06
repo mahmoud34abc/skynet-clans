@@ -336,7 +336,7 @@ async function webhook(body, response) {
       }
     }
   }
-  response.send(responseBody).status(200)
+  response.status(200).send(responseBody)
   responseBody = []
 }
 
