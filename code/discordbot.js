@@ -745,3 +745,8 @@ process.on('exit', async () => {
 })
 
 //shareData("hiii")
+
+setInterval(() => {
+  const m = process.memoryUsage();
+  console.log(`heap=${(m.heapUsed/1048576)|0}MB rss=${(m.rss/1048576)|0}MB`, process.getActiveResourcesInfo().length, 'active resources');
+}, 5 * 60 * 1000).unref();
