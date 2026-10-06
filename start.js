@@ -127,15 +127,10 @@ async function spawnScript(filePath) {
           otherChild.send(actualMessage);
           //console.log(`Forwarded to ${info.scriptName}`);
         } else {
-          function retrySendingMessage() {
-            var otherChild = info?.child;
-            if (otherChild && otherChild.connected) {
-              otherChild.send(actualMessage);
-              //console.log(`Forwarded to ${info.scriptName}`);
-            } else {
-              //console.log("Not connected, retrying later..")
-              setTimeout(retrySendingMessage, restartDelay)
-            }
+          function retrySendingMessage(attempt = 0) {
+            const target = processes[scriptToSendTo]?.child;
+            if (target && target.connected) return target.send(actualMessage);
+            if (attempt < 20) setTimeout(() => retrySendingMessage(attempt + 1), restartDelay);
           }
           setTimeout(retrySendingMessage, restartDelay)
         }
