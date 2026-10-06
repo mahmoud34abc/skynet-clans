@@ -111,6 +111,10 @@ var commonWebRequestOptions = {
 
 setDefaultRequestOptions(commonWebRequestOptions)
 
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 async function webRequest(options, requestBodyString) {
   return new Promise((resolve) => {
     if (requestBodyString) {
@@ -433,34 +437,47 @@ async function performOpenCloudBan(userId, gameName, banType, banReason, issuedB
   openCloudFunction("PATCH", requestPath, requestBody, callbackFunction)
 }
 
-async function loadRobloxImageOfAsset(assetId) { //return success, pathToFile
+async function loadRobloxImageOfAsset(assetId) {
   if (catalogItemImageCache.has(assetId)) {
     return { success: true, pathToFile: catalogItemImageCache.get(assetId), cached: true };
   }
 
-  var options = { ...commonWebRequestOptions }
-  options.hostname = "thumbnails.roblox.com"
-  options.path = "/v1/assets?assetIds=" + assetId + "&size=420x420&format=png&isCircular=false"
+  for (let attempt = 0; attempt <= 3; attempt++) {
+    var options = { ...commonWebRequestOptions }
+    options.hostname = "thumbnails.roblox.com"
+    options.path = "/v1/assets?assetIds=" + assetId + "&size=420x420&format=png&isCircular=false"
 
-  var { success, statusCode, data, response } = await webRequest(options, null)
+    const { success, statusCode, data, response } = await webRequest(options, null);
 
-  if (!success || statusCode != 200 || !data || !data.data || data.data.length === 0) {
-    if (statusCode == 429) {
-      return await setTimeout(loadRobloxImageOfAsset, 1000 + (response.headers['retry-after'] * 1000), assetId);
+    if (statusCode === 429 && attempt < 3) {
+      const retryHeader = response?.headers?.['retry-after'];
+      const retryAfterSec = Number(retryHeader);
+
+      const exponentialBackoffMs = Math.min(1000 * (2 ** attempt), 10000);
+      const delayMs = Number.isFinite(retryAfterSec)
+        ? (retryAfterSec * 1000) + 500
+        : exponentialBackoffMs;
+
+      await sleep(delayMs);
+      continue;
     }
-    return { success: false, pathToFile: null, cached: false }
-  }
 
-  const imageUrl = data.data[0].imageUrl;
+    if (!success || statusCode !== 200 || !data?.data?.[0]?.imageUrl) {
+      return { success: false, pathToFile: null, cached: false };
+    }
 
-  try {
-    const filePath = await downloadFileTo(imageUrl, assetId + ".png");
-    catalogItemImageCache.set(assetId, filePath)
-    return { success: true, pathToFile: filePath, cached: false };
-  } catch (err) {
-    console.warn('Failed to download image:', err);
-    return { success: false, pathToFile: null, cached: false };
+    const imageUrl = data.data[0].imageUrl;
+
+    try {
+      const filePath = await downloadFileTo(imageUrl, `${assetId}.png`);
+      catalogItemImageCache.set(assetId, filePath);
+      return { success: true, pathToFile: filePath, cached: false };
+    } catch (err) {
+      console.warn('Failed to download image:', err);
+      return { success: false, pathToFile: null, cached: false };
+    }
   }
+  return { success: false, pathToFile: null, cached: false };
 }
 
 const sharedTable = {

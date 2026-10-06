@@ -10,7 +10,7 @@ const { promiseAccess, removeFile } = require('./Modules/fileHelper.cjs');
 const isUpdatedDiscord = process.env.UPDATEDDISCORD == "true";
 const botPrefix = "c!"
 
-var botOnline = false
+const botOnline = new Promise(r => client.once('clientReady', r));
 var brokenTyping = false
 var brokenTypingInterval = null
 
@@ -652,10 +652,7 @@ client.login(process.env.TOKEN); //log in as bot
 // Receive script messages
 
 async function handleSharedData(data) {
-    if (!botOnline) {
-        setTimeout(function () { handleSharedData(data) }, 500)
-        return
-    }
+    await botOnline
 
     //console.log(data)
     //console.log(MessageListeners)
