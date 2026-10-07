@@ -25,7 +25,7 @@ if (doesFolderOrFileExist(tempPath)) {
 makeFolder(tempPath, { recursive: true });
 
 var cacheOptions = {
-  max: 5120,
+  max: 10240,
 
   // for use with tracking overall storage size
   maxSize: 1024 * 1024 * 1024 * 700,
@@ -67,7 +67,7 @@ var cacheOptions = {
 
 const catalogItemImageCache = new LRUCache(cacheOptions)
 
-cacheOptions.maxSize = 5120
+cacheOptions.maxSize = 10240
 cacheOptions.sizeCalculation = () => {
   return 1;
 }
@@ -866,8 +866,3 @@ process.on('message', (data) => {
   //console.log("Received on Webhook")
   handleSharedData(data)
 });
-
-setInterval(() => {
-  const m = process.memoryUsage();
-  console.log(`heap=${(m.heapUsed/1048576)|0}MB rss=${(m.rss/1048576)|0}MB`, process.getActiveResourcesInfo().length, 'active resources');
-}, 5 * 60 * 1000).unref();

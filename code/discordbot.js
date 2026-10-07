@@ -3,7 +3,7 @@
 import { createRequire } from 'module';
 const require = createRequire(import.meta.url);
 const path = require('path');
-const { Client, GatewayIntentBits, EmbedBuilder, MessageEmbed, AttachmentBuilder, Intents } = require('discord.js');
+const { Client, GatewayIntentBits, EmbedBuilder, MessageEmbed, AttachmentBuilder, Intents, Options } = require('discord.js');
 
 const { promiseAccess, removeFile } = require('./Modules/fileHelper.cjs');
 
@@ -35,6 +35,14 @@ function getClient() {
                 GatewayIntentBits.GuildMessages,
                 GatewayIntentBits.MessageContent,
             ],
+            makeCache: Options.cacheWithLimits({
+                ...Options.DefaultMakeCacheSettings,
+                MessageManager: 10,
+            }),
+            sweepers: {
+                ...Options.DefaultSweeperSettings,
+                messages: { interval: 300, lifetime: 600 },
+            },
         });
     } else {
         return new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES, Intents.FLAGS.MESSAGE_CONTENT] });
