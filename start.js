@@ -47,6 +47,29 @@ function prefixLines(data, prefix, isError = false) {
     .join('\n') + '\n';
 }
 
+const logFile = join(__dirname, 'log.txt');
+const logStream = fs.createWriteStream(logFile, { flags: 'w' });
+
+function writeToLog(scriptName, data, isError = false) {
+  const lines = data.toString()
+    .replace(/\x1b\[[0-9;]*m/g, '') //remove colors
+    .split('\n')
+    .filter(line => line.trim() !== '');
+
+  const timestamp = new Date().toISOString();
+  const level = isError ? 'ERR' : 'OUT';
+  const text = lines
+    .map(line => `${timestamp} [${scriptName}] [${level}] ${line}`)
+    .join('\n');
+
+  if (text) logStream.write(text + '\n');
+}
+
+const origLog = console.log;
+const origError = console.error;
+console.log = (...args) => { origLog(...args); writeToLog('manager', args.join(' ')); };
+console.error = (...args) => { origError(...args); writeToLog('manager', args.join(' '), true); };
+
 const processes = {}
 
 async function spawnScript(filePath) {
@@ -72,7 +95,7 @@ async function spawnScript(filePath) {
   processes[scriptName] = {
     child: child,
     filePath: filePath,
-    scriptColor: scriptColorIndex,
+    scriptColor: scriptColor,
     restarts: 0,
     scriptName: scriptName,
     pid: child.pid
@@ -82,11 +105,13 @@ async function spawnScript(filePath) {
 
   // stdout — prefixed in script's color
   child.stdout.on('data', (data) => {
+    writeToLog(scriptName, data);
     process.stdout.write(prefixLines(data, prefix));
   });
 
   // stderr — prefixed in red
   child.stderr.on('data', (data) => {
+    writeToLog(scriptName, data, true);
     process.stderr.write(prefixLines(data, prefix, true));
   });
 
@@ -116,9 +141,9 @@ async function spawnScript(filePath) {
       //console.log(scriptToSendTo)
       //console.log(processes)
 
-      if (!scriptToSendTo) return
+      if (!scriptToSendTo) continue;
       var info = processes[scriptToSendTo]
-      if (!info) return
+      if (!info) continue;
 
       if (info.pid !== child.pid) {
         // Get the actual child process reference
@@ -206,19 +231,21 @@ async function startNgrok() {
 process.on('exit', () => {
   stopRestarting = true;
   console.log('Parent process exiting - cleaning up child processes');
+  logStream.end();
 
   try {
-    process.kill(ngrok.pid, 0);
-    process.kill(ngrok.pid);
+    if (ngrok) {
+      process.kill(ngrok.pid, 0);
+      process.kill(ngrok.pid);
+    }
   } catch (e) {
     if (e.code === 'ESRCH') {
       console.log(`Process ngrok already dead`);
     } else {
-      console.error(`Error killing process ${scriptName}:`, e);
+      console.error(`Error killing ngrok:`, e);
     }
   }
   
-
   for (const [scriptName] of Object.entries(processes)) {
     try {
       // Check if process still exists before killing
