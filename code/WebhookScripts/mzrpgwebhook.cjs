@@ -367,7 +367,12 @@ async function webhook(body, response) {
 
             var brokenLoop = -1
             for (var [key, value] of Object.entries(commands)) {
-              var tempText = text + "**[" + value[0] + "]** " + value[1] + "\n"
+              var playerName = value[0]
+              if ((playerName == null || playerName == undefined || playerName == "") && value[2] != null && value[2] != undefined) {
+                playerName = await shared.getRobloxUsername(value[2])
+              }
+
+              var tempText = text + "**[" + playerName + "]** " + value[1] + "\n"
               if (tempText.length > 1024) {
                 brokenLoop = key
                 break;
