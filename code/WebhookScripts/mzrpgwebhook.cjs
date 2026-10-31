@@ -6,6 +6,7 @@ function init(sharedTable) {
 }
 
 var defaultFooter = "Skynet Clans • Version " + process.env.VERSION + " • Hosting on: " + process.env.HOSTING
+var imageSize = process.env.USEHIGHQUALITYIMAGES == "true" ? 420 : 150
 
 var pendingSyncingRequests = {
   MZRPG: [],
@@ -314,7 +315,7 @@ async function webhook(body, response) {
             var newEmbed = {
               ["title"]: ":loudspeaker: Modcall",
               ["footer"]: defaultFooter,
-              ["image"]: await shared.getRobloxAvatarPic(reporteduserid, 420, "avatar"),
+              ["image"]: await shared.getRobloxAvatarPic(reporteduserid, imageSize, "avatar"),
               ["thumbnail"]: await shared.getRobloxAvatarPic(reportinguserid, 150, "avatar-headshot"),
               ["color"]: 0x990000,
               ["description"]: "From: " + gamename,

@@ -16,6 +16,11 @@ const { doesFolderOrFileExist, getFileSize, removeFile, makeFolder, openWriteStr
 const { httpGet, httpRequest, setDefaultRequestOptions } = require('./Modules/webHelper.cjs');
 
 var tempPath = path.resolve(".temp")
+var imageSize = process.env.USEHIGHQUALITYIMAGES == "true" ? 420 : 150
+var cacheSizeMB = Number(process.env.CACHESIZEMB)
+if (cacheSizeMB == NaN) {
+  cacheSizeMB = 512
+}
 
 //console.log(tempPath)
 
@@ -28,7 +33,7 @@ var cacheOptions = {
   max: 10240,
 
   // for use with tracking overall storage size
-  maxSize: 1024 * 1024 * 1024 * 700,
+  maxSize: cacheSizeMB * 1024 * 1024,
   sizeCalculation: (value) => {
     if (doesFolderOrFileExist(path.join(value))) {
       return getFileSize(path.join(value));
@@ -52,7 +57,7 @@ var cacheOptions = {
   //},
 
   // how long to live in ms
-  ttl: 1000 * 60 * 60 * 24,
+  ttl: (cacheSizeMB / 512) * 1000 * 60 * 60 * 24,
 
   // return stale items before removing from cache?
   allowStale: false,
@@ -443,7 +448,7 @@ async function loadRobloxImageOfAsset(assetId) {
   for (let attempt = 0; attempt <= 3; attempt++) {
     var options = { ...commonWebRequestOptions }
     options.hostname = "thumbnails.roblox.com"
-    options.path = "/v1/assets?assetIds=" + assetId + "&size=420x420&format=png&isCircular=false"
+    options.path = "/v1/assets?assetIds=" + assetId + "&size=" + imageSize + "x" + imageSize + "&format=png&isCircular=false"
 
     const { success, statusCode, data, response } = await webRequest(options, null);
 
