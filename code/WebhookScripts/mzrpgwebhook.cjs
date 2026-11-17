@@ -107,6 +107,9 @@ async function OutfitsLookupRequest(user, discordStuff, ownedOutfitsOnly) {
         wentThroughOutfits = true
         outfit.LookedUp = true
         outfit.LookedUpOriginChannel = discordStuff[1]
+        outfit.LookUper = discordStuff[2]
+        outfit.OutfitNum = returnedData.Outfits.indexOf(outfit) + 1
+        outfit.MaxNum = returnedData.Outfits.length
         //outfit.UserId = userId
         //outfit.Username = userName
 
@@ -497,7 +500,7 @@ async function webhook(body, response) {
     const maximumOutfitOrders = 2
     let currentOutfitOrders = 0
 
-    if (body.Capabilities["OutfitModerationTools"]) {
+    if (body.Capabilities["OutfitModerationToolsHOTFIX1"]) {
       var remaining = []
       for (const message of QueuedMessages) {
         if (message.gameId == body.FromGame && currentOutfitOrders < maximumOutfitOrders) {
